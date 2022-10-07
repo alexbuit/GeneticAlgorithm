@@ -1,0 +1,35 @@
+FTDI - D2XX Driver Release Information
+======================================
+
+Version No.	Date		Changes
+
+1.06.06		30 Oct 2003	Fixed bug that limited write requests to 64Kbytes.
+
+1.06.05		27 Oct 2003	Fixed bug in FT_W32_SetCommMask.
+				Added FT_ResetPort.
+
+1.06.02		18 Sep 2003	Fixed bug in FT_W32_WaitCommEvent.
+				Added FT_SetResetPipeRetryCount.
+
+1.05.12		12 June 2003	Fixed power management so that laptops can suspend.
+				Fixed bug in event notification.
+				Added FT_StopInTask and FT_RestartInTask.
+
+1.05.09		21 Mar 2003	Fixed problem with write timeout when setup by FT_W32_SetCommTimeouts.
+
+1.05.08		19 Mar 2003	Fixed power management problems.
+				FT_W32_PurgeComm purges read queue.
+				Added FT_W32_CancelIo.
+
+1.05.04		08 Nov 2002	Added FT_GetDeviceInfo.
+
+1.05.03		08 Nov 2002	Supports BM devices.
+
+1.05.01		04 October 2002	Supports USB transfer sizes up to 64Kbytes
+				Works with USB2.0 host controllers
+
+1.04.01		07 August 2002	Suspend / Resume Problem fixed with Open Devices ( Win2000 / WinXP )
+
+1.03.20		29 July 2002	Improved Support for surprise removal ( Win2000 / WinXP )
+				Version Number updated in INF file
+

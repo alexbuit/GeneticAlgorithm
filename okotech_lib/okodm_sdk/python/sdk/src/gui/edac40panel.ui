@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EDAC40Panel</class>
+ <widget class="QDialog" name="EDAC40Panel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>388</width>
+    <height>445</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <stylestrategy>PreferDefault</stylestrategy>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>EDAC40</string>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Choose device:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="deviceComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>151</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="text">
+        <string>Refresh list</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Device IP address:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ipLabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>XXX.XXX.XXX.XXX</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>Amplitude</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QRadioButton" name="valueUnitButton">
+          <property name="text">
+           <string>1</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="valueThreeQuartersButton">
+          <property name="text">
+           <string>3/4</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="valueOneHalfButton">
+          <property name="text">
+           <string>1/2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="valueOneQuarterButton">
+          <property name="text">
+           <string>1/4</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="valueZeroButton">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QRadioButton" name="valueOtherButton">
+            <property name="text">
+             <string>Other:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="valueSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximum">
+             <number>65535</number>
+            </property>
+            <property name="singleStep">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>65535</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>Shape</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QRadioButton" name="constantButton">
+          <property name="text">
+           <string>Constant</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="squareButton">
+          <property name="text">
+           <string>Square</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rampButton">
+          <property name="text">
+           <string>Ramp</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>65</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QPushButton" name="commitButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Go</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="stopButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Stop</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Adjustments</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="estimatedRangeLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Estimated range (V):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="rangeMinLabel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>-12.00</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="dotsLabel">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="rangeMaxLabel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>+12.00</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="4">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>78</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="offsetDACLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Offset:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QSpinBox" name="offsetDACSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>61</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>16383</number>
+        </property>
+        <property name="value">
+         <number>8192</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3" colspan="2">
+       <widget class="QSlider" name="offsetDACSlider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="maximum">
+         <number>16383</number>
+        </property>
+        <property name="pageStep">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>8192</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="invertedAppearance">
+         <bool>true</bool>
+        </property>
+        <property name="invertedControls">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="gainLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Gain:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="2">
+       <widget class="QSpinBox" name="gainSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>61</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+        <property name="value">
+         <number>65535</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3" colspan="2">
+       <widget class="QSlider" name="gainSlider">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+        <property name="pageStep">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>65535</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="adjustmentsEnableCheckBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="2">
+       <widget class="QPushButton" name="resetDefaultsButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Restore Defaults</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3" colspan="2">
+       <widget class="QPushButton" name="saveDefaultsButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Save to NVRAM</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>refreshButton</sender>
+   <signal>clicked()</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>listDevices()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueOtherButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>valueSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>258</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>152</x>
+     <y>259</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>deviceComboBox</sender>
+   <signal>activated(int)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>chooseDevice(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>135</x>
+     <y>58</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>commitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>commitChanges()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>374</x>
+     <y>146</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>284</x>
+     <y>118</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stopButton</sender>
+   <signal>clicked()</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>stopGenerator()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>374</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>272</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>adjustmentsEnableCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>setAdjustmentsEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>469</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>2</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>offsetDACSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>offsetDACSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>378</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>offsetDACSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>offsetDACSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>378</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gainSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>gainSlider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>409</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>407</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gainSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>gainSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>407</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>409</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>offsetDACSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>sendAdjustments()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>252</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gainSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>sendAdjustments()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>409</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>142</x>
+     <y>381</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>offsetDACSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>calculateRange()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>259</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gainSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>calculateRange()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>189</x>
+     <y>409</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>342</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>resetDefaultsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>setDefaultAdjustments()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>473</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>409</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveDefaultsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>saveDefaults()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>473</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>392</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueUnitButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueThreeQuartersButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueOneHalfButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>165</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueOneQuarterButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueZeroButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>219</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueOtherButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>248</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>valueSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>EDAC40Panel</receiver>
+   <slot>updateVoltageValue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>248</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>193</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>listDevices()</slot>
+  <slot>chooseDevice(int)</slot>
+  <slot>commitChanges()</slot>
+  <slot>stopGenerator()</slot>
+  <slot>setAdjustmentsEnabled(bool)</slot>
+  <slot>setOffsetDAC(int)</slot>
+  <slot>setGain(int)</slot>
+  <slot>setOffset(int)</slot>
+  <slot>calculateRange()</slot>
+  <slot>setDefaultAdjustments()</slot>
+  <slot>saveDefaults()</slot>
+  <slot>updateVoltageValue()</slot>
+  <slot>sendAdjustments()</slot>
+ </slots>
+</ui>
