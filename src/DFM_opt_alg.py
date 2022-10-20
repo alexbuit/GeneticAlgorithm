@@ -9,9 +9,14 @@ import math
 import random as rand
 import struct
 
+from helper import *
+
 
 np.random.seed(12)
 
+
+bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
+         128: [1, 15, 112], 256: [1, 19, 236]}
 
 def t_roulette_sel(tsize=int(1e6), bitsize=4):
     """
@@ -25,7 +30,7 @@ def t_roulette_sel(tsize=int(1e6), bitsize=4):
     tsart = time()
     rpop = rand_bit_pop(tsize, bitsize)
     # print(rpop)
-    parent_list = roulette_select(b2int(rpop))
+    parent_list = roulette_select(b2int(rpop), tfx)
 
     tl = []
     for parent in parent_list:
@@ -37,77 +42,6 @@ def t_roulette_sel(tsize=int(1e6), bitsize=4):
 
     t = time() - tsart
     return t, corrperc
-
-
-def b2int(bit: np.ndarray) -> np.ndarray:
-    """
-    Conversion of m x n (big endian) bit array to integers.
-    :param bit: m x n ndarray of numpy integers (0, 1) representing a bit
-    :return: m x n ndarray of integers
-    """
-    # credits Geoffrey Andersons solution
-    # https://stackoverflow.com/questions/41069825/convert-binary-01-numpy-to-integer-or-binary-string
-    m, n = bit.shape  # number of columns is needed, not bits.size
-    a = 2 ** np.arange(n) # [::-1]  # -1 reverses array of powers of 2 of same length as bits
-    return bit @ a  # this matmult is the key line of code
-
-
-def b2sfloat(bit: np.ndarray) -> np.ndarray:
-    """
-    Conversion of m x n (big endian) bit array (numpy) to IEEE 754 single precision float
-    according to Jaime's solution
-    (https://stackoverflow.com/questions/26018448/convert-a-binary-string-into-ieee-754-single-precision-python)
-    :param bit: m x n ndarray of numpy integers representing a bit
-    :return: m x n ndarray of IEEE 754 single precision floats
-    """
-    return np.packbits(bit.reshape(-1, 8)).reshape(-1, 4)[:, ::-1].copy().view(
-        np.float32).transpose()[0]
-
-
-def b2dfloat(bit: np.ndarray) -> np.ndarray:
-    """
-    Conversion of bit m x n (big endian) bit array (numpy) to IEEE 754 double precision float
-    according to Jaime's solution
-    (https://stackoverflow.com/questions/26018448/convert-a-binary-string-into-ieee-754-single-precision-python)
-    :param bit: m x n ndarray of numpy integers representing a bit
-    :return: m x n ndarray of IEEE 754 double precision floats
-    """
-    return np.packbits(bit.reshape(-1, 16)).reshape(-1, 8)[:, ::-1].copy().view(
-        np.float64).transpose()[0]
-
-
-def floatToBinary64(val):
-    """
-    https://www.technical-recipes.com/2012/converting-between-binary-and-decimal-representations-of-ieee-754-floating-point-numbers-in-c/
-    :param value:
-    :return:
-    """
-    value = struct.unpack("Q", struct.pack('d', val))[0]
-    if val < 0:
-        return np.array([int(i) for i in format(value, "#065b")[2:]])
-
-    if value > 0:
-        return np.array([int(i) for i in "0" + format(value, "#065b")[2:]])
-
-    else:
-        return np.array([int(i) for i in "".join("0" for _ in range(64))])
-
-
-def floatToBinary32(val):
-    """
-    https://www.technical-recipes.com/2012/converting-between-binary-and-decimal-representations-of-ieee-754-floating-point-numbers-in-c/
-    :param value:
-    :return:
-    """
-    value = struct.unpack("L", struct.pack('f', val))[0]
-    if val < 0:
-        return np.array([int(i) for i in format(value, "#033b")[2:]])
-
-    if value > 0:
-        return np.array([int(i) for i in "0" + format(value, "#033b")[2:]])
-
-    else:
-        return np.array([int(i) for i in "".join("0" for _ in range(32))])
 
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
@@ -182,14 +116,14 @@ def cauchyrand_bit_pop_float(n, bitsize, loc, scale):
 def tfx(x):
     return 3 * x**2 + 2 * x + 1
 
-def wheelers_ridge(x1: float, x2: float, a: float = 1.5) -> float:
+def wheelers_ridge(x: list, a: float = 1.5) -> float:
     """
     Compute the Wheelersridge function for given x1 and x2
-    :param x1: First input
-    :param x2: Second input
+    :param x: list with x1 (otype: float) and x2 (otype: float)
     :param a: additional parameter typically a=1.5
     :return: Value f(x1, x2, a), real float
     """
+    x1, x2 = x
     return -np.exp(-(x1 * x2 - a) ** 2 - (x2 - a) ** 2)
 
 
@@ -278,6 +212,35 @@ def cross_parents64(parent1, parent2):
     return child
 
 
+def cross_parents(parent1, parent2, bitsize):
+    global bdict
+
+    child = np.zeros(parent1.shape)
+
+    nbits = int(parent1.size/bitsize)
+    p1_1 = parent1[:nbits * (1 + bdict[bitsize][1])]
+    p1_2 = parent1[nbits * (1 + bdict[bitsize][1]):]
+
+    p2_1 = parent2[:nbits * (1 + bdict[bitsize][1])]
+    p2_2 = parent2[nbits * (1 + bdict[bitsize][1]):]
+
+    if np.random.randint(0, 1):
+        child[:nbits * (1 + bdict[bitsize][1])] = p1_1[:nbits * (1 + bdict[bitsize][1])]
+    else:
+        child[:nbits * (1 + bdict[bitsize][1])] = p2_1[:nbits * (1 + bdict[bitsize][1])]
+
+    c1 = np.random.randint(nbits * (1 + bdict[bitsize][1]), parent1.size - 1)
+    c2 = np.random.randint(c1 + 1, parent1.size)
+
+    child[nbits * (1 + bdict[bitsize][1]):c1] = parent1[nbits * (1 + bdict[bitsize][1]):c1]
+    child[c1:c2] = parent2[c1:c2]
+    child[c2:] = parent1[c2:]
+
+    return child
+
+p1, p2 = float2Ndbit(np.array([0.332, 0.5332]), 64), float2Ndbit(np.array([4.332, 2.5332]), 64)
+print(cross_parents(p1, p2, 64).shape)
+
 def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
                cross: Callable, mutate: Callable):
     """
@@ -302,60 +265,62 @@ def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
 
     return pop
 
-if __name__ == "__main__":
-    tsart = time()
+# if __name__ == "__main__":
+#     tsart = time()
+#
+#
+#     size = 1000
+#     genlist = []
+#
+#
+#     # rpop = normalrand_bit_pop_float(10000, 64, -5, 5)
+#     rpop = cauchyrand_bit_pop_float(size, 64, 0, 5)
+#     print(rpop.shape)
+#     parents = roulette_select(rpop, tfx)
+#
+#     epochs = int(np.floor(np.log2(size)))
+#
+#     for j in range(epochs):
+#         print("%s/%s" % (j+1, epochs))
+#         newgen = []
+#         for ppair in parents:
+#             newgen.append(cross_parents64(rpop[ppair[0]], rpop[ppair[1]]))
+#
+#         genlist.append(b2dfloat(rpop))
+#         rpop = np.array(newgen)
+#         print(rpop.shape)
+#         parents = roulette_select(np.array(newgen), tfx)
+#     genlist.append(b2dfloat(rpop[0]))
+#     genlist = genlist
+#     genarr = np.full((len(genlist), genlist[0].size), np.NAN)
+#
+#     k = 0
+#     for i in genlist:
+#         for j in range(i.size):
+#             genarr[k, j] = i[j]
+#         k += 1
+#     genarr = genarr.transpose()
+#     print(genarr)
+#     print(b2dfloat(rpop[0]))
+#
+#     dataind = 6
+#     np.savetxt("tdataGA_%s.txt" % dataind, genarr, delimiter=";",
+#                header="".join("%s;" %i for i in range(len(genlist) + 1)))
+#     # from AdrianPack.Aplot import LivePlot
+#     #
+#     # print(genlist)
+#     #
+#     # def livefunc(i):
+#     #     print(i)
+#     #     return tfx(genlist[i])
+#     #
+#     # LP = LivePlot(x=genlist, x_label="x data", y_label="y data")
+#     # LP.run(interval=100)
+#
+#
+#     print("t: ", time() - tsart)
 
 
-    size = 1000
-    genlist = []
-
-
-    # rpop = normalrand_bit_pop_float(10000, 64, -5, 5)
-    rpop = cauchyrand_bit_pop_float(size, 64, 0, 5)
-    print(rpop.shape)
-    parents = roulette_select(rpop, tfx)
-
-    epochs = int(np.floor(np.log2(size)))
-
-    for j in range(epochs):
-        print("%s/%s" % (j+1, epochs))
-        newgen = []
-        for ppair in parents:
-            newgen.append(cross_parents64(rpop[ppair[0]], rpop[ppair[1]]))
-
-        genlist.append(b2dfloat(rpop))
-        rpop = np.array(newgen)
-        print(rpop.shape)
-        parents = roulette_select(np.array(newgen), tfx)
-    genlist.append(b2dfloat(rpop[0]))
-    genlist = genlist
-    genarr = np.full((len(genlist), genlist[0].size), np.NAN)
-
-    k = 0
-    for i in genlist:
-        for j in range(i.size):
-            genarr[k, j] = i[j]
-        k += 1
-    genarr = genarr.transpose()
-    print(genarr)
-    print(b2dfloat(rpop[0]))
-
-    dataind = 6
-    np.savetxt("tdataGA_%s.txt" % dataind, genarr, delimiter=";",
-               header="".join("%s;" %i for i in range(len(genlist) + 1)))
-    # from AdrianPack.Aplot import LivePlot
-    #
-    # print(genlist)
-    #
-    # def livefunc(i):
-    #     print(i)
-    #     return tfx(genlist[i])
-    #
-    # LP = LivePlot(x=genlist, x_label="x data", y_label="y data")
-    # LP.run(interval=100)
-
-
-    print("t: ", time() - tsart)
     # rpop = rand_bit_pop(10000, 4)
     # # # print(rpop)
     # roulette_select(b2int(rpop))

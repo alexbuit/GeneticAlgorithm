@@ -121,7 +121,7 @@ def t():
 
 
 # fx = mirror
-k = 2
+k = 3
 fx = read
 earg = 15
 lp = LivePlot(x=t, y=read, x_label="time", y_label="Intensity",
