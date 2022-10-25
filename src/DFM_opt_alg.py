@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Union, Iterable
 
 import numpy
 from scipy.stats import cauchy
@@ -12,7 +12,7 @@ import struct
 from helper import *
 
 
-np.random.seed(12)
+np.random.seed(10)
 
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
@@ -77,44 +77,27 @@ def normalrand_bit_pop_float(n, bitsize, lower, upper):
     return np.array(blist)
 
 
-def cauchyrand_bit_pop_float(n, bitsize, loc, scale):
-    pop_float = cauchy.rvs(loc=loc, scale=scale, size=n)
-    blist = []
-    if bitsize == 32:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary32(pop_float[val]))
-            # print(pop_float[val], floatToBinary32(pop_float[val]).size)
-            # tval, tres = pop_float[val], b2sfloat(floatToBinary32(pop_float[val]))[0]
-            # try: np.testing.assert_almost_equal(tres, tval ,decimal=4)
-            # except AssertionError:
-            #     print(floatToBinary32(pop_float[val]))
-            #     print(tres, tval)
-            #     print("Fail")
+def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: float,
+                             scale: float) -> np.ndarray:
+    if isinstance(shape, int):
+        shape = (shape, 1)
+    elif len(shape) == 1:
+        shape = (shape[0], 1)
 
-    elif bitsize == 64:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary64(pop_float[val]))
-            # tval, tres = pop_float[val], b2dfloat(floatToBinary64(pop_float[val]))[0]
-            # try: np.testing.assert_almost_equal(tres, tval ,decimal=8)
-            # except AssertionError:
-            #     print(floatToBinary32(pop_float[val]))
-            #     print(tres, tval)
-            #     print("Fail")
+    size = shape[0] * shape[1]
+
+    pop_float = cauchy.rvs(loc=loc, scale=scale, size=size)
+    pop_float = np.array(np.array_split(pop_float, int(size/shape[0])), dtype=float)
+    blist = []
+    for val in range(pop_float.shape[0]):
+        blist.append(float2Ndbit(pop_float[:, val], bitsize))
 
     return np.array(blist)
 
 
-# print("b2int 32")
-# print(b2int(rand_bit_pop(10, 32)))
-# print("b2sfloat 32")
-# print(b2sfloat(rand_bit_pop(10, 32)))
-# print("b2int 64")
-# print(b2int(rand_bit_pop(10, 64)))
-# print("b2dfloat 64")
-# print(b2dfloat(rand_bit_pop(10, 64)))
-
 def tfx(x):
     return 3 * x**2 + 2 * x + 1
+
 
 def wheelers_ridge(x: list, a: float = 1.5) -> float:
     """
@@ -140,6 +123,11 @@ def michealewicz(x: list, m: float = 10.0) -> float:
 
 
 def roulette_select(pop, fx):
+
+    y = np.zeros(pop.shape)
+    for val in range(pop.shape[0]):
+        pass
+
     y = fx(b2dfloat(pop))
     y = np.max(y) - y
     yc = y.copy()
@@ -197,16 +185,6 @@ def cross_parents64(parent1, parent2):
     child[c1:c2] = parent2[c1:c2]
     child[c2:] = parent1[c2:]
 
-    # print("p1")
-    # print(parent1)
-    # print(b2dfloat(parent1))
-    # print("p2")
-    # print(parent2)
-    # print(b2dfloat(parent2))
-    # print("Child")
-    # print(child)
-    # print(b2dfloat(child))
-
     child_float = b2dfloat(child.transpose())
 
     return child
@@ -215,14 +193,12 @@ def cross_parents64(parent1, parent2):
 def cross_parents(parent1, parent2, bitsize):
     global bdict
 
-    child = np.zeros(parent1.shape)
+    child = np.zeros(parent1.shape, dtype=np.uint8)
 
     nbits = int(parent1.size/bitsize)
-    p1_1 = parent1[:nbits * (1 + bdict[bitsize][1])]
-    p1_2 = parent1[nbits * (1 + bdict[bitsize][1]):]
 
+    p1_1 = parent1[:nbits * (1 + bdict[bitsize][1])]
     p2_1 = parent2[:nbits * (1 + bdict[bitsize][1])]
-    p2_2 = parent2[nbits * (1 + bdict[bitsize][1]):]
 
     if np.random.randint(0, 1):
         child[:nbits * (1 + bdict[bitsize][1])] = p1_1[:nbits * (1 + bdict[bitsize][1])]
@@ -238,8 +214,27 @@ def cross_parents(parent1, parent2, bitsize):
 
     return child
 
-p1, p2 = float2Ndbit(np.array([0.332, 0.5332]), 64), float2Ndbit(np.array([4.332, 2.5332]), 64)
-print(cross_parents(p1, p2, 64).shape)
+
+def mutate(bit, bitsize, **kwargs):
+    global bdict
+
+    bitc = bit.copy()
+
+    mutate_coeff = 1/bitsize
+    if "mutate_coeff" in kwargs:
+        mutate_coeff = kwargs["mutate_coeff"]
+
+    mutations = np.random.randint(bdict[bitsize][2], bit.size, int(1/mutate_coeff))
+
+    # Speed up?
+    for mutation in mutations:
+        if bitc[mutation]:
+            bitc[mutation] = 0
+        else:
+            bitc[mutation] = 1
+
+    return bitc
+
 
 def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
                cross: Callable, mutate: Callable):
@@ -265,97 +260,60 @@ def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
 
     return pop
 
-# if __name__ == "__main__":
-#     tsart = time()
-#
-#
-#     size = 1000
-#     genlist = []
-#
-#
-#     # rpop = normalrand_bit_pop_float(10000, 64, -5, 5)
-#     rpop = cauchyrand_bit_pop_float(size, 64, 0, 5)
-#     print(rpop.shape)
-#     parents = roulette_select(rpop, tfx)
-#
-#     epochs = int(np.floor(np.log2(size)))
-#
-#     for j in range(epochs):
-#         print("%s/%s" % (j+1, epochs))
-#         newgen = []
-#         for ppair in parents:
-#             newgen.append(cross_parents64(rpop[ppair[0]], rpop[ppair[1]]))
-#
-#         genlist.append(b2dfloat(rpop))
-#         rpop = np.array(newgen)
-#         print(rpop.shape)
-#         parents = roulette_select(np.array(newgen), tfx)
-#     genlist.append(b2dfloat(rpop[0]))
-#     genlist = genlist
-#     genarr = np.full((len(genlist), genlist[0].size), np.NAN)
-#
-#     k = 0
-#     for i in genlist:
-#         for j in range(i.size):
-#             genarr[k, j] = i[j]
-#         k += 1
-#     genarr = genarr.transpose()
-#     print(genarr)
-#     print(b2dfloat(rpop[0]))
-#
-#     dataind = 6
-#     np.savetxt("tdataGA_%s.txt" % dataind, genarr, delimiter=";",
-#                header="".join("%s;" %i for i in range(len(genlist) + 1)))
-#     # from AdrianPack.Aplot import LivePlot
-#     #
-#     # print(genlist)
-#     #
-#     # def livefunc(i):
-#     #     print(i)
-#     #     return tfx(genlist[i])
-#     #
-#     # LP = LivePlot(x=genlist, x_label="x data", y_label="y data")
-#     # LP.run(interval=100)
-#
-#
-#     print("t: ", time() - tsart)
+if __name__ == "__main__":
+    tsart = time()
 
 
-    # rpop = rand_bit_pop(10000, 4)
-    # # # print(rpop)
-    # roulette_select(b2int(rpop))
-    # print("t: ", time() - tsart)
+    size = (1000, 100)
+    genlist = []
 
-    # resdata = np.zeros(3)
-    # step, stop = 100, 10000
-    # bitsize = 4
+
+    # rpop = normalrand_bit_pop_float(10000, 64, -5, 5)
+    rpop = cauchyrand_bit_pop_float(size, 64, 0, 5)
+    print(rpop.shape)
+    parents = roulette_select(rpop, tfx)
+
+    epochs = int(np.floor(np.log2(size)))
+
+    for j in range(epochs):
+        print("%s/%s" % (j+1, epochs))
+        newgen = []
+        for ppair in parents:
+            newgen.append(cross_parents64(rpop[ppair[0]], rpop[ppair[1]]))
+
+        genlist.append(b2dfloat(rpop))
+        rpop = np.array(newgen)
+        print(rpop.shape)
+        parents = roulette_select(np.array(newgen), tfx)
+    genlist.append(b2dfloat(rpop[0]))
+    genlist = genlist
+    genarr = np.full((len(genlist), genlist[0].size), np.NAN)
+
+    k = 0
+    for i in genlist:
+        for j in range(i.size):
+            genarr[k, j] = i[j]
+        k += 1
+    genarr = genarr.transpose()
+    print(genarr)
+    print(b2dfloat(rpop[0]))
+
+    dataind = 0
+    np.savetxt("tdataGAmult_%s.txt" % dataind, genarr, delimiter=";",
+               header="".join("%s;" %i for i in range(len(genlist) + 1)))
+    # from AdrianPack.Aplot import LivePlot
     #
-    # for i in np.arange(step, stop + step, step):
-    #     print("%s / %s" % (i, stop))
-    #     # rpop = rand_bit_pop(i, bitsize)
-    #     test = t_roulette_sel(i, bitsize)
-    #     resdata = np.vstack([resdata, [i, test[0], test[1]]])
+    # print(genlist)
     #
-    # np.savetxt("resdata%s_%s_%s.txt" % (bitsize, step, stop), X=resdata, delimiter=";",
-    #            header="tsize;time;corrperc")
+    # def livefunc(i):
+    #     print(i)
+    #     return tfx(genlist[i])
     #
-    # tsize = resdata[:, 0]
-    # timedata = resdata[:, 1]
-    # corrdata = resdata[:, 2]
-    #
-    # from AdrianPack.Aplot import Default
-    #
-    # # def fx(x, a, b):
-    # #     return a * np.exp(x) + b
-    #
-    # graph = Default(tsize, timedata, x_label="Population size", y_label="Time (s)",
-    #                 degree=2)
-    # print(graph.fit_coeffs)
-    # # graph2 = Default(tsize, corrdata, add_mode=True)
-    # # graph += graph2
-    # graph()
-    # # graph.save_as = "resdata%s_%s_%s.png"
-    # # graph()
-    #
-    #
+    # LP = LivePlot(x=genlist, x_label="x data", y_label="y data")
+    # LP.run(interval=100)
+
+
+    print("t: ", time() - tsart)
+
+
 

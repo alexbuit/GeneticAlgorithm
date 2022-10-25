@@ -89,7 +89,12 @@ def Ndbit2float(valarr: np.ndarray, bitsize: int) -> np.ndarray:
     mant = np.asarray(np.array_split(valarr[nbits + nbits * bdict[bitsize][1]:], nbits))
 
     # Concat the rows of bits together
-    return b2f(np.hstack([sign,exp, mant]))
+    res = np.concatenate([sign.T, exp.T, mant.T]).T
+    resarr = np.zeros(res.shape[0])
+    for row in range(res.shape[0]):
+        resarr[row] = b2f(res[row, :])
+
+    return resarr
 
 
 def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
@@ -99,11 +104,12 @@ def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
 
     valarr = np.array([f2b(val) for val in valarr])
 
-    sign = valarr[:, 0][:, np.newaxis]
-    exp = valarr[:, 1:bdict[bitsize][1] + 1]
-    mantissa = valarr[:, bdict[bitsize][1] + 1:]
+    sign = valarr[:, 0][:, np.newaxis].flatten()
+    exp = valarr[:, 1:bdict[bitsize][1] + 1].flatten()
+    mantissa = valarr[:, bdict[bitsize][1] + 1:].flatten()
 
-    return np.hstack([sign, exp, mantissa])
+    return np.concatenate([sign, exp, mantissa])
+
 
 if __name__ == "__main__":
     from time import time
@@ -111,9 +117,13 @@ if __name__ == "__main__":
     start, stop = 0, 100
     tlist = []
     tstart = time()
-    test_rng = range(100, 100000, 100)
+    low, high, step = 100, 10000, 100
+    test_rng = range(low, high, step)
 
     for size in test_rng:
+        if size % 1000 == 0:
+            print("%s / %s" % (str(size + 1000), high))
+
         arr = np.linspace(start, stop, size)
 
         barr = float2Ndbit(arr, 64)
@@ -124,7 +134,13 @@ if __name__ == "__main__":
         tlist.append(time() - tstart)
         tstart = time()
 
-    Default(list(test_rng), tlist, x_label="N-values", y_label="time")()
+    pl = Default(list(test_rng), tlist, x_label="N-values", y_label="time", degree=1,
+                 decimal_comma=False)
+    print(pl.fit_stats())
+    pl()
+    pl.save_as = "Testbinconvs%sl%sh%s.png" % (low, high, step)
+    pl()
+
 
 
 
