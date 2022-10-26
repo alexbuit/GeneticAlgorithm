@@ -9,149 +9,17 @@ import math
 import random as rand
 import struct
 
-from helper import *
+from population_initatilisation import *
+from selection_funcs import *
+from t_functions import *
 
 
-np.random.seed(10)
+# np.random.seed(10)
 
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
-def t_roulette_sel(tsize=int(1e6), bitsize=4):
-    """
-
-    :param tsize: Size of the population
-    :param bitsize: Size of a parent within the population
-
-    Correct % => If > 100% or <100% there is are double indexes in the list.
-    :return:
-    """
-    tsart = time()
-    rpop = rand_bit_pop(tsize, bitsize)
-    # print(rpop)
-    parent_list = roulette_select(b2int(rpop), tfx)
-
-    tl = []
-    for parent in parent_list:
-        tl.append(parent[0])
-        tl.append(parent[1])
-
-    # print(len(tl), ":", len(set(tl)))
-    corrperc = 100 - ((len(tl) - len(set(tl))) / (tsize / 2)) * 100
-
-    t = time() - tsart
-    return t, corrperc
-
-
-def rand_bit_pop(n: int, m: int) -> np.ndarray:
-    """
-    Generate a random bit population
-    :param n: Population size dtype int
-    :param m: Bitsize dtype int
-    :return: List of random bits with a bit being a ndarray array of 0 and 1.
-    """
-    return np.array([np.random.randint(0, 2, size=m) for _ in range(n)])
-
-
-def normalrand_bit_pop_float(n, bitsize, lower, upper):
-
-    pop_float = np.linspace(lower, upper, num=n)
-    blist = []
-    if bitsize == 32:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary32(pop_float[val]))
-            # tval, tres = pop_float[val], b2sfloat(floatToBinary64(pop_float[val]))[0]
-            # try: np.testing.assert_almost_equal(tres, tval )
-            # except AssertionError: print("Fail")
-
-    elif bitsize == 64:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary64(pop_float[val]))
-            # tval, tres = pop_float[val], b2dfloat(blist[-1])[0]
-            # try: np.testing.assert_almost_equal(tres, tval )
-            # except AssertionError: print("Fail")
-
-    else:
-        pass
-    return np.array(blist)
-
-
-def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: float,
-                             scale: float) -> np.ndarray:
-    if isinstance(shape, int):
-        shape = (shape, 1)
-    elif len(shape) == 1:
-        shape = (shape[0], 1)
-
-    size = shape[0] * shape[1]
-
-    pop_float = cauchy.rvs(loc=loc, scale=scale, size=size)
-    pop_float = np.array(np.array_split(pop_float, int(size/shape[0])), dtype=float)
-    blist = []
-    for val in range(pop_float.shape[0]):
-        blist.append(float2Ndbit(pop_float[:, val], bitsize))
-
-    return np.array(blist)
-
-
-def tfx(x):
-    return 3 * x**2 + 2 * x + 1
-
-
-def wheelers_ridge(x: list, a: float = 1.5) -> float:
-    """
-    Compute the Wheelersridge function for given x1 and x2
-    :param x: list with x1 (otype: float) and x2 (otype: float)
-    :param a: additional parameter typically a=1.5
-    :return: Value f(x1, x2, a), real float
-    """
-    x1, x2 = x
-    return -np.exp(-(x1 * x2 - a) ** 2 - (x2 - a) ** 2)
-
-
-def michealewicz(x: list, m: float = 10.0) -> float:
-    """
-    Compute the Micealewicz function for x1, x2, x...
-    :param x: List of x inputs, where N-dimensions = len(x)
-    :param m: Steepness parameter, typically m=10
-    :return: Value f(x1, x2, ....), real float
-    """
-    return sum(
-        [np.sin(x[i]) * np.sin((i * x[i] ** 2) / np.pi) ** (2 * m) for i in
-         range(len(x))])
-
-
-def roulette_select(pop, fx):
-
-    y = np.zeros(pop.shape)
-    for val in range(pop.shape[0]):
-        pass
-
-    y = fx(b2dfloat(pop))
-    y = np.max(y) - y
-    yc = y.copy()
-    yrng = np.asarray(range(y.size))
-    p = y / sum(y)
-
-    pind = []
-    for i in range(int(y.size / 2)):
-        if p.size > 1:
-            try:
-                par = np.random.choice(yrng, 2, p=p, replace=False)
-            except ValueError:
-                p = np.full(p.size, 1 / p.size)
-                par = np.random.choice(yrng, 2, p=p, replace=False)
-
-            pind.append(list(sorted(par).__reversed__()))
-
-            yc = np.delete(yc, np.where(yrng == pind[-1][0])[0][0])
-            yc = np.delete(yc, np.where(yrng == pind[-1][1])[0][0])
-            yrng = np.delete(yrng, np.where(yrng == pind[-1][0])[0][0])
-            yrng = np.delete(yrng, np.where(yrng == pind[-1][1])[0][0])
-            p = yc / sum(yc)
-
-    return pind
 
 
 def cross_parents64(parent1, parent2):
@@ -168,8 +36,6 @@ def cross_parents64(parent1, parent2):
         child[0] = p1sign
 
 
-    p1exp = parent1[1:12]
-    p2exp = parent2[1:12]
     #
     # for i in range(1, 11):
     #     if np.random.randint(0, 1):
@@ -184,8 +50,6 @@ def cross_parents64(parent1, parent2):
     child[12:c1] = parent1[12:c1]
     child[c1:c2] = parent2[c1:c2]
     child[c2:] = parent1[c2:]
-
-    child_float = b2dfloat(child.transpose())
 
     return child
 
@@ -260,47 +124,98 @@ def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
 
     return pop
 
+
+class genetic_algoritm:
+
+    def __init__(self, dtype: str = "float", bitsize: int = 32,
+                 endianness: str = "big"):
+        self.dtype = dtype
+        self.bitsize = bitsize
+        self.endianness = endianness
+
+    def run(self, size: Iterable = (1000, 1), ):
+        pass
+
+    def get_results(self):
+        pass
+
+    def save_results(self, path: str):
+        pass
+
+    def load_results(self, path: str):
+        pass
+
+    def plot_results(self):
+        pass
+
+
 if __name__ == "__main__":
     tsart = time()
 
 
-    size = (1000, 100)
-    genlist = []
+    size = (1000, 2)
+    low, high = 10, 20
+    bitsize = 64
+    tfunc = wheelers_ridge
 
+    # epochs = int(np.floor(np.log2(size[0])))
+    epochs = 100
 
+    for sim in range(1):
+        genlist = []
     # rpop = normalrand_bit_pop_float(10000, 64, -5, 5)
-    rpop = cauchyrand_bit_pop_float(size, 64, 0, 5)
-    print(rpop.shape)
-    parents = roulette_select(rpop, tfx)
+        rpop = uniform_bit_pop_float(size, bitsize, low, high)
+        parents = roulette_select(rpop, tfunc, bitsize)
 
-    epochs = int(np.floor(np.log2(size)))
+        for j in range(epochs):
+            print("%s/%s" % (j+1, epochs))
 
-    for j in range(epochs):
-        print("%s/%s" % (j+1, epochs))
-        newgen = []
-        for ppair in parents:
-            newgen.append(cross_parents64(rpop[ppair[0]], rpop[ppair[1]]))
+            newgen = cauchyrand_bit_pop_float([int(size[0]/2), size[1]], bitsize, low, high).tolist()
+            for ppair in parents:
+                newgen.append(cross_parents(rpop[ppair[0]], rpop[ppair[1]], bitsize))
 
-        genlist.append(b2dfloat(rpop))
-        rpop = np.array(newgen)
-        print(rpop.shape)
-        parents = roulette_select(np.array(newgen), tfx)
-    genlist.append(b2dfloat(rpop[0]))
-    genlist = genlist
-    genarr = np.full((len(genlist), genlist[0].size), np.NAN)
+            # Select top10
+            t10 = roulette_select(rpop, tfunc, 64)[:5]
+            genlist.append([])
+            for ppair in t10:
+                genlist[j].append(rpop[ppair[0]])
+                genlist[j].append(rpop[ppair[1]])
+            genlist[j] = np.array(genlist[j])
 
-    k = 0
-    for i in genlist:
-        for j in range(i.size):
-            genarr[k, j] = i[j]
-        k += 1
-    genarr = genarr.transpose()
-    print(genarr)
-    print(b2dfloat(rpop[0]))
+            # genlist.append(rpop)
+            rpop = np.array(newgen)
+            parents = roulette_select(np.array(newgen), tfunc, bitsize)
 
-    dataind = 0
-    np.savetxt("tdataGAmult_%s.txt" % dataind, genarr, delimiter=";",
-               header="".join("%s;" %i for i in range(len(genlist) + 1)))
+        # genlist.append(rpop)
+        genarr = np.empty((size[0], epochs), dtype=object)
+
+        k = 0
+        for i in genlist:
+            for j in range(i.shape[0] - 1):
+
+                strbit = "".join(str(s) for s in i[j])
+                # print("~~~~~~")
+                # print("strbit: %s" % strbit)
+                # print("i: %s, k: %s" % (j, k))
+                # print(genarr[j, k])
+                genarr[j, k] = strbit
+                # print(genarr[j, k])
+            k += 1
+
+        genarr = genarr.T
+        # print(genarr)
+        # print(Ndbit2float(rpop[0], bitsize))
+
+        dataind = 5
+        with open("GAmult_%s_tfunc%s_bsize%s_sim%s.txt" % (dataind, tfunc.__name__, bitsize, sim), 'w') as f:
+            f.write(';'.join([str(i) for i in range(genarr.shape[0])]) + "\n")
+            genarr = genarr.T
+            for i in range(genarr.shape[0]):
+                f.write(";".join([str(item) for item in genarr[i]]) + "\n")
+
+    # np.savetxt("tdataGAmult_%s.txt" % dataind, genarr, delimiter=";",
+    #            header="".join("%s;" %i for i in range(len(genlist) + 1)))
+
     # from AdrianPack.Aplot import LivePlot
     #
     # print(genlist)

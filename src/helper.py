@@ -5,6 +5,12 @@ import struct
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
+
+def bindict():
+    return {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
+         128: [1, 15, 112], 256: [1, 19, 236]}
+
+
 def b2int(bit: np.ndarray) -> np.ndarray:
     """
     Conversion of m x n (big endian) bit array to integers.
@@ -78,23 +84,41 @@ def floatToBinary32(val):
 
 def Ndbit2float(valarr: np.ndarray, bitsize: int) -> np.ndarray:
     global bdict
-
     b2f = b2dfloat if bitsize == 64 else b2sfloat
 
-    nbits = int(valarr.size/bitsize)
+    if valarr.ndim == 1:
+        valarr = valarr[np.newaxis, :]
 
-    # Seperate all the sign, exp and mantissa arrays
-    sign = valarr[:nbits * 1][:, np.newaxis]
-    exp = np.asarray(np.array_split(valarr[nbits:nbits * bdict[bitsize][1] + nbits], nbits))
-    mant = np.asarray(np.array_split(valarr[nbits + nbits * bdict[bitsize][1]:], nbits))
+    shape = list(valarr.shape)
+    shape[-1] = int(np.ceil(shape[-1]/bitsize))
 
-    # Concat the rows of bits together
-    res = np.concatenate([sign.T, exp.T, mant.T]).T
-    resarr = np.zeros(res.shape[0])
-    for row in range(res.shape[0]):
-        resarr[row] = b2f(res[row, :])
+    resmat = np.zeros(shape)
 
-    return resarr
+    for b in range(shape[0]):
+
+        pairarr = valarr[b, :]
+
+        nbits = int(pairarr.size/bitsize)
+
+        # Seperate all the sign, exp and mantissa arrays
+        sign = pairarr[:nbits * 1][:, np.newaxis]
+        exp = np.asarray(np.array_split(pairarr[nbits:nbits * bdict[bitsize][1] + nbits], nbits))
+        mant = np.asarray(np.array_split(pairarr[nbits + nbits * bdict[bitsize][1]:], nbits))
+
+        # print(sign, exp, mant)
+        # print(sign.shape, exp.shape, mant.shape)
+
+        # Concat the rows of bits together
+        res = np.concatenate([sign.T, exp.T, mant.T]).T
+
+        resarr = np.zeros(res.shape[0])
+        for row in range(res.shape[0]):
+            resarr[row] = b2f(res[row, :])[:, np.newaxis]
+
+        resmat[b, :] = resarr
+
+    # Note if input dim is 1 will return array with dim 2.
+    return resmat
 
 
 def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
