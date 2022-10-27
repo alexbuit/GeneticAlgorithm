@@ -7,41 +7,51 @@ from AdrianPack.Aplot import LivePlot
 from AdrianPack.Fileread import Fileread
 from helper import Ndbit2float
 
-from DFM_opt_alg import tfx, wheelers_ridge
+from DFM_opt_alg import *
 
 tstart = time()
-data = list(Fileread(path="GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt")().values())
+# data = list(Fileread(path="GAmult_4_tfuncwheelers_ridge_bsize64_sim0.txt")().values())
+#
+low, high = 0, 10
+# popsize = [len(i) for i in data]
+#
+# for i in range(len(data)):
+#     # print(data[i])
+#     # print(np.where(data[i] == "None"))
+#     # print(data[i])
+#     data[i] = np.delete(data[i], np.where(data[i] == "None"))
+#
+#     resmat = np.empty((len(data[i]), len(data[i][0])), dtype=np.uint8)
+#     for x in range(len(data[i])):
+#         for b in range(len(data[i][x])):
+#             resmat[x, b] = int(data[i][x][b])
+#
+#     data[i] = resmat
+#
+# data_float = [Ndbit2float(i, 64) for i in data]
 
-low, high = -10, 10
-popsize = [len(i) for i in data]
+ga = genetic_algoritm()
+ga.load_results("michea_2d_2.txt")
+data_float = ga.get_numeric(bitsize=32)
 
-for i in range(len(data)):
-    # print(data[i])
-    # print(np.where(data[i] == "None"))
-    # print(data[i])
-    data[i] = np.delete(data[i], np.where(data[i] == "None"))
+popsize = [len(i) for i in data_float]
 
-    resmat = np.empty((len(data[i]), len(data[i][0])), dtype=np.uint8)
-    for x in range(len(data[i])):
-        for b in range(len(data[i][x])):
-            resmat[x, b] = int(data[i][x][b])
-
-    data[i] = resmat
-
-data_float = [Ndbit2float(i, 64) for i in data]
 figure = plt.figure()
 
 line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
                                    marker="o", label="Algortithm")
 
-x1, x2 = np.linspace(-2, 10, 1000), np.linspace(-10, 10, 1000)
+x1, x2 = np.linspace(0, 10, 1000), np.linspace(0, 10, 1000)
 X1, X2 = np.meshgrid(x1, x2)
-y = wheelers_ridge([X1, X2])
+y = michealewicz([X1, X2])
 
-plt.contour(X1, X2, y)
+plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
 
-plt.xlim(min(x1), 20)
-plt.ylim(-2.5, 40)
+plt.xlim(0, 10)
+plt.ylim(0, 10)
+
+plt.legend(loc="upper right")
+plt.colorbar()
 
 tx = plt.text(high - 3, 0, popsize[0])
 
@@ -57,9 +67,9 @@ def update(frame):
     plt.title("Iteration: %s" % frame)
     return None
 
-animation = FuncAnimation(figure, update, interval=1000, frames=range(len(data)))
-animation.save("wheelersridge_8.gif", dpi=300, writer=PillowWriter(fps=5))
-
+animation = FuncAnimation(figure, update, interval=2000, frames=range(len(popsize)))
+animation.save("michea_2.gif", dpi=300, writer=PillowWriter(fps=5))
+# plt.show()
 
 print("time: %s" % (time() - tstart))
 

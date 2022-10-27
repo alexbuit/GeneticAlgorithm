@@ -11,6 +11,7 @@ import struct
 
 from population_initatilisation import *
 from selection_funcs import *
+from cross_funcs import *
 from t_functions import *
 
 
@@ -48,31 +49,6 @@ def cross_parents64(parent1, parent2):
     c2 = np.random.randint(c1 + 1, parent1.size)
 
     child[12:c1] = parent1[12:c1]
-    child[c1:c2] = parent2[c1:c2]
-    child[c2:] = parent1[c2:]
-
-    return child
-
-
-def cross_parents(parent1, parent2, bitsize):
-    global bdict
-
-    child = np.zeros(parent1.shape, dtype=np.uint8)
-
-    nbits = int(parent1.size/bitsize)
-
-    p1_1 = parent1[:nbits * (1 + bdict[bitsize][1])]
-    p2_1 = parent2[:nbits * (1 + bdict[bitsize][1])]
-
-    if np.random.randint(0, 1):
-        child[:nbits * (1 + bdict[bitsize][1])] = p1_1[:nbits * (1 + bdict[bitsize][1])]
-    else:
-        child[:nbits * (1 + bdict[bitsize][1])] = p2_1[:nbits * (1 + bdict[bitsize][1])]
-
-    c1 = np.random.randint(nbits * (1 + bdict[bitsize][1]), parent1.size - 1)
-    c2 = np.random.randint(c1 + 1, parent1.size)
-
-    child[nbits * (1 + bdict[bitsize][1]):c1] = parent1[nbits * (1 + bdict[bitsize][1]):c1]
     child[c1:c2] = parent2[c1:c2]
     child[c2:] = parent1[c2:]
 
@@ -140,12 +116,13 @@ class genetic_algoritm:
         self.targs: dict = {}
 
         self.select: Callable = roulette_select
-        self.cross: Callable = cross_parents
+        self.cross: Callable = two_point
         self.mutation: Callable = mutate
 
         self.seed: Callable = self.none
 
         self.epochs = None
+        self.shape = (0, 0)
 
         self.results: list = []
 
@@ -180,11 +157,11 @@ class genetic_algoritm:
         parents = self.select(self.pop, **selargs)
 
         if self.seed.__name__ == "none":
-            self.epochs = int(np.floor(np.log2(size[0])))
+            self.epochs = int(np.floor(np.log2(self.shape[0])))
 
         for epoch in range(self.epochs):
             if verbosity:
-                print("%s/%s" % (epoch + 1, epochs))
+                print("%s/%s" % (epoch + 1, self.epochs))
 
             if self.seed.__name__ == "none":
                 newgen = []
@@ -197,7 +174,7 @@ class genetic_algoritm:
                                          **cargs))
 
             # Select top10
-            t10 = self.select(self.pop, self.tfunc, 64)[:5]
+            t10 = self.select(self.pop, self.tfunc, 64)[:]
             self.genlist.append([])
             for ppair in t10:
                 self.genlist[epoch].append(self.pop[ppair[0]])
@@ -243,6 +220,8 @@ class genetic_algoritm:
         else:
             self.pop = method(**kwargs)
 
+        self.shape = (self.pop.shape[0], self.pop.shape[1]/self.bitsize)
+
         return None
 
     def set_pop(self, pop: np.ndarray):
@@ -255,6 +234,7 @@ class genetic_algoritm:
         :return: None
         """
         self.pop = pop
+        self.shape = (self.pop.shape[0], self.pop.shape[1] / self.bitsize)
         return None
 
     def get_pop(self):
@@ -271,7 +251,7 @@ class genetic_algoritm:
         return None
 
     def get_results(self):
-        return self.genlist
+        return self.results
 
     def set_cross(self, cross: Callable):
         """
@@ -378,12 +358,38 @@ class genetic_algoritm:
 
             data[i] = resmat
 
-        self.results = [Ndbit2float(i, 64) for i in data]
+        self.results = data
 
         return self.results
 
-    def plot_results(self):
-        pass
+    def get_numeric(self, bit2num: Callable = Ndbit2float, **kwargs):
+        """
+        Convert results list with np.ndarrays of dimension mx1 to numeric data
+        using provided method or builtin routine for multi variable
+        float conversion.
+
+        Provided method needs to accept np.ndarray with binary information
+        stored as dtype np.uint8 and return np.ndarray of shape nx1 contaning
+        numeric data of float, int.
+
+        Example
+        def b2int(bit: np.ndarray) -> np.ndarray:
+            '''
+            Conversion of m x n (big endian) bit array to integers.
+            :param bit2num: m x n ndarray of numpy integers (0, 1) representing a bit
+            :return: m x n ndarray of integers
+            '''
+            m, n = bit.shape
+            a = 2 ** np.arange(n)
+            return bit @ a
+
+        :param bit2num:
+            Binary to numeric conversion routine
+        :param kwargs:
+            kwargs for bit2num
+        :return: numeric values for results of the loaded GA data
+        """
+        return [bit2num(i, **kwargs) for i in self.results]
 
     @staticmethod
     def none(*args, **kwargs):
@@ -395,21 +401,25 @@ if __name__ == "__main__":
 
 
     size = (10000, 2)
-    low, high = 0, 100
-    bitsize = 64
-    tfunc = wheelers_ridge
+    low, high = 0, 10
+    bitsize = 32
+    tfunc = michealewicz
 
     # epochs = int(np.floor(np.log2(size[0])))
     epochs = 100
 
-    ga = genetic_algoritm(bitsize=64)
-    ga.init_pop("uniform", shape=(1000, 2), low=0, high=100, bitsize=64)
+    ga = genetic_algoritm(bitsize=bitsize)
+    ga.init_pop("uniform", shape=size, low=low, high=high, bitsize=bitsize)
+    ga.cross = single_point
     # ga.seed = uniform_bit_pop_float
+    print(ga.seed)
     ga.target_func(tfunc)
-    ga.run(seedargs={"shape": (int(size[0]/2), 2), "bitsize": 64, "low": low,
+    ga.run(seedargs={"shape": (int(size[0]/2), 2), "bitsize": bitsize, "low": low,
                      "high": high}, epochs=epochs)
-    ga.save_results("test.txt")
-    print(Ndbit2float(ga[-1], 64))
+    ga.save_results("michea_2d_2.txt")
+    # print(Ndbit2float(ga[-1], 64))
+    # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
+    # print(ga.get_numeric(bitsize=64)[-1])
 
     # for sim in range(1):
     #     genlist = []
