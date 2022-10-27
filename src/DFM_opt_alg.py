@@ -140,7 +140,18 @@ class genetic_algoritm:
         self.cross: Callable = cross_parents
         self.mutation: Callable = mutate
 
+        self.seed = "None"
+
         self.results: list = []
+
+    def __call__(self, *args, **kwargs):
+        self.run(*args, **kwargs)
+
+    def __repr__(self):
+        return ""
+
+    def __getitem__(self, item):
+        return self.results[item]
 
     def run(self, sargs, epochs: int = 100, verbosity: int = 1):
         """
@@ -160,8 +171,17 @@ class genetic_algoritm:
             if verbosity:
                 print("%s/%s" % (j + 1, epochs))
 
+            if self.seed == 'None':
+                newgen = []
+            else:
+                newgen = uniform_bit_pop_float([int(size[0] / 2), size[1]],
+                                               bitsize, low, high).tolist()
 
+            for ppair in parents:
+                child = cross_parents(rpop[ppair[0]], rpop[ppair[1]], bitsize)
 
+                newgen.append(
+                    cross_parents(rpop[ppair[0]], rpop[ppair[1]], bitsize))
 
         pass
 
