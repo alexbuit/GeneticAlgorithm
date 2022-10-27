@@ -40,8 +40,8 @@ y = wheelers_ridge([X1, X2])
 
 plt.contour(X1, X2, y)
 
-plt.xlim(min(x1), 10)
-plt.ylim(-2.5, 5)
+plt.xlim(min(x1), 20)
+plt.ylim(-2.5, 40)
 
 tx = plt.text(high - 3, 0, popsize[0])
 
