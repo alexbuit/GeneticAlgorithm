@@ -197,7 +197,7 @@ class genetic_algoritm:
                                          **cargs))
 
             # Select top10
-            t10 = self.select(self.pop, self.tfunc, 64)[:]
+            t10 = self.select(self.pop, self.tfunc, 64)[:5]
             self.genlist.append([])
             for ppair in t10:
                 self.genlist[epoch].append(self.pop[ppair[0]])
@@ -208,6 +208,8 @@ class genetic_algoritm:
             # genlist.append(rpop)
             self.pop = np.array(newgen)
             parents = self.select(np.array(newgen), **selargs)
+
+        self.results = self.genlist
 
     def run_threaded(self, threads, **kwargs):
 
@@ -402,11 +404,12 @@ if __name__ == "__main__":
 
     ga = genetic_algoritm(bitsize=64)
     ga.init_pop("uniform", shape=(1000, 2), low=0, high=100, bitsize=64)
-    ga.seed = uniform_bit_pop_float
+    # ga.seed = uniform_bit_pop_float
     ga.target_func(tfunc)
     ga.run(seedargs={"shape": (int(size[0]/2), 2), "bitsize": 64, "low": low,
-                     "high": high}, epochs=10)
+                     "high": high}, epochs=epochs)
     ga.save_results("test.txt")
+    print(Ndbit2float(ga[-1], 64))
 
     # for sim in range(1):
     #     genlist = []
