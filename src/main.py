@@ -12,7 +12,7 @@ from DFM_opt_alg import *
 tstart = time()
 # data = list(Fileread(path="GAmult_4_tfuncwheelers_ridge_bsize64_sim0.txt")().values())
 #
-low, high = 0, 10
+low, high = 0, 4
 # popsize = [len(i) for i in data]
 #
 # for i in range(len(data)):
@@ -31,7 +31,7 @@ low, high = 0, 10
 # data_float = [Ndbit2float(i, 64) for i in data]
 
 ga = genetic_algoritm()
-ga.load_results("michea_2d_2.txt")
+ga.load_results("wheeler1.txt")
 data_float = ga.get_numeric(bitsize=32)
 
 popsize = [len(i) for i in data_float]
@@ -41,14 +41,14 @@ figure = plt.figure()
 line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
                                    marker="o", label="Algortithm")
 
-x1, x2 = np.linspace(0, 10, 1000), np.linspace(0, 10, 1000)
+x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
 X1, X2 = np.meshgrid(x1, x2)
-y = michealewicz([X1, X2])
+y = wheelers_ridge([X1, X2])
 
 plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
 
-plt.xlim(0, 10)
-plt.ylim(0, 10)
+plt.xlim(low, high)
+plt.ylim(low, high)
 
 plt.legend(loc="upper right")
 plt.colorbar()
@@ -57,6 +57,8 @@ tx = plt.text(high - 3, 0, popsize[0])
 
 def update(frame):
     global tx
+
+    print(frame)
 
     tx.remove()
 
@@ -67,8 +69,8 @@ def update(frame):
     plt.title("Iteration: %s" % frame)
     return None
 
-animation = FuncAnimation(figure, update, interval=2000, frames=range(len(popsize)))
-animation.save("michea_2.gif", dpi=300, writer=PillowWriter(fps=5))
+animation = FuncAnimation(figure, update, interval=500, frames=range(len(popsize)))
+animation.save("wheeler1.gif", dpi=600, writer=PillowWriter(fps=5))
 # plt.show()
 
 print("time: %s" % (time() - tstart))

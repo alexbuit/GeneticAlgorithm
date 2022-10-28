@@ -59,13 +59,14 @@ def mutate(bit, bitsize, **kwargs):
     global bdict
 
     bitc = bit.copy()
+    nbits = int(bitc.size/bitsize)
 
-    mutate_coeff = 1/bitsize
+
+    mutate_coeff = int(bit.size/bitsize)
     if "mutate_coeff" in kwargs:
         mutate_coeff = kwargs["mutate_coeff"]
-
-    mutations = np.random.randint(bdict[bitsize][2], bit.size, int(1/mutate_coeff))
-
+    # mutations = np.random.randint(nbits * (1 + bdict[bitsize][1]), bit.size, mutate_coeff)
+    mutations = np.random.choice(np.arange(nbits * (1 + bdict[bitsize][1]), bit.size), mutate_coeff, replace=False)
     # Speed up?
     for mutation in mutations:
         if bitc[mutation]:
@@ -116,15 +117,17 @@ class genetic_algoritm:
         self.targs: dict = {}
 
         self.select: Callable = roulette_select
-        self.cross: Callable = two_point
+        self.cross: Callable = equal_prob_cross
         self.mutation: Callable = mutate
 
-        self.seed: Callable = self.none
+        # self.seed: Callable = self.none
 
         self.epochs = None
         self.shape = (0, 0)
 
         self.results: list = []
+
+        self.min = np.NAN
 
     def __call__(self, *args, **kwargs):
         self.run(*args, **kwargs)
@@ -135,8 +138,8 @@ class genetic_algoritm:
     def __getitem__(self, item):
         return self.results[item]
 
-    def run(self, selargs: dict = {}, seedargs: dict = {},
-            cargs: dict = {},
+    def run(self, selargs: dict = {},
+            cargs: dict = {}, muargs: dict = {},
             epochs: int = 100, verbosity: int = 1):
         """
 
@@ -156,25 +159,30 @@ class genetic_algoritm:
         selargs["bitsize"] = bitsize
         parents = self.select(self.pop, **selargs)
 
-        if self.seed.__name__ == "none":
-            self.epochs = int(np.floor(np.log2(self.shape[0])))
+        # if self.seed.__name__ == "none":
+        #     self.epochs = int(np.floor(np.log2(self.shape[0])))
+
+        self.min = np.min(Ndbit2float(self.pop, self.bitsize))
+        # seedargs["low"] = self.min
 
         for epoch in range(self.epochs):
+            # seedargs["low"] = self.min
+            newgen = []
             if verbosity:
                 print("%s/%s" % (epoch + 1, self.epochs))
 
-            if self.seed.__name__ == "none":
-                newgen = []
-            else:
-                newgen = self.seed(**seedargs).tolist()
-
             cargs["bitsize"] = self.bitsize
+            muargs["bitsize"] = self.bitsize
             for ppair in parents:
-                newgen.append(self.cross(self.pop[ppair[0]], self.pop[ppair[1]],
-                                         **cargs))
+                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                # print("~~~~~~")
+                # print(Ndbit2float(child, 32) - Ndbit2float(self.mutation(child, **muargs), 32))
+                # print(Ndbit2float(child1, self.bitsize), Ndbit2float(child2, self.bitsize))
+                newgen.append(self.mutation(child1, **muargs))
+                newgen.append(self.mutation(child2, **muargs))
 
             # Select top10
-            t10 = self.select(self.pop, self.tfunc, 64)[:]
+            t10 = self.select(self.pop, self.tfunc, self.bitsize)[:]
             self.genlist.append([])
             for ppair in t10:
                 self.genlist[epoch].append(self.pop[ppair[0]])
@@ -185,6 +193,9 @@ class genetic_algoritm:
             # genlist.append(rpop)
             self.pop = np.array(newgen)
             parents = self.select(np.array(newgen), **selargs)
+
+            y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
+            self.min = np.min(y)
 
         self.results = self.genlist
 
@@ -400,23 +411,22 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = (10000, 2)
-    low, high = 0, 10
+    size = (100, 2)
+    low, high = 0, 4
     bitsize = 32
-    tfunc = michealewicz
+    tfunc = wheelers_ridge
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 100
+    epochs = 500
 
     ga = genetic_algoritm(bitsize=bitsize)
     ga.init_pop("uniform", shape=size, low=low, high=high, bitsize=bitsize)
-    ga.cross = single_point
+
     # ga.seed = uniform_bit_pop_float
-    print(ga.seed)
+    ga.set_cross(double_point)
     ga.target_func(tfunc)
-    ga.run(seedargs={"shape": (int(size[0]/2), 2), "bitsize": bitsize, "low": low,
-                     "high": high}, epochs=epochs)
-    ga.save_results("michea_2d_2.txt")
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 1})
+    ga.save_results("wheeler1.txt")
     # print(Ndbit2float(ga[-1], 64))
     # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
     # print(ga.get_numeric(bitsize=64)[-1])

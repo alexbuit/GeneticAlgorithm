@@ -24,6 +24,6 @@ def michealewicz(x: list, m: float = 10.0) -> float:
     :param m: Steepness parameter, typically m=10
     :return: Value f(x1, x2, ....), real float
     """
-    return sum(
+    return -sum(
         [np.sin(x[i]) * np.sin((i * x[i] ** 2) / np.pi) ** (2 * m) for i in
          range(len(x))])
