@@ -5,6 +5,15 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
 
+def cross_decoartor(crossfx, select, tfx, exclusion):
+    def wrapper(*args, **kwargs):
+        # First check the ranking
+
+        # top = select(self.pop, self.tfunc, self.bitsize)[:]
+        return None
+    return wrapper
+
+
 def double_point(parent1, parent2, bitsize):
     global bdict
 
