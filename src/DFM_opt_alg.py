@@ -155,8 +155,8 @@ class genetic_algoritm:
 
         self.epochs = epochs
 
-        selargs["fx"] = tfunc
-        selargs["bitsize"] = bitsize
+        selargs["fx"] = self.tfunc
+        selargs["bitsize"] = self.bitsize
         parents = self.select(self.pop, **selargs)
 
         # if self.seed.__name__ == "none":

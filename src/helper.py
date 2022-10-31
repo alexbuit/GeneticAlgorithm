@@ -135,35 +135,70 @@ def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
     return np.concatenate([sign, exp, mantissa])
 
 
+def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True):
+
+    if valarr.ndim == 1:
+        valarr = valarr[np.newaxis, :]
+
+    shape = list(valarr.shape)
+    shape[-1] = int(np.ceil(shape[-1]/bitsize))
+
+    resmat = np.zeros(shape)
+
+    for b in range(shape[0]):
+
+        pairarr = valarr[b, :]
+
+        nbits = int(pairarr.size/bitsize)
+        res = np.array_split(pairarr, nbits)
+        res = np.vstack(res)
+        if normalised:
+            resmat[b] = b2int(res)/2**bitsize
+        else:
+            resmat[b] = b2int(res)
+
+    return resmat
+
+def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True):
+
+
+    return None
+
+
 if __name__ == "__main__":
     from time import time
     from AdrianPack.Aplot import Default
-    start, stop = 0, 100
-    tlist = []
-    tstart = time()
-    low, high, step = 100, 10000, 100
-    test_rng = range(low, high, step)
+    from population_initatilisation import *
 
-    for size in test_rng:
-        if size % 1000 == 0:
-            print("%s / %s" % (str(size + 1000), high))
-
-        arr = np.linspace(start, stop, size)
-
-        barr = float2Ndbit(arr, 64)
-        farr = Ndbit2float(barr, 64)
-
-        np.testing.assert_almost_equal(arr, farr, 4)
-
-        tlist.append(time() - tstart)
-        tstart = time()
-
-    pl = Default(list(test_rng), tlist, x_label="N-values", y_label="time", degree=1,
-                 decimal_comma=False)
-    print(pl.fit_stats())
-    pl()
-    pl.save_as = "Testbinconvs%sl%sh%s.png" % (low, high, step)
-    pl()
+    pop = bit8([100, 37])
+    print(pop)
+    print(ndbit2int(pop, 8, normalised=True))
+    # start, stop = 0, 100
+    # tlist = []
+    # tstart = time()
+    # low, high, step = 100, 10000, 100
+    # test_rng = range(low, high, step)
+    #
+    # for size in test_rng:
+    #     if size % 1000 == 0:
+    #         print("%s / %s" % (str(size + 1000), high))
+    #
+    #     arr = np.linspace(start, stop, size)
+    #
+    #     barr = float2Ndbit(arr, 64)
+    #     farr = Ndbit2float(barr, 64)
+    #
+    #     np.testing.assert_almost_equal(arr, farr, 4)
+    #
+    #     tlist.append(time() - tstart)
+    #     tstart = time()
+    #
+    # pl = Default(list(test_rng), tlist, x_label="N-values", y_label="time", degree=1,
+    #              decimal_comma=False)
+    # print(pl.fit_stats())
+    # pl()
+    # pl.save_as = "Testbinconvs%sl%sh%s.png" % (low, high, step)
+    # pl()
 
 
 

@@ -73,3 +73,21 @@ def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: floa
         blist.append(float2Ndbit(pop_float[:, val], bitsize))
 
     return np.array(blist)
+
+
+def bit8(shape: list):
+
+    if isinstance(shape, int):
+        shape = (shape, 1)
+    elif len(shape) == 1:
+        shape = (shape[0], 1)
+
+    shape[1] *= 8
+
+    blist = []
+    for val in range(shape[0]):
+        blist.append(np.random.randint(0, 2, shape[1]))
+
+    return np.array(blist, dtype=np.uint8)
+
+# print(bit8([10, 2]))

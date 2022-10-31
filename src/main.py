@@ -3,7 +3,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from time import time
 
 import numpy as np
-from AdrianPack.Aplot import LivePlot
+from AdrianPack.Aplot import LivePlot, Default
 from AdrianPack.Fileread import Fileread
 from helper import Ndbit2float
 
@@ -30,48 +30,60 @@ low, high = 0, 4
 #
 # data_float = [Ndbit2float(i, 64) for i in data]
 
-ga = genetic_algoritm()
-ga.load_results("wheeler1.txt")
-data_float = ga.get_numeric(bitsize=32)
+# ga = genetic_algoritm()
+# ga.load_results("wheeler1.txt")
+# data_float = ga.get_numeric(bitsize=32)
+#
+# popsize = [len(i) for i in data_float]
+#
+# figure = plt.figure()
+#
+# line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
+#                                    marker="o", label="Algortithm")
+#
+# x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
+# X1, X2 = np.meshgrid(x1, x2)
+# y = wheelers_ridge([X1, X2])
+#
+# plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
+#
+# plt.xlim(low, high)
+# plt.ylim(low, high)
+#
+# plt.legend(loc="upper right")
+# plt.colorbar()
+#
+# tx = plt.text(high - 3, 0, popsize[0])
+#
+# def update(frame):
+#     global tx
+#
+#     print(frame)
+#
+#     tx.remove()
+#
+#     line.set_data(data_float[frame][:, 0], data_float[frame][:, 1])
+#
+#     tx = plt.text(-5, tfx(high) - 40, "popsize: %s" % popsize[frame])
+#
+#     plt.title("Iteration: %s" % frame)
+#     return None
+#
+# animation = FuncAnimation(figure, update, interval=500, frames=range(len(popsize)))
+# animation.save("wheeler1.gif", dpi=600, writer=PillowWriter(fps=5))
 
-popsize = [len(i) for i in data_float]
-
-figure = plt.figure()
-
-line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
-                                   marker="o", label="Algortithm")
-
-x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
-X1, X2 = np.meshgrid(x1, x2)
-y = wheelers_ridge([X1, X2])
-
-plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
-
-plt.xlim(low, high)
-plt.ylim(low, high)
-
-plt.legend(loc="upper right")
-plt.colorbar()
-
-tx = plt.text(high - 3, 0, popsize[0])
-
-def update(frame):
-    global tx
-
-    print(frame)
-
-    tx.remove()
-
-    line.set_data(data_float[frame][:, 0], data_float[frame][:, 1])
-
-    tx = plt.text(-5, tfx(high) - 40, "popsize: %s" % popsize[frame])
-
-    plt.title("Iteration: %s" % frame)
-    return None
-
-animation = FuncAnimation(figure, update, interval=500, frames=range(len(popsize)))
-animation.save("wheeler1.gif", dpi=600, writer=PillowWriter(fps=5))
 # plt.show()
+
+# N-epochs = 25
+data = Fileread("gatimetest2.txt")()
+data2 = Fileread("gatimetest3.txt")()
+print(data)
+pl = Default(data["0"], data["1"]/10, linestyle=" ", degree=1, data_label="bitsize 32", colour="C0", x_label = "Time", y_label="pop size")
+pl2 = Default(data2["0"], data2["1"]/10, degree=1, add_mode=True, linestyle=" ", data_label="bitsize 64", colour="C1")
+
+print(pl.x, pl.y)
+pl += pl2
+pl()
 
 print("time: %s" % (time() - tstart))
 
