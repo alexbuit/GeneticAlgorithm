@@ -67,6 +67,9 @@ def mutate(bit, bitsize, **kwargs):
         mutate_coeff = kwargs["mutate_coeff"]
     # mutations = np.random.randint(nbits * (1 + bdict[bitsize][1]), bit.size, mutate_coeff)
     mutations = np.random.choice(np.arange(nbits * (1 + bdict[bitsize][1]), bit.size), mutate_coeff, replace=False)
+    # mutations = np.random.choice(
+    #     np.arange(0, bit.size), mutate_coeff,
+    #     replace=False)
     # Speed up?
     for mutation in mutations:
         if bitc[mutation]:
@@ -102,6 +105,17 @@ def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
     return pop
 
 
+def cross_dec(top):
+    def inner_dec(crossfx):
+        @functools.wraps(crossfx)
+        def wrapper(self, *args, **kwargs):
+            # First check the ranking
+
+            # top = select(self.pop, self.tfunc, self.bitsize)[:]
+            return None
+        return wrapper
+    return inner_dec
+
 class genetic_algoritm:
 
     def __init__(self, dtype: str = "float", bitsize: int = 32,
@@ -119,6 +133,9 @@ class genetic_algoritm:
         self.select: Callable = roulette_select
         self.cross: Callable = equal_prob_cross
         self.mutation: Callable = mutate
+
+        # The top that is exlcuded from creating children/mutating
+        self.elitism_coeff = 10
 
         # self.seed: Callable = self.none
 
@@ -165,6 +182,7 @@ class genetic_algoritm:
         self.min = np.min(Ndbit2float(self.pop, self.bitsize))
         # seedargs["low"] = self.min
 
+        print(self.tfunc)
         for epoch in range(self.epochs):
             # seedargs["low"] = self.min
             newgen = []
@@ -173,7 +191,14 @@ class genetic_algoritm:
 
             cargs["bitsize"] = self.bitsize
             muargs["bitsize"] = self.bitsize
-            for ppair in parents:
+            print("~~~~~")
+            for ppair in parents[:self.elitism_coeff]:
+                newgen.append(self.pop[ppair[0]])
+                newgen.append(self.pop[ppair[1]])
+
+                print(self.tfunc([Ndbit2float(self.pop[ppair[0]], self.bitsize), Ndbit2float(self.pop[ppair[1]], self.bitsize)]))
+
+            for ppair in parents[self.elitism_coeff:]:
                 child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 # print("~~~~~~")
                 # print(Ndbit2float(child, 32) - Ndbit2float(self.mutation(child, **muargs), 32))
@@ -182,7 +207,7 @@ class genetic_algoritm:
                 newgen.append(self.mutation(child2, **muargs))
 
             # Select top10
-            t10 = self.select(self.pop, self.tfunc, self.bitsize)[:]
+            t10 = self.select(self.pop, self.tfunc, self.bitsize)[:10]
             self.genlist.append([])
             for ppair in t10:
                 self.genlist[epoch].append(self.pop[ppair[0]])
@@ -192,10 +217,9 @@ class genetic_algoritm:
 
             # genlist.append(rpop)
             self.pop = np.array(newgen)
+
             parents = self.select(np.array(newgen), **selargs)
 
-            y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
-            self.min = np.min(y)
 
         self.results = self.genlist
 
@@ -411,13 +435,13 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = (100, 2)
+    size = (10000, 2)
     low, high = 0, 4
-    bitsize = 32
+    bitsize = 64
     tfunc = wheelers_ridge
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 500
+    epochs = 20
 
     ga = genetic_algoritm(bitsize=bitsize)
     ga.init_pop("uniform", shape=size, low=low, high=high, bitsize=bitsize)
@@ -425,8 +449,8 @@ if __name__ == "__main__":
     # ga.seed = uniform_bit_pop_float
     ga.set_cross(double_point)
     ga.target_func(tfunc)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 1})
-    ga.save_results("wheeler1.txt")
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 12})
+    ga.save_results("wheeler3_2.txt")
     # print(Ndbit2float(ga[-1], 64))
     # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
     # print(ga.get_numeric(bitsize=64)[-1])
