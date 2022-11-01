@@ -77,6 +77,26 @@ def mutate(bit, bitsize, **kwargs):
     return bitc
 
 
+def full_mutate(bit, bitsize, **kwargs):
+    global bdict
+
+    bitc = bit.copy()
+
+    mutate_coeff = int(bit.size/bitsize)
+    if "mutate_coeff" in kwargs:
+        mutate_coeff = kwargs["mutate_coeff"]
+    # mutations = np.random.randint(nbits * (1 + bdict[bitsize][1]), bit.size, mutate_coeff)
+    mutations = np.random.choice(np.arange(0, bit.size), mutate_coeff, replace=False)
+    # Speed up?
+    for mutation in mutations:
+        if bitc[mutation]:
+            bitc[mutation] = 0
+        else:
+            bitc[mutation] = 1
+
+    return bitc
+
+
 def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
                cross: Callable, mutate: Callable):
     """
@@ -124,6 +144,8 @@ class genetic_algoritm:
 
         self.epochs = None
         self.shape = (0, 0)
+        self.elitism = 10
+        self.save_top = 10
 
         self.results: list = []
 
@@ -162,8 +184,6 @@ class genetic_algoritm:
         # if self.seed.__name__ == "none":
         #     self.epochs = int(np.floor(np.log2(self.shape[0])))
 
-        self.min = np.min(Ndbit2float(self.pop, self.bitsize))
-        # seedargs["low"] = self.min
 
         for epoch in range(self.epochs):
             # seedargs["low"] = self.min
@@ -173,7 +193,14 @@ class genetic_algoritm:
 
             cargs["bitsize"] = self.bitsize
             muargs["bitsize"] = self.bitsize
-            for ppair in parents:
+
+            for ppair in parents[:self.elitism]:
+                # child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
+                newgen.append(child1)
+                newgen.append(child2)
+
+            for ppair in parents[self.elitism:]:
                 child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 # print("~~~~~~")
                 # print(Ndbit2float(child, 32) - Ndbit2float(self.mutation(child, **muargs), 32))
@@ -182,7 +209,7 @@ class genetic_algoritm:
                 newgen.append(self.mutation(child2, **muargs))
 
             # Select top10
-            t10 = self.select(self.pop, self.tfunc, self.bitsize)[:]
+            t10 = self.select(self.pop, **selargs)[:self.save_top]
             self.genlist.append([])
             for ppair in t10:
                 self.genlist[epoch].append(self.pop[ppair[0]])
@@ -194,8 +221,8 @@ class genetic_algoritm:
             self.pop = np.array(newgen)
             parents = self.select(np.array(newgen), **selargs)
 
-            y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
-            self.min = np.min(y)
+            # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
+            # self.min = np.min(y)
 
         self.results = self.genlist
 
@@ -212,7 +239,7 @@ class genetic_algoritm:
             the str should match the init method, so uniform -> 'uniform' and
             cauchy 'cauchy' etc
             full list of usable args:
-            ['uniform', 'cauchy']
+            ['uniform', 'cauchy', '8bit']
 
             if callable the population will be the return value of given function.
             A population function should return a mx1 numpy array of bits, to convert
@@ -228,6 +255,8 @@ class genetic_algoritm:
             self.pop = uniform_bit_pop_float(**kwargs)
         elif method == "cauchy":
             self.pop = cauchyrand_bit_pop_float(**kwargs)
+        elif method == "8bit":
+            self.pop = bit8(**kwargs)
         else:
             self.pop = method(**kwargs)
 
@@ -357,11 +386,10 @@ class genetic_algoritm:
     def load_results(self, path: str):
         from AdrianPack.Fileread import Fileread
 
-        data = list(Fileread(path=path)().values())
+        data = list(Fileread(path=path, dtype="str", delimiter=";")().values())
 
         for i in range(len(data)):
             data[i] = np.delete(data[i], np.where(data[i] == "None"))
-
             resmat = np.empty((len(data[i]), len(data[i][0])), dtype=np.uint8)
             for x in range(len(data[i])):
                 for b in range(len(data[i][x])):
@@ -411,22 +439,26 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = (100, 2)
-    low, high = 0, 4
-    bitsize = 32
-    tfunc = wheelers_ridge
+    size = [1000, 2]
+    low, high = -1, 1
+    bitsize = 9
+    tfunc = ackley
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 500
+    epochs = 10
 
     ga = genetic_algoritm(bitsize=bitsize)
-    ga.init_pop("uniform", shape=size, low=low, high=high, bitsize=bitsize)
+    ga.init_pop("8bit", shape=size, bitsize=bitsize)
 
     # ga.seed = uniform_bit_pop_float
-    ga.set_cross(double_point)
+    ga.set_cross(full_single_point)
+    ga.set_mutate(full_mutate)
+
+    ga.save_top = size[0]
+
     ga.target_func(tfunc)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 1})
-    ga.save_results("wheeler1.txt")
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 2}, selargs={"nbit2num": ndbit2int})
+    ga.save_results("ackley4inv.txt")
     # print(Ndbit2float(ga[-1], 64))
     # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
     # print(ga.get_numeric(bitsize=64)[-1])

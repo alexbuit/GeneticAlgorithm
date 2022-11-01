@@ -2,10 +2,10 @@
 import numpy as np
 from helper import *
 
-def roulette_select(pop, fx, bitsize):
+def roulette_select(pop, fx, bitsize, nbit2num = Ndbit2float):
 
-    y = np.apply_along_axis(fx, 1, Ndbit2float(pop, bitsize))
-    y = np.max(y) - y
+    y = np.apply_along_axis(fx, 1, nbit2num(pop, bitsize))
+    # y = np.max(y) - y
     yc = y.copy()
     yrng = np.asarray(range(y.size))
     p = y / sum(y)
