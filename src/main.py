@@ -10,17 +10,19 @@ from helper import Ndbit2float
 from DFM_opt_alg import *
 
 tstart = time()
-# data = list(Fileread(path="GAmult_4_tfuncwheelers_ridge_bsize64_sim0.txt")().values())
+data = list(Fileread(path="ackley2_1.txt", dtype="str", delimiter=";")().values())
+# print(Fileread(path="ackley1.txt", dtype="str", delimiter=";")())
 #
-low, high = 0, 4
-# popsize = [len(i) for i in data]
-#
+low, high = -1, 1
+popsize = [len(i) for i in data]
+
 # for i in range(len(data)):
 #     # print(data[i])
 #     # print(np.where(data[i] == "None"))
 #     # print(data[i])
 #     data[i] = np.delete(data[i], np.where(data[i] == "None"))
-#
+#     print(data[i])
+#     print((len(data[i]), len(data[i][0])))
 #     resmat = np.empty((len(data[i]), len(data[i][0])), dtype=np.uint8)
 #     for x in range(len(data[i])):
 #         for b in range(len(data[i][x])):
@@ -28,62 +30,66 @@ low, high = 0, 4
 #
 #     data[i] = resmat
 #
-# data_float = [Ndbit2float(i, 64) for i in data]
+# data_float = [ndbit2int(i, 8) for i in data]
 
-# ga = genetic_algoritm()
-# ga.load_results("wheeler1.txt")
-# data_float = ga.get_numeric(bitsize=32)
-#
-# popsize = [len(i) for i in data_float]
-#
-# figure = plt.figure()
-#
-# line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
-#                                    marker="o", label="Algortithm")
-#
-# x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
-# X1, X2 = np.meshgrid(x1, x2)
-# y = wheelers_ridge([X1, X2])
-#
-# plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
-#
-# plt.xlim(low, high)
-# plt.ylim(low, high)
-#
-# plt.legend(loc="upper right")
-# plt.colorbar()
-#
-# tx = plt.text(high - 3, 0, popsize[0])
-#
-# def update(frame):
-#     global tx
-#
-#     print(frame)
-#
-#     tx.remove()
-#
-#     line.set_data(data_float[frame][:, 0], data_float[frame][:, 1])
-#
-#     tx = plt.text(-5, tfx(high) - 40, "popsize: %s" % popsize[frame])
-#
-#     plt.title("Iteration: %s" % frame)
-#     return None
-#
-# animation = FuncAnimation(figure, update, interval=500, frames=range(len(popsize)))
-# animation.save("wheeler1.gif", dpi=600, writer=PillowWriter(fps=5))
+# print(np.loadtxt("ackley1.txt", delimiter=";"))
+
+ga = genetic_algoritm()
+ga.load_results("ackley4inv.txt")
+data_float = ga.get_numeric(bit2num=ndbit2int, bitsize=9)
+
+popsize = [len(i) for i in data_float]
+
+figure = plt.figure()
+
+line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
+                                   marker="o", label="Algortithm")
+
+x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
+X1, X2 = np.meshgrid(x1, x2)
+y = ackley([X1, X2])
+
+plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
+
+plt.xlim(low, high)
+plt.ylim(low, high)
+
+plt.legend(loc="upper right")
+plt.colorbar()
+
+tx = plt.text(high - 3, 0, popsize[0])
+
+def update(frame):
+    global tx
+
+    print(frame)
+
+    tx.remove()
+
+    line.set_data(data_float[frame][:, 0], data_float[frame][:, 1])
+
+    tx = plt.text(-5, tfx(high) - 40, "popsize: %s" % popsize[frame])
+
+    plt.title("Iteration: %s" % frame)
+    return None
+
+animation = FuncAnimation(figure, update, interval=500, frames=range(len(data_float)))
+animation.save("ackley4inv.gif", dpi=600, writer=PillowWriter(fps=1))
 
 # plt.show()
 
-# N-epochs = 25
-data = Fileread("gatimetest2.txt")()
-data2 = Fileread("gatimetest3.txt")()
-print(data)
-pl = Default(data["0"], data["1"]/10, linestyle=" ", degree=1, data_label="bitsize 32", colour="C0", x_label = "Time", y_label="pop size")
-pl2 = Default(data2["0"], data2["1"]/10, degree=1, add_mode=True, linestyle=" ", data_label="bitsize 64", colour="C1")
-
-print(pl.x, pl.y)
-pl += pl2
-pl()
+# def ologn(n, a, b, c):
+#     return a * np.log2(n * b) + c
+#
+# # N-epochs = 25
+# data = Fileread("gatimetestepoch32.txt")()
+# data2 = Fileread("gatimetestepoch64.txt")()
+# print(data)
+# pl = Default(data["0"], data["1"]/10, linestyle=" ", degree=1, data_label="bitsize 32", colour="C0", x_label = "Time", y_label="pop size")
+# pl2 = Default(data2["0"], data2["1"]/10, add_mode=True, linestyle=" ", data_label="bitsize 64", colour="C1", fx=ologn)
+#
+# pl += pl2
+# pl()
 
 print("time: %s" % (time() - tstart))
 

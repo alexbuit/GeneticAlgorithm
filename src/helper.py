@@ -152,17 +152,18 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True):
         nbits = int(pairarr.size/bitsize)
         res = np.array_split(pairarr, nbits)
         res = np.vstack(res)
+
+        sign = res[:, 0]
+        sign = (-1) ** sign
+
+        res = res[:, 1:]
+
         if normalised:
-            resmat[b] = b2int(res)/2**bitsize
+            resmat[b] = sign * b2int(res)/2**(bitsize - 1)
         else:
-            resmat[b] = b2int(res)
+            resmat[b] = sign * b2int(res)
 
     return resmat
-
-def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True):
-
-
-    return None
 
 
 if __name__ == "__main__":

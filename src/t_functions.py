@@ -27,3 +27,18 @@ def michealewicz(x: list, m: float = 10.0) -> float:
     return -sum(
         [np.sin(x[i]) * np.sin((i * x[i] ** 2) / np.pi) ** (2 * m) for i in
          range(len(x))])
+
+
+def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
+    """
+    Compute Ackley' function for x1, x2, x...
+    :param x: list of x inputs where N-dimension = len(x)
+    :param a: 
+    :param b:
+    :param c:
+    :return:
+    """
+    ndim = len(x)
+    x = np.array(x, dtype=float)
+    return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
+

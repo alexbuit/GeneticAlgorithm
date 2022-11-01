@@ -170,7 +170,7 @@ earg = 15
 lp = LivePlot(x=t, y=read, x_label="time", y_label="Intensity",
               linestyle="")
 lp.live_floating_point_average(0, 10)
-res = lp.run(interval=1, endpoint=fx)
+res = lp.run(interval=1)
 # res.save_as = r"lidar%sfx%sarg%s.png" % (k, fx.__name__, earg)
 # np.savetxt(r"lidar%sfx%sarg%s.txt" % (k, fx.__name__, earg),
 #            np.asarray([res.x, res.y]).T, header="time;Intens",
