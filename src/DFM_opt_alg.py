@@ -1,14 +1,5 @@
 from typing import Callable, Union, Iterable, Optional
 
-import numpy
-from scipy.stats import cauchy
-from time import time
-
-import numpy as np
-import math
-import random as rand
-import struct
-
 from population_initatilisation import *
 from selection_funcs import *
 from cross_funcs import *
@@ -165,6 +156,8 @@ class genetic_algoritm:
             cargs: dict = {}, muargs: dict = {},
             epochs: int = 100, verbosity: int = 1):
         """
+        :param cargs:
+        :param muargs:
         :param seedargs:
         :param selargs:
         :param epochs:
