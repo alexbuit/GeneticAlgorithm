@@ -100,9 +100,7 @@ def full_mutate(bit, bitsize, **kwargs):
 def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
                cross: Callable, mutate: Callable):
     """
-
     :param fx:
-
     :param pop:
     :param max_iter:
     :param select:
@@ -149,6 +147,9 @@ class genetic_algoritm:
 
         self.results: list = []
 
+        self.dolog = 0
+        self.log = {}
+
         self.min = np.NAN
 
     def __call__(self, *args, **kwargs):
@@ -164,7 +165,6 @@ class genetic_algoritm:
             cargs: dict = {}, muargs: dict = {},
             epochs: int = 100, verbosity: int = 1):
         """
-
         :param seedargs:
         :param selargs:
         :param epochs:
@@ -196,7 +196,7 @@ class genetic_algoritm:
 
             for ppair in parents[:self.elitism]:
                 # child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
-                child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
+                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 newgen.append(child1)
                 newgen.append(child2)
 
@@ -221,6 +221,12 @@ class genetic_algoritm:
             self.pop = np.array(newgen)
             parents = self.select(np.array(newgen), **selargs)
 
+            if self.dolog:
+                if self.dolog == 2:
+                    pass
+                elif self.dolog == 1:
+                    pass
+
             # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
             # self.min = np.min(y)
 
@@ -239,23 +245,20 @@ class genetic_algoritm:
             the str should match the init method, so uniform -> 'uniform' and
             cauchy 'cauchy' etc
             full list of usable args:
-            ['uniform', 'cauchy', '8bit']
-
+            ['uniform', 'cauchy', 'nbit']
             if callable the population will be the return value of given function.
             A population function should return a mx1 numpy array of bits, to convert
             floating point values to approved bit values use the float2Ndbit function
             included in helper.py
-
         :param kwargs:
             kwargs for init method
-
         :return: None
         """
         if method == "uniform":
             self.pop = uniform_bit_pop_float(**kwargs)
         elif method == "cauchy":
             self.pop = cauchyrand_bit_pop_float(**kwargs)
-        elif method == "8bit":
+        elif method == "nbit":
             self.pop = bit8(**kwargs)
         else:
             self.pop = method(**kwargs)
@@ -300,16 +303,12 @@ class genetic_algoritm:
           + optional kwargs
         and return a single numpy array with binary value of the resulting child
         from p1 and p2.
-
         :param cross:
             Method to cross binary data p1 and p2 to form child.
-
         Example method:
-
         def cross(p1, p2, bitsize, **kwargs):
             # Take the first half of p1 and cross it with the other half of p2
             return pnp.concatenate([p1[:int(1/2 * bitsize)], p2[int(1/2 * bitsize):]])
-
         It is recommended to add **kwargs to the provided method to be able to
         handle excess arguments.
         :return: None
@@ -322,17 +321,13 @@ class genetic_algoritm:
         Set the parent selection method used in GA, method should take an
         np.ndarray of dim mx1 as an argument + kwargs and return a list of lists with
         indexes of (unique) combinations.
-
         :param select:
             Method to select parent combination by returning their indexes in the
             population self.pop.
-
         Example method:
-
         def select(pop, **kwargs):
             # Return completely random combinations in pop array
             return np.random.choice(range(pop.shape[0]), 2, replace=False)
-
         It is recommended to add **kwargs to the provided method to be able to
         handle excess arguments.
         :return: None
@@ -345,12 +340,9 @@ class genetic_algoritm:
         Set the mutation method which takes a single np.ndarray of dim 1 with
         dtype np.uint8 and kwargs to return the mutated bit. The shape of the input
         array should equal the shape of the output array.
-
         :param mutation:
             Method to mutate a single np.ndarray of bits
-
         Example method:
-
         def mutate(bit, **kwargs):
             # select a random point in the bit
             ind = np.random.randint(0, bit.size)
@@ -361,7 +353,6 @@ class genetic_algoritm:
                  bit[ind] = 1
             # return the mutated bit
             return bit
-
         It is recommended to add **kwargs to the provided method to be able to
         handle excess arguments.
         :return:
@@ -406,11 +397,9 @@ class genetic_algoritm:
         Convert results list with np.ndarrays of dimension mx1 to numeric data
         using provided method or builtin routine for multi variable
         float conversion.
-
         Provided method needs to accept np.ndarray with binary information
         stored as dtype np.uint8 and return np.ndarray of shape nx1 contaning
         numeric data of float, int.
-
         Example
         def b2int(bit: np.ndarray) -> np.ndarray:
             '''
@@ -421,7 +410,6 @@ class genetic_algoritm:
             m, n = bit.shape
             a = 2 ** np.arange(n)
             return bit @ a
-
         :param bit2num:
             Binary to numeric conversion routine
         :param kwargs:
@@ -429,6 +417,51 @@ class genetic_algoritm:
         :return: numeric values for results of the loaded GA data
         """
         return [bit2num(i, **kwargs) for i in self.results]
+
+    def logdata(self, verbosity: int = 2):
+        """
+        Initiate self.log to verbosity to save extra information per epoch in a
+        dictionary with key epoch and value a dict with for verbosity level 2
+        {
+         time: float, #time of one epoch
+         ranking: list of list, # result from self.select
+         fitness: list of float, # fitness values of all input values ordered as ranking
+         value: list of np.ndarray, # genlist with all bitvalues.
+         value_top: list of np.ndarray, # genlist with bitvalues selected by top.
+         value_num: list of np.ndarray, # genlist with all values converted to numeric values.
+        }
+
+        and for verbosity level 1
+        {
+         time: float, #time of one epoch
+         ranking: list of list, # result from self.select
+         value: list of np.ndarray, # genlist with all values.
+        }
+
+        The resulting dict will look like the following
+            {
+             0: epoch_log_dict,
+             1: epoch_log_dict,
+             ...
+             n: epoch_log_dict
+            }
+
+        Save log to txt with the log2txt method
+        Get log by calling the get_log method or by assigning a variable
+        to geneticalgorithm.log
+
+        :return: None
+        """
+        self.log = {}
+        self.dolog = verbosity
+
+        return None
+
+    def get_log(self):
+        return self.log
+
+    def log2txt(self, path):
+        return None
 
     @staticmethod
     def none(*args, **kwargs):
@@ -439,26 +472,26 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [1000, 2]
+    size = [10, 2]
     low, high = -1, 1
     bitsize = 9
-    tfunc = ackley
+    tfunc = wheelers_ridge
 
     # epochs = int(np.floor(np.log2(size[0])))
     epochs = 10
 
     ga = genetic_algoritm(bitsize=bitsize)
-    ga.init_pop("8bit", shape=size, bitsize=bitsize)
+    ga.init_pop("nbit", shape=size, bitsize=bitsize)
 
     # ga.seed = uniform_bit_pop_float
-    ga.set_cross(full_single_point)
+    ga.set_cross(full_double_point)
     ga.set_mutate(full_mutate)
 
     ga.save_top = size[0]
 
     ga.target_func(tfunc)
     ga.run(epochs=epochs, muargs={"mutate_coeff": 2}, selargs={"nbit2num": ndbit2int})
-    ga.save_results("ackley4inv.txt")
+    ga.save_results("wheeler8bit1.txt")
     # print(Ndbit2float(ga[-1], 64))
     # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
     # print(ga.get_numeric(bitsize=64)[-1])
@@ -534,6 +567,3 @@ if __name__ == "__main__":
 
 
     print("t: ", time() - tsart)
-
-
-

@@ -13,7 +13,7 @@ tstart = time()
 data = list(Fileread(path="ackley2_1.txt", dtype="str", delimiter=";")().values())
 # print(Fileread(path="ackley1.txt", dtype="str", delimiter=";")())
 #
-low, high = -1, 1
+low, high = -10, 10
 popsize = [len(i) for i in data]
 
 # for i in range(len(data)):
@@ -35,7 +35,7 @@ popsize = [len(i) for i in data]
 # print(np.loadtxt("ackley1.txt", delimiter=";"))
 
 ga = genetic_algoritm()
-ga.load_results("ackley4inv.txt")
+ga.load_results("wheeler8bit1.txt")
 data_float = ga.get_numeric(bit2num=ndbit2int, bitsize=9)
 
 popsize = [len(i) for i in data_float]
@@ -47,7 +47,7 @@ line, = plt.plot(data_float[0][:, 0], data_float[0][:, 1], linestyle="",
 
 x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
 X1, X2 = np.meshgrid(x1, x2)
-y = ackley([X1, X2])
+y = wheelers_ridge([X1, X2])
 
 plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
 
@@ -74,7 +74,7 @@ def update(frame):
     return None
 
 animation = FuncAnimation(figure, update, interval=500, frames=range(len(data_float)))
-animation.save("ackley4inv.gif", dpi=600, writer=PillowWriter(fps=1))
+animation.save("wheeler8bit1.gif", dpi=600, writer=PillowWriter(fps=1))
 
 # plt.show()
 

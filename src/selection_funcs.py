@@ -5,7 +5,9 @@ from helper import *
 def roulette_select(pop, fx, bitsize, nbit2num = Ndbit2float):
 
     y = np.apply_along_axis(fx, 1, nbit2num(pop, bitsize))
-    # y = np.max(y) - y
+    print(min(y), max(y))
+    y = np.max(y) - y
+    print(min(y), max(y))
     yc = y.copy()
     yrng = np.asarray(range(y.size))
     p = y / sum(y)

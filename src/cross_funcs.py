@@ -117,3 +117,31 @@ def full_single_point(parent1, parent2, **kwargs):
     child1[c1:] = parent1[c1:]
 
     return [child1, child2]
+
+
+def full_double_point(parent1, parent2, **kwargs):
+    global bdict
+
+    child1 = np.zeros(parent1.shape, dtype=np.uint8)
+    child2 = np.zeros(parent1.shape, dtype=np.uint8)
+
+
+    if np.random.randint(0, 1):
+        child1[0] = parent1[0]
+        child2[0] = parent2[0]
+    else:
+        child1[0] = parent2[0]
+        child2[0] = parent1[0]
+
+    c1 = np.random.randint(0, parent1.size - 1)
+    c2 = np.random.randint(c1 + 1, parent1.size)
+
+    child1[:c1] = parent1[:c1]
+    child1[c1:c2] = parent2[c1:c2]
+    child1[c2:] = parent1[c2:]
+
+    child1[:c1] = parent2[:c1]
+    child1[c1:c2] = parent1[c1:c2]
+    child1[c2:] = parent2[c2:]
+
+    return [child1, child2]
