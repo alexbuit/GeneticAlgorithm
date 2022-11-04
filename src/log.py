@@ -88,11 +88,23 @@ class log_object:
         self.bitsize = bitsize
         self.b2n = b2num
 
+        self.args = args
+        self.kwargs = kwargs
+
     def __getitem__(self, item: int):
         return self.data[item]
 
     def __repr__(self):
         return str(self.data)
+
+    def __copy__(self):
+        object_copy = log_object(self.b2n, self.bitsize, *self.args, **self.kwargs)
+        object_copy.data = self.data
+        object_copy.epoch = self.epoch
+        return object_copy
+
+    def copy(self):
+        return self.__copy__()
 
     def savetxt(self, path):
 
@@ -107,8 +119,14 @@ class log_object:
 
 class log_time(log_object):
 
-    def __init__(self,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def __copy__(self):
+        object_copy = log_time(self.b2n, self.bitsize, *self.args, **self.kwargs)
+        object_copy.data = self.data
+        object_copy.epoch = self.epoch
+        return object_copy
 
     def plot(self):
         pass
@@ -119,6 +137,13 @@ class log_ranking(log_object):
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ranknum = []
+
+    def __copy__(self):
+        object_copy = log_ranking(self.b2n, self.bitsize, *self.args, **self.kwargs)
+        object_copy.data = self.data
+        object_copy.epoch = self.epoch
+        object_copy.ranknum = self.ranknum
+        return object_copy
 
     def update(self, data, *args):
         self.data.append(data)
@@ -136,6 +161,12 @@ class log_fitness(log_object):
 
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def __copy__(self):
+        object_copy = log_fitness(self.b2n, self.bitsize, *self.args, **self.kwargs)
+        object_copy.data = self.data
+        object_copy.epoch = self.epoch
+        return object_copy
 
     def plot(self, top: int = None, show: bool = True, save_as: str = "",**kwargs):
         if top == None:
@@ -178,6 +209,15 @@ class log_value(log_object):
 
     def __repr__(self):
         return str(self.value)
+
+    def __copy__(self):
+        object_copy = log_value(self.b2n, self.bitsize, *self.args, **self.kwargs)
+        object_copy.data = self.data
+        object_copy.epoch = self.epoch
+        object_copy.value = self.value
+        object_copy.numvalue = self.numvalue
+        object_copy.topx = self.topx
+        return object_copy
 
     def update(self, data, *args):
         self.value.append(data)
