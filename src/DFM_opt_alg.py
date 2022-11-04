@@ -1,12 +1,18 @@
 from typing import Callable, Union, Iterable, Optional
 
+import numpy as np
+import pickle
+
+from time import time
+
 from population_initatilisation import *
 from selection_funcs import *
 from cross_funcs import *
 from t_functions import *
+from log import log
 
 
-# np.random.seed(10)
+np.random.seed(10)
 
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
@@ -129,19 +135,24 @@ class genetic_algoritm:
         self.cross: Callable = equal_prob_cross
         self.mutation: Callable = mutate
 
+        # Calculate the fitness of the population
+        self.fitness: Callable = fitness_method
+
         # self.seed: Callable = self.none
 
         self.epochs = None
-        self.shape = (0, 0)
-        self.elitism = 10
-        self.save_top = 10
+        self.shape: tuple = (0, 0)
+        self.elitism: int = 10
+        self.save_top: int = 10
 
         self.results: list = []
 
-        self.dolog = 0
-        self.log = {}
+        self.dolog: int = 0
+        self.b2n: Callable = Ndbit2float
+        self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
+                              self.fitness, self.b2n,self.elitism, self.save_top,
+                              self.bitsize)
 
-        self.min = np.NAN
 
     def __call__(self, *args, **kwargs):
         self.run(*args, **kwargs)
@@ -188,8 +199,8 @@ class genetic_algoritm:
             muargs["bitsize"] = self.bitsize
 
             for ppair in parents[:self.elitism]:
+                child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
                 # child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
-                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 newgen.append(child1)
                 newgen.append(child2)
 
@@ -215,11 +226,36 @@ class genetic_algoritm:
             parents = self.select(np.array(newgen), **selargs)
 
             if self.dolog:
-                if self.dolog == 2:
-                    pass
-                elif self.dolog == 1:
-                    pass
+                # Highest log level
+                rank = []
+                for ppair in parents:
+                    rank.append(self.pop[ppair[0]])
+                    rank.append(self.pop[ppair[1]])
+                rank = np.asarray(rank)
 
+                if self.dolog == 2:
+                    fitness = self.fitness(rank, **selargs)
+
+                    self.log.ranking.update(rank)
+                    self.log.time.update(time() - tsart)
+                    self.log.fitness.update(fitness)
+                    self.log.value.update(self.pop, self.genlist[epoch])
+
+                    self.log.logdict[epoch] = {"time": time() - tsart,
+                                       "ranking": rank,
+                                       "ranknum": self.b2n(rank, self.bitsize),
+                                       "fitness": fitness,
+                                       "value": self.pop,
+                                       "valuetop%s" % self.save_top: self.genlist[epoch],
+                                       "valuenum": np.asarray(self.get_numeric(target=list(self.pop), bitsize=self.bitsize))}
+
+                elif self.dolog == 1:
+                    self.log.ranking.update(rank)
+                    self.log.time.update(time() - tsart)
+
+                    self.log.logdict[epoch] = {"time": time() - tsart,
+                                       "ranking": rank,
+                                       "value": self.pop}
             # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
             # self.min = np.min(y)
 
@@ -256,6 +292,7 @@ class genetic_algoritm:
         else:
             self.pop = method(**kwargs)
 
+        self.log.pop = self.pop
         self.shape = (self.pop.shape[0], self.pop.shape[1]/self.bitsize)
 
         return None
@@ -270,6 +307,7 @@ class genetic_algoritm:
         :return: None
         """
         self.pop = pop
+        self.log.pop = self.pop
         self.shape = (self.pop.shape[0], self.pop.shape[1] / self.bitsize)
         return None
 
@@ -309,7 +347,7 @@ class genetic_algoritm:
         self.cross = cross
         return None
 
-    def set_select(self, select: Callable):
+    def set_select(self, select: Callable, fitness: Callable = fitness_method):
         """
         Set the parent selection method used in GA, method should take an
         np.ndarray of dim mx1 as an argument + kwargs and return a list of lists with
@@ -323,9 +361,14 @@ class genetic_algoritm:
             return np.random.choice(range(pop.shape[0]), 2, replace=False)
         It is recommended to add **kwargs to the provided method to be able to
         handle excess arguments.
+
+        :param: optional fitness
+            Method to determine the fitness of a population which will be logged
+            in self.log.
         :return: None
         """
         self.select = select
+        self.fitness = fitness_method
         return None
 
     def set_mutate(self, mutation: Callable):
@@ -385,7 +428,7 @@ class genetic_algoritm:
 
         return self.results
 
-    def get_numeric(self, bit2num: Callable = Ndbit2float, **kwargs):
+    def get_numeric(self, bit2num: Callable = None, target: list = None, **kwargs):
         """
         Convert results list with np.ndarrays of dimension mx1 to numeric data
         using provided method or builtin routine for multi variable
@@ -409,11 +452,17 @@ class genetic_algoritm:
             kwargs for bit2num
         :return: numeric values for results of the loaded GA data
         """
-        return [bit2num(i, **kwargs) for i in self.results]
+        if bit2num == None:
+            bit2num = self.b2n
+
+        if target == None:
+            target = self.results
+
+        return [bit2num(i, **kwargs) for i in target]
 
     def logdata(self, verbosity: int = 2):
         """
-        Initiate self.log to verbosity to save extra information per epoch in a
+        Initiate log class to verbosity to save extra information per epoch in a
         dictionary with key epoch and value a dict with for verbosity level 2
         {
          time: float, #time of one epoch
@@ -439,13 +488,15 @@ class genetic_algoritm:
              n: epoch_log_dict
             }
 
-        Save log to txt with the log2txt method
-        Get log by calling the get_log method or by assigning a variable
-        to geneticalgorithm.log
+        The log class saves all the data to seperate methods in addition to this
+        logdict, see the log class documentation.
 
         :return: None
         """
-        self.log = {}
+        self.log = log(self.pop, self.select, self.cross, self.mutation,
+                              self.fitness, self.b2n,self.elitism, self.save_top,
+                              self.bitsize)
+
         self.dolog = verbosity
 
         return None
@@ -456,6 +507,43 @@ class genetic_algoritm:
     def log2txt(self, path):
         return None
 
+    def save_log(self, path: str = ""):
+        if path == "":
+            date_str = self.log.creation.__str__().replace(":", "_")
+            path = "GAlog%s" % date_str + ".pickle"
+        with open(path, "wb") as f:
+            pickle.dump(self.log, f)
+
+        print("Log saved to: %s" % path)
+
+    def load_log(self, path:str):
+        with open(path, "rb") as f:
+            old_log = pickle.load(f)
+
+        self.log = log(old_log.pop, old_log.select, old_log.cross, old_log.mutation,
+                       old_log.fitness, old_log.b2n, old_log.elitism, old_log.savetop,
+                       old_log.bitsize)
+        self.log.creation = old_log.creation
+
+        self.log.time.data = old_log.time.data
+        self.log.time.epoch = old_log.time.epoch
+
+        self.log.ranking.data = old_log.ranking.data
+        self.log.ranking.epoch = old_log.ranking.epoch
+        self.log.ranking.ranknum = old_log.ranking.ranknum
+
+
+        self.log.fitness.data = old_log.fitness.data
+        self.log.fitness.epoch = old_log.fitness.epoch
+
+        self.log.value.data = old_log.value.data
+        self.log.value.epoch = old_log.value.epoch
+        self.log.value.value = old_log.value.value
+        self.log.value.numvalue = old_log.value.numvalue
+        self.log.value.topx = old_log.value.topx
+
+        return self.log.copy()
+
     @staticmethod
     def none(*args, **kwargs):
         return None
@@ -465,26 +553,46 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [10, 2]
-    low, high = -1, 1
-    bitsize = 9
+    size = [1000, 2]
+    low, high = 0, 100
+    bitsize = 64
     tfunc = wheelers_ridge
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 10
+    epochs = 100
 
     ga = genetic_algoritm(bitsize=bitsize)
-    ga.init_pop("nbit", shape=size, bitsize=bitsize)
+    ga.init_pop("uniform", shape=size, bitsize=bitsize, low=low, high=high)
+
+    ga.elitism = 10
+
+    ga.b2n = Ndbit2float
+    ga.logdata(2)
 
     # ga.seed = uniform_bit_pop_float
-    ga.set_cross(full_double_point)
-    ga.set_mutate(full_mutate)
+    ga.set_cross(equal_prob_cross)
+    ga.set_mutate(mutate)
 
-    ga.save_top = size[0]
+    ga.save_top = 10
 
     ga.target_func(tfunc)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 2}, selargs={"nbit2num": ndbit2int})
-    ga.save_results("wheeler8bit1.txt")
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 10}, selargs={"nbit2num": Ndbit2float})
+
+    ga.save_log("wheeler100_ineff.pickle")
+
+    # ga.save_log()
+
+    # print(ga.log.fitness)
+    # print(ga.log[3]["ranknum"])
+    # print(ga.log[3]["fitness"])
+
+    # print(ga.log[1])
+
+    # ga.log2txt("hier.txt")
+    #
+    # ga.save_results("wheeler8bit1.txt")
+
+
     # print(Ndbit2float(ga[-1], 64))
     # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
     # print(ga.get_numeric(bitsize=64)[-1])

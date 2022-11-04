@@ -165,6 +165,37 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True):
 
     return resmat
 
+def convertpop2n(bit2num = None, target = None, **kwargs):
+        """
+        FROM genetic_algortim.get_numeric() TO BE USED IN OTHER FILES.
+
+        Convert results list with np.ndarrays of dimension mx1 to numeric data
+        using provided method or builtin routine for multi variable
+        float conversion.
+        Provided method needs to accept np.ndarray with binary information
+        stored as dtype np.uint8 and return np.ndarray of shape nx1 contaning
+        numeric data of float, int.
+        Example
+        def b2int(bit: np.ndarray) -> np.ndarray:
+            '''
+            Conversion of m x n (big endian) bit array to integers.
+            :param bit2num: m x n ndarray of numpy integers (0, 1) representing a bit
+            :return: m x n ndarray of integers
+            '''
+            m, n = bit.shape
+            a = 2 ** np.arange(n)
+            return bit @ a
+        :param bit2num:
+            Binary to numeric conversion routine
+        :param kwargs:
+            kwargs for bit2num
+        :return: numeric values for results of the loaded GA data
+        """
+        return [bit2num(i, **kwargs) for i in target]
+
+
+def sigmoid(x):
+    return 1 / (1 + pow(np.e, -x))
 
 if __name__ == "__main__":
     from time import time
