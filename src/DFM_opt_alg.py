@@ -564,8 +564,9 @@ if __name__ == "__main__":
     # epochs = int(np.floor(np.log2(size[0])))
     epochs = 25
 
-    for k in np.linspace(0.1, 2.1, 10):
-
+    iteration = 0
+    for k in np.logspace(-3, 1, 5):
+        print(k)
         ga = genetic_algoritm(bitsize=bitsize)
         print(ga.log.creation)
         ga.init_pop("nbit", shape=[500, 2], bitsize=bitsize)
@@ -589,7 +590,9 @@ if __name__ == "__main__":
         ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
                                                                    "k": k})
 
-        ga.save_log("wheeler16b_k%s.pickle" % k)
+        ga.save_log("wheeler16b_k%s.pickle" % iteration)
+        iteration += 1
+
 
 
     # ga.save_log()

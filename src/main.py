@@ -28,18 +28,41 @@ gea.b2n = ndbit2int
 # pl += pl2
 #
 # pl()
-gea.load_log("wheeler16b_2.pickle")
-print(gea.log)
-# gea.log.value.animate2d(tfunc, low, high)
 
-plt.plot(np.arange(0, 1000), gea.log.fitness[50], label = "k = 0.8")
+rng = np.logspace(-3, 1, 5)
 
-gea.load_log("wheeler16b_3.pickle")
-print(gea.log)
+figure = plt.figure()
 
-plt.plot(np.arange(0, 1000), gea.log.fitness[50], label="k = 2.5")
+fitness = []
+pdict = {}
+for i in range(rng.size):
+    gea.load_log("wheeler16b_k%s.pickle" % i)
+    print(gea.log)
+    fitness.append(gea.log.fitness.data)
+    pdict[i] = plt.plot(gea.log.fitness[0], label="k=%s" % rng[i], linestyle="-",
+                        marker="")
+
+plt.legend(loc="upper right")
+
+def update(frame):
+    plt.legend(loc="upper right")
+
+    for i in range(rng.size):
+        pdict[i][0].set_data(np.arange(0, 500), fitness[i][frame])
+
+    plt.title("Iteration: %s" % frame)
+    return None
+
+
+animation = FuncAnimation(figure, update, interval=500,
+                          frames=range(25))
+
 plt.legend()
-plt.show()
+plt.xlabel("Rank")
+plt.ylabel("normalised fitness")
+
+animation.save("fitness_for_vallogk.gif", dpi=1000, writer=PillowWriter(fps=1))
+
 
 
 # print(max(gea.log.value[0][:, 0][:, 1]))
