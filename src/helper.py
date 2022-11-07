@@ -82,7 +82,7 @@ def floatToBinary32(val):
         return np.array([int(i) for i in "".join("0" for _ in range(32))])
 
 
-def Ndbit2float(valarr: np.ndarray, bitsize: int) -> np.ndarray:
+def Ndbit2float(valarr: np.ndarray, bitsize: int, **kwargs) -> np.ndarray:
     global bdict
     b2f = b2dfloat if bitsize == 64 else b2sfloat
 
@@ -135,7 +135,12 @@ def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
     return np.concatenate([sign, exp, mantissa])
 
 
-def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True):
+def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
+              **kwargs):
+
+    factor: int = 10
+    if "factor" in kwargs:
+        factor = kwargs["factor"]
 
     if valarr.ndim == 1:
         valarr = valarr[np.newaxis, :]
@@ -159,7 +164,7 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True):
         res = res[:, 1:]
 
         if normalised:
-            resmat[b] = sign * b2int(res)/2**(bitsize - 1)
+            resmat[b] = sign * b2int(res)/2**(bitsize - 1) * factor
         else:
             resmat[b] = sign * b2int(res)
 

@@ -131,7 +131,7 @@ class genetic_algoritm:
         self.tfunc: Callable = self.none
         self.targs: dict = {}
 
-        self.select: Callable = roulette_select
+        self.select: Callable = roulette_selection
         self.cross: Callable = equal_prob_cross
         self.mutation: Callable = mutate
 
@@ -149,9 +149,10 @@ class genetic_algoritm:
 
         self.dolog: int = 0
         self.b2n: Callable = Ndbit2float
+        self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
                               self.fitness, self.b2n,self.elitism, self.save_top,
-                              self.bitsize)
+                              self.bitsize, self.b2nkwargs)
 
 
     def __call__(self, *args, **kwargs):
@@ -183,6 +184,7 @@ class genetic_algoritm:
 
         selargs["fx"] = self.tfunc
         selargs["bitsize"] = self.bitsize
+
         parents = self.select(self.pop, **selargs)
 
         # if self.seed.__name__ == "none":
@@ -199,8 +201,8 @@ class genetic_algoritm:
             muargs["bitsize"] = self.bitsize
 
             for ppair in parents[:self.elitism]:
-                child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
-                # child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                # child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
+                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 newgen.append(child1)
                 newgen.append(child2)
 
@@ -368,7 +370,7 @@ class genetic_algoritm:
         :return: None
         """
         self.select = select
-        self.fitness = fitness_method
+        self.fitness = fitness
         return None
 
     def set_mutate(self, mutation: Callable):
@@ -495,7 +497,7 @@ class genetic_algoritm:
         """
         self.log = log(self.pop, self.select, self.cross, self.mutation,
                               self.fitness, self.b2n,self.elitism, self.save_top,
-                              self.bitsize)
+                              self.bitsize, self.b2nkwargs)
 
         self.dolog = verbosity
 
@@ -522,7 +524,8 @@ class genetic_algoritm:
 
         self.log = log(old_log.pop, old_log.select, old_log.cross, old_log.mutation,
                        old_log.fitness, old_log.b2n, old_log.elitism, old_log.savetop,
-                       old_log.bitsize)
+                       old_log.bitsize, old_log.b2nkwargs)
+
         self.log.creation = old_log.creation
 
         self.log.time.data = old_log.time.data
@@ -553,32 +556,41 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [1000, 2]
+    size = [500, 2]
     low, high = 0, 100
-    bitsize = 64
+    bitsize = 16
     tfunc = wheelers_ridge
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 100
+    epochs = 25
 
-    ga = genetic_algoritm(bitsize=bitsize)
-    ga.init_pop("uniform", shape=size, bitsize=bitsize, low=low, high=high)
+    for k in np.linspace(0.1, 2.1, 10):
 
-    ga.elitism = 10
+        ga = genetic_algoritm(bitsize=bitsize)
+        print(ga.log.creation)
+        ga.init_pop("nbit", shape=[500, 2], bitsize=bitsize)
+        print(ga.pop.shape)
+        ga.b2nkwargs = {"factor": 10}
 
-    ga.b2n = Ndbit2float
-    ga.logdata(2)
+        ga.elitism = 5
 
-    # ga.seed = uniform_bit_pop_float
-    ga.set_cross(equal_prob_cross)
-    ga.set_mutate(mutate)
+        ga.b2n = ndbit2int
+        ga.logdata(2)
 
-    ga.save_top = 10
+        # ga.seed = uniform_bit_pop_float
+        ga.set_cross(full_single_point)
+        ga.set_mutate(full_mutate)
 
-    ga.target_func(tfunc)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 10}, selargs={"nbit2num": Ndbit2float})
+        ga.save_top = 10
 
-    ga.save_log("wheeler100_ineff.pickle")
+        ga.target_func(tfunc)
+
+        print(k)
+        ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
+                                                                   "k": k})
+
+        ga.save_log("wheeler16b_k%s.pickle" % k)
+
 
     # ga.save_log()
 

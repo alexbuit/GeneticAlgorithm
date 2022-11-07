@@ -12,10 +12,10 @@ from DFM_opt_alg import *
 tstart = time()
 tfunc = wheelers_ridge
 
-low, high = 0, 5
+low, high = 0, 2
 
-gea = genetic_algoritm(bitsize=64)
-gea.b2n = Ndbit2float
+gea = genetic_algoritm(bitsize=16)
+gea.b2n = ndbit2int
 # gea.load_log("wheeler100_noelite.pickle")
 # print(gea.log)
 # top = 1000
@@ -28,10 +28,22 @@ gea.b2n = Ndbit2float
 # pl += pl2
 #
 # pl()
-gea.load_log("wheeler100_ineff.pickle")
+gea.load_log("wheeler16b_2.pickle")
 print(gea.log)
 # gea.log.value.animate2d(tfunc, low, high)
-gea.log.fitness.plot()
+
+plt.plot(np.arange(0, 1000), gea.log.fitness[50], label = "k = 0.8")
+
+gea.load_log("wheeler16b_3.pickle")
+print(gea.log)
+
+plt.plot(np.arange(0, 1000), gea.log.fitness[50], label="k = 2.5")
+plt.legend()
+plt.show()
+
+
+# print(max(gea.log.value[0][:, 0][:, 1]))
+# gea.log.fitness.plot(top=10)
 
 # pl = gea.log.fitness.plot()
 # print(pl)

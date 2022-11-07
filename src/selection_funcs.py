@@ -2,56 +2,77 @@
 import numpy as np
 from helper import *
 
-def roulette_select(pop, fx, bitsize, nbit2num = Ndbit2float):
+def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs):
+    return np.apply_along_axis(fx, 1, nbit2num(pop, bitsize, **kwargs))
 
-    y = np.apply_along_axis(fx, 1, nbit2num(pop, bitsize))
-    print(min(y), max(y))
-    y = np.max(y) - y
-    print(min(y), max(y))
-    yc = y.copy()
-    yrng = np.asarray(range(y.size))
-    p = y / sum(y)
 
+def lin_fitness(y, a, b):
+    return a * y + b
+
+
+def exp_fitness(y, k):
+    return y ** k
+
+
+def sort_list(y, p):
+    """
+
+    :param y: np.ndarray with values f(x1, x2, x3, x...)
+    :param p: np.ndarray with probablity values correlating to y values
+              so that p[1] has contains the probablity of y[1]
+    :return: selected parents based on their probability
+    """
     pind = []
+    rng = np.arange(0, y.size)
+
     for i in range(int(y.size / 2)):
         if p.size > 1:
             try:
-                par = np.random.choice(yrng, 2, p=p, replace=False)
+                par = np.random.choice(rng, 2, p=p, replace=False)
             except ValueError:
                 p = np.full(p.size, 1 / p.size)
-                par = np.random.choice(yrng, 2, p=p, replace=False)
+                par = np.random.choice(rng, 2, p=p, replace=False)
 
             pind.append(list(sorted(par).__reversed__()))
 
-            yc = np.delete(yc, np.where(yrng == pind[-1][0])[0][0])
-            yc = np.delete(yc, np.where(yrng == pind[-1][1])[0][0])
-            yrng = np.delete(yrng, np.where(yrng == pind[-1][0])[0][0])
-            yrng = np.delete(yrng, np.where(yrng == pind[-1][1])[0][0])
-            p = yc / sum(yc)
+            y = np.delete(y, np.where(rng == pind[-1][0])[0][0])
+            y = np.delete(y, np.where(rng == pind[-1][1])[0][0])
+            rng = np.delete(rng, np.where(rng == pind[-1][0])[0][0])
+            rng = np.delete(rng, np.where(rng == pind[-1][1])[0][0])
+            p = y / sum(y)
+
     return pind
 
+# def roulette_select(pop, fx, bitsize, nbit2num = Ndbit2float):
+#
+#     y = np.apply_along_axis(fx, 1, nbit2num(pop, bitsize))
+#     y = np.max(y) - y
+#     p = y / sum(y)
+#
+#     return sort_list(y, p)
 
-# def t_roulette_sel(tsize=int(1e6), bitsize=4):
-#     """
-#
-#     :param tsize: Size of the population
-#     :param bitsize: Size of a parent within the population
-#
-#     Correct % => If > 100% or <100% there is are double indexes in the list.
-#     :return:
-#     """
-#     tsart = time()
-#     rpop = rand_bit_pop(tsize, bitsize)
-#     # print(rpop)
-#     parent_list = roulette_select(b2int(rpop), tfx)
-#
-#     tl = []
-#     for parent in parent_list:
-#         tl.append(parent[0])
-#         tl.append(parent[1])
-#
-#     # print(len(tl), ":", len(set(tl)))
-#     corrperc = 100 - ((len(tl) - len(set(tl))) / (tsize / 2)) * 100
-#
-#     t = time() - tsart
-#     return t, corrperc
+def roulette_selection(*args, **kwargs):
+    y = calc_fx(*args, **kwargs)
+    y = np.max(y) - y
+
+    k = 1.5
+    if "k" in kwargs:
+        k = kwargs["k"]
+
+    fitness = exp_fitness(y, k)
+    p = fitness / sum(fitness)
+
+    return sort_list(y, p)
+
+def fitness_method(*args, **kwargs):
+    y = calc_fx(*args, **kwargs)
+    y = np.max(y) - y
+
+    k = 1.5
+    if "k" in kwargs:
+        k = kwargs["k"]
+
+    fitness = exp_fitness(y, k)
+    return fitness
+
+

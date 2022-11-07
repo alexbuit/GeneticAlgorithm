@@ -12,16 +12,16 @@ from AdrianPack.Aplot import Default
 class log:
 
     def __init__(self, pop, select, cross, mutate, fitness, b2n, elitism, savetop,
-                 bitsize: int):
+                 bitsize: int, b2nkwargs: dict):
         # Pop
         self.pop = pop
         self.bitsize = bitsize
 
         # Logs
-        self.time = log_time(b2n, bitsize)
-        self.ranking = log_ranking(b2n, bitsize)
-        self.fitness = log_fitness(b2n, bitsize)
-        self.value = log_value(b2n, bitsize)
+        self.time = log_time(b2n, bitsize, b2nkwargs)
+        self.ranking = log_ranking(b2n, bitsize, b2nkwargs)
+        self.fitness = log_fitness(b2n, bitsize, b2nkwargs)
+        self.value = log_value(b2n, bitsize, b2nkwargs)
 
         # Used methods
         self.select: Callable = select
@@ -35,6 +35,7 @@ class log:
 
         # Binary to numerical conversion
         self.b2n = b2n
+        self.b2nkwargs = b2nkwargs
 
         self.logdict = {}
 
@@ -52,7 +53,7 @@ class log:
     def __copy__(self):
         logcopy = log(self.pop, self.select, self.cross, self.mutation,
                        self.fitness, self.b2n, self.elitism, self.savetop,
-                       self.bitsize)
+                       self.bitsize, self.b2nkwargs)
 
         logcopy.creation = self.creation
 
@@ -80,13 +81,14 @@ class log:
 
 class log_object:
 
-    def __init__(self, b2num, bitsize, *args, **kwargs):
+    def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.epoch = []
         self.data = []
 
         self.bitsize = bitsize
         self.b2n = b2num
+        self.b2nkwargs = b2nkwargs
 
         self.args = args
         self.kwargs = kwargs
@@ -148,7 +150,7 @@ class log_ranking(log_object):
     def update(self, data, *args):
         self.data.append(data)
         self.epoch.append(len(self.data))
-        self.ranknum.append(self.b2n(data, self.bitsize))
+        self.ranknum.append(self.b2n(data, self.bitsize, **self.b2nkwargs))
 
     def __getitem__(self, item: int):
         return self.ranknum[item]
@@ -224,7 +226,8 @@ class log_value(log_object):
         self.epoch.append(len(self.data))
         self.numvalue.append(np.asarray(convertpop2n(bit2num=self.b2n,
                                                      target=list(data),
-                                                     bitsize=self.bitsize)))
+                                                     bitsize=self.bitsize,
+                                                     **self.b2nkwargs)))
         self.topx.append(args[0])
         return None
 
