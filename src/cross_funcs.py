@@ -145,3 +145,20 @@ def full_double_point(parent1, parent2, **kwargs):
     child1[c2:] = parent2[c2:]
 
     return [child1, child2]
+
+def full_equal_prob(parent1, parent2, **kwargs):
+    global bdict
+
+    child1 = np.zeros(parent1.shape, dtype=np.uint8)
+    child2 = np.zeros(parent1.shape, dtype=np.uint8)
+
+    for i in range(0, parent1.size):
+        if np.random.randint(0, 1):
+            child1[i] = parent2[i]
+            child2[i] = parent1[i]
+        else:
+            child1[i] = parent1[i]
+            child2[i] = parent2[i]
+
+    return [child1, child2]
+

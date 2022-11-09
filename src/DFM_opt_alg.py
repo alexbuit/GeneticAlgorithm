@@ -145,6 +145,7 @@ class genetic_algoritm:
         self.elitism: int = 10
         self.save_top: int = 10
 
+        self.optimumfx: Union[Iterable, float] = 1.0
         self.results: list = []
 
         self.dolog: int = 0
@@ -189,6 +190,26 @@ class genetic_algoritm:
 
         # if self.seed.__name__ == "none":
         #     self.epochs = int(np.floor(np.log2(self.shape[0])))
+
+        if self.dolog:
+            # Highest log level
+            rank = []
+            for ppair in parents:
+                rank.append(self.pop[ppair[0]])
+                rank.append(self.pop[ppair[1]])
+            rank = np.asarray(rank)
+
+            if self.dolog == 2:
+                fitness = self.fitness(rank, **selargs)
+
+                self.log.ranking.update(rank, self.optimumfx)
+                self.log.time.update(time() - tsart)
+                self.log.fitness.update(fitness)
+
+            elif self.dolog == 1:
+                self.log.ranking.update(rank, self.optimumfx)
+                self.log.time.update(time() - tsart)
+
 
 
         for epoch in range(self.epochs):
@@ -238,7 +259,7 @@ class genetic_algoritm:
                 if self.dolog == 2:
                     fitness = self.fitness(rank, **selargs)
 
-                    self.log.ranking.update(rank)
+                    self.log.ranking.update(rank, self.optimumfx)
                     self.log.time.update(time() - tsart)
                     self.log.fitness.update(fitness)
                     self.log.value.update(self.pop, self.genlist[epoch])
@@ -252,7 +273,7 @@ class genetic_algoritm:
                                        "valuenum": np.asarray(self.get_numeric(target=list(self.pop), bitsize=self.bitsize))}
 
                 elif self.dolog == 1:
-                    self.log.ranking.update(rank)
+                    self.log.ranking.update(rank, self.optimumfx)
                     self.log.time.update(time() - tsart)
 
                     self.log.logdict[epoch] = {"time": time() - tsart,
@@ -534,7 +555,8 @@ class genetic_algoritm:
         self.log.ranking.data = old_log.ranking.data
         self.log.ranking.epoch = old_log.ranking.epoch
         self.log.ranking.ranknum = old_log.ranking.ranknum
-
+        self.log.ranking.effectivity = old_log.ranking.effectivity
+        self.log.ranking.distance = old_log.ranking.distance
 
         self.log.fitness.data = old_log.fitness.data
         self.log.fitness.epoch = old_log.fitness.epoch
@@ -556,8 +578,8 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [500, 2]
-    low, high = 0, 100
+    size = [100, 2]
+    low, high = 0, 10
     bitsize = 16
     tfunc = wheelers_ridge
 
@@ -565,11 +587,13 @@ if __name__ == "__main__":
     epochs = 25
 
     iteration = 0
-    for k in np.logspace(-3, 1, 5):
-        print(k)
+    for mute in np.arange(2, 12, 2):
+
+        k = 0.1
         ga = genetic_algoritm(bitsize=bitsize)
         print(ga.log.creation)
-        ga.init_pop("nbit", shape=[500, 2], bitsize=bitsize)
+        ga.optimumfx = [1, 3/2]
+        ga.init_pop("nbit", shape=[50, 2], bitsize=bitsize)
         print(ga.pop.shape)
         ga.b2nkwargs = {"factor": 10}
 
@@ -581,16 +605,18 @@ if __name__ == "__main__":
         # ga.seed = uniform_bit_pop_float
         ga.set_cross(full_single_point)
         ga.set_mutate(full_mutate)
+        ga.set_select(roulette_selection)
 
         ga.save_top = 10
 
         ga.target_func(tfunc)
 
         print(k)
-        ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
-                                                                   "k": k})
+        ga.run(epochs=epochs, muargs={"mutate_coeff": mute}, selargs={"nbit2num": ndbit2int,
+                                                                   "k": k, "fitness_func": exp_fitness
+                                                                   })
 
-        ga.save_log("wheeler16b_k%s.pickle" % iteration)
+        ga.save_log("wheeler16b_m%s.pickle" % iteration)
         iteration += 1
 
 

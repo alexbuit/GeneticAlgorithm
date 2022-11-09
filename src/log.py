@@ -9,6 +9,10 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from AdrianPack.Aplot import Default
 
 
+def pythagoras(x):
+    return np.sqrt(sum(x))
+
+
 class log:
 
     def __init__(self, pop, select, cross, mutate, fitness, b2n, elitism, savetop,
@@ -63,6 +67,10 @@ class log:
         logcopy.ranking.data = self.ranking.data
         logcopy.ranking.epoch = self.ranking.epoch
         logcopy.ranking.ranknum = self.ranking.ranknum
+        logcopy.ranking.effectivity = self.ranking.effectivity
+        logcopy.ranking.distance = self.ranking.distance
+
+
 
 
         logcopy.fitness.data = self.fitness.data
@@ -139,24 +147,58 @@ class log_ranking(log_object):
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ranknum = []
+        self.effectivity = []
+        self.distance = []
 
     def __copy__(self):
         object_copy = log_ranking(self.b2n, self.bitsize, *self.args, **self.kwargs)
         object_copy.data = self.data
         object_copy.epoch = self.epoch
         object_copy.ranknum = self.ranknum
+        object_copy.effectivity = self.effectivity
+        object_copy.distance = self.distance
         return object_copy
 
     def update(self, data, *args):
+        """
+
+        :param data:
+        :param args: the optimum, highest effectivity
+        :return:
+        """
         self.data.append(data)
         self.epoch.append(len(self.data))
         self.ranknum.append(self.b2n(data, self.bitsize, **self.b2nkwargs))
+
+        # Calculate the euclidian distance between the optimum and all pop values
+        self.distance.append(np.apply_along_axis(pythagoras, 1, (np.absolute(self.ranknum[-1] - args[0]))**2))
+
+        # Determine the effectivity relative to the larges distcance after the first epoch.
+        self.effectivity.append(1 - self.distance[-1] / max(self.distance[0]))
 
     def __getitem__(self, item: int):
         return self.ranknum[item]
 
     def __repr__(self):
         return str(self.ranknum)
+
+    def plot(self, top: int = None, show: bool = True, save_as: str = ""
+             , datasource = None, **kwargs):
+
+        if top == None:
+            top = len(self.effectivity[0])
+
+        if datasource == None:
+            datasource = self.effectivity
+
+        avgpepoch = [np.average(i[:top]) for i in datasource]
+
+        pl = Default(self.epoch, avgpepoch, linestyle="-", marker="o", **kwargs)
+        if show:
+            if save_as != "":
+                pl.save_as = save_as
+            pl()
+        return pl
 
 
 class log_fitness(log_object):
