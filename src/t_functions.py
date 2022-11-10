@@ -25,8 +25,8 @@ def michealewicz(x: list, m: float = 10.0) -> float:
     :return: Value f(x1, x2, ....), real float
     """
     return -sum(
-        [np.sin(x[i]) * np.sin((i * x[i] ** 2) / np.pi) ** (2 * m) for i in
-         range(len(x))])
+        [np.sin(x[i - 1]) * np.sin((i * x[i - 1] ** 2) / np.pi) ** (2 * m) for i in
+         range(1, len(x)+1)])
 
 
 def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):

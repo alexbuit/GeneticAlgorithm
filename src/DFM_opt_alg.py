@@ -185,6 +185,7 @@ class genetic_algoritm:
 
         selargs["fx"] = self.tfunc
         selargs["bitsize"] = self.bitsize
+        selargs["verbosity"] = verbosity
 
         parents = self.select(self.pop, **selargs)
 
@@ -250,14 +251,15 @@ class genetic_algoritm:
 
             if self.dolog:
                 # Highest log level
-                rank = []
-                for ppair in parents:
-                    rank.append(self.pop[ppair[0]])
-                    rank.append(self.pop[ppair[1]])
-                rank = np.asarray(rank)
-
+                rank = np.zeros(self.pop.shape)
                 if self.dolog == 2:
-                    fitness = self.fitness(rank, **selargs)
+                    fitness = self.fitness(self.pop, **selargs)
+                    rankind = np.argsort(fitness)
+
+                    j = 0
+                    for i in rankind:
+                        rank[j] = self.pop[i]
+                        j += 1
 
                     self.log.ranking.update(rank, self.optimumfx)
                     self.log.time.update(time() - tsart)
@@ -557,6 +559,7 @@ class genetic_algoritm:
         self.log.ranking.ranknum = old_log.ranking.ranknum
         self.log.ranking.effectivity = old_log.ranking.effectivity
         self.log.ranking.distance = old_log.ranking.distance
+        self.log.ranking.bestsol = old_log.ranking.bestsol
 
         self.log.fitness.data = old_log.fitness.data
         self.log.fitness.epoch = old_log.fitness.epoch
@@ -578,26 +581,28 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [100, 2]
+    size = [500, 2]
     low, high = 0, 10
-    bitsize = 16
-    tfunc = wheelers_ridge
+    bitsize = 32
+    tfunc = michealewicz
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 25
+    epochs = 50
 
     iteration = 0
-    for mute in np.arange(2, 12, 2):
 
-        k = 0.1
+    for ex in range(2, 11, 2):
+        p = 0.9
+
+        k = np.e
         ga = genetic_algoritm(bitsize=bitsize)
         print(ga.log.creation)
-        ga.optimumfx = [1, 3/2]
-        ga.init_pop("nbit", shape=[50, 2], bitsize=bitsize)
+        ga.optimumfx = [2.20, 1.57]
+        ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
         print(ga.pop.shape)
         ga.b2nkwargs = {"factor": 10}
 
-        ga.elitism = 5
+        ga.elitism = 25
 
         ga.b2n = ndbit2int
         ga.logdata(2)
@@ -605,18 +610,20 @@ if __name__ == "__main__":
         # ga.seed = uniform_bit_pop_float
         ga.set_cross(full_single_point)
         ga.set_mutate(full_mutate)
-        ga.set_select(roulette_selection)
+        ga.set_select(rank_selection)
 
         ga.save_top = 10
 
         ga.target_func(tfunc)
 
-        print(k)
-        ga.run(epochs=epochs, muargs={"mutate_coeff": mute}, selargs={"nbit2num": ndbit2int,
-                                                                   "k": k, "fitness_func": exp_fitness
-                                                                   })
+        print(p)
+        ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
+                                                                   "k": k, "fitness_func": exp_fitness,
+                                                                   "allow_duplicates": True,
+                                                                   "p": p},
+               verbosity=0)
 
-        ga.save_log("wheeler16b_m%s.pickle" % iteration)
+        ga.save_log("Micheal16b_p%s.pickle" % iteration)
         iteration += 1
 
 

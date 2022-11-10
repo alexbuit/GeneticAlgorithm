@@ -12,14 +12,18 @@ def lin_fitness(y, a, b):
 
 
 def exp_fitness(y, k):
-    return y ** k
+    return 1 / (k ** y)
+
+def simple_fitness(y, *args):
+    y = np.abs(y)
+    return np.max(y) - y
 
 
 def sigmoid_fitness(x, k, x0 = 0):
     return 1 / (1 + np.exp(-k * (x - x0)))
 
 
-def sort_list(y, p):
+def sort_list(y, p, allow_duplicates=False, **kwargs):
     """
     Select parents out the pool pop represented by their  (in same order as pop in ga) from their
     corresponding
@@ -41,11 +45,12 @@ def sort_list(y, p):
 
             pind.append(list(sorted(par).__reversed__()))
 
-            y = np.delete(y, np.where(rng == pind[-1][0])[0][0])
-            y = np.delete(y, np.where(rng == pind[-1][1])[0][0])
-            rng = np.delete(rng, np.where(rng == pind[-1][0])[0][0])
-            rng = np.delete(rng, np.where(rng == pind[-1][1])[0][0])
-            p = y / sum(y)
+            if not allow_duplicates:
+                y = np.delete(y, np.where(rng == pind[-1][0])[0][0])
+                y = np.delete(y, np.where(rng == pind[-1][1])[0][0])
+                rng = np.delete(rng, np.where(rng == pind[-1][0])[0][0])
+                rng = np.delete(rng, np.where(rng == pind[-1][1])[0][0])
+                p = y / sum(y)
 
     return pind
 
@@ -70,7 +75,6 @@ def roulette_selection(*args, **kwargs):
     :return:
     """
     y = calc_fx(*args, **kwargs)
-    y = np.max(y) - y
 
     k = [1.5]
     if "k" in kwargs:
@@ -87,7 +91,7 @@ def roulette_selection(*args, **kwargs):
 
     p = fitness / sum(fitness)
 
-    return sort_list(fitness, p)
+    return sort_list(fitness, p, **kwargs)
 
 
 
@@ -103,7 +107,6 @@ def fitness_method(*args, **kwargs):
     :return:
     """
     y = calc_fx(*args, **kwargs)
-    y = np.max(y) - y
 
     k = [1.5]
     if "k" in kwargs:
@@ -131,7 +134,6 @@ def rank_selection(*args, **kwargs):
     :return:
     """
     y = calc_fx(*args, **kwargs)
-    y = np.max(y) - y
 
     # probability paramter for rank selection
     prob_param = 1.9
@@ -152,7 +154,7 @@ def rank_selection(*args, **kwargs):
         fitness_func = kwargs["fitness_func"]
 
     fitness = fitness_func(y, *k)
-    fit_rng = np.argsort(fitness)
+    fit_rng = np.flip(np.argsort(fitness))
 
     p = (prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1))
     p = p/np.sum(p)
@@ -169,40 +171,78 @@ def rank_selection(*args, **kwargs):
             try:
                 par = np.random.choice(rng, 2, p=selection_array, replace=False)
             except ValueError:
-                print("Value error in selection, equal probability")
+                if kwargs["verbosity"] == 1:
+                    print("Value error in selection, equal probability")
+
                 selection_array = np.full(selection_array.size, 1 / selection_array.size)
                 par = np.random.choice(rng, 2, p=selection_array, replace=False)
 
             pind.append(list(sorted(par).__reversed__()))
 
-            fitness[pind[-1][0]] = -1
-            fitness[pind[-1][1]] = -1
-
-        fit_rng = np.argsort(fitness)
-
-        p = (prob_param * (1 - prob_param) ** (
-                    np.arange(1, (fitness.size) + 1, dtype=float) - 1))
-        p = p / np.sum(p)
-
-        for i in range(fitness.size):
-            selection_array[fit_rng[i]] = p[i]
-
-        for i in range(fitness.size):
-            if fitness[i] == -1:
-                selection_array[i] = 0
 
     return pind
+
+
+def rank_space_selection(*args, **kwargs):
+    """
+
+        calc_fx params:
+        pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+    y = calc_fx(*args, **kwargs)
+
+    # probability paramter for rank selection
+    prob_param = 1.9
+    if "p" in kwargs:
+        prob_param = kwargs["p"]
+
+    # diversity parameter for significance of the distance between individuals
+    div_param = 1
+    if "d" in kwargs:
+        div_param = kwargs["d"]
+
+    # parameters for fitness func
+    k = [1.5]
+    if "k" in kwargs:
+        k = kwargs["k"]
+
+    if not isinstance(k, Iterable):
+        k = [k]
+
+    # fitness func
+    fitness_func = exp_fitness
+    if "fitness_func" in kwargs:
+        fitness_func = kwargs["fitness_func"]
+
+    fitness = fitness_func(y, *k)
+    fit_rng = np.argsort(fitness)
+
+    p = (prob_param * (1 - prob_param) ** (
+                np.arange(1, fitness.size + 1, dtype=float) - 1))
+    p = p / np.sum(p)
+
+
+
 
 if __name__ == "__main__":
     from population_initatilisation import *
     from t_functions import *
 
-    pop = bit8([15, 4], 16)
+    pop = bit8([16, 4], 16)
     pop_float = ndbit2int(pop, 16, factor=5)
 
     tst_fx = michealewicz
 
-    parents = rank_selection(pop=pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int,
+    print(michealewicz([0, 0]))
+    print(wheelers_ridge([0, 0]))
+    print(ackley([0, 0]))
+
+
+    parents = rank_space_selection(pop=pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int,
                    factor=5, p=0.1, k=0.01)
     print(parents)
 

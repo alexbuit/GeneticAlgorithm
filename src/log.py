@@ -69,9 +69,7 @@ class log:
         logcopy.ranking.ranknum = self.ranking.ranknum
         logcopy.ranking.effectivity = self.ranking.effectivity
         logcopy.ranking.distance = self.ranking.distance
-
-
-
+        logcopy.ranking.bestsol = self.ranking.bestsol
 
         logcopy.fitness.data = self.fitness.data
         logcopy.fitness.epoch = self.fitness.epoch
@@ -149,6 +147,7 @@ class log_ranking(log_object):
         self.ranknum = []
         self.effectivity = []
         self.distance = []
+        self.bestsol = []
 
     def __copy__(self):
         object_copy = log_ranking(self.b2n, self.bitsize, *self.args, **self.kwargs)
@@ -157,6 +156,7 @@ class log_ranking(log_object):
         object_copy.ranknum = self.ranknum
         object_copy.effectivity = self.effectivity
         object_copy.distance = self.distance
+        object_copy.bestsol = self.bestsol
         return object_copy
 
     def update(self, data, *args):
@@ -176,6 +176,10 @@ class log_ranking(log_object):
         # Determine the effectivity relative to the larges distcance after the first epoch.
         self.effectivity.append(1 - self.distance[-1] / max(self.distance[0]))
 
+        # Find the best solution of this iteration and append it to the list
+        ind = np.where(self.effectivity[-1] == max(self.effectivity[-1]))[0]
+        self.bestsol.append(self.ranknum[-1][ind])
+
     def __getitem__(self, item: int):
         return self.ranknum[item]
 
@@ -187,13 +191,19 @@ class log_ranking(log_object):
 
         if top == None:
             top = len(self.effectivity[0])
-
+        print(top)
         if datasource == None:
             datasource = self.effectivity
 
-        avgpepoch = [np.average(i[:top]) for i in datasource]
+        avgpepoch = [np.average(i) for i in datasource]
 
-        pl = Default(self.epoch, avgpepoch, linestyle="-", marker="o", **kwargs)
+        if not "linestyle" in kwargs:
+            kwargs["linestyle"] = "-"
+
+        if not "marker" in kwargs:
+            kwargs["marker"] = "o"
+
+        pl = Default(self.epoch, avgpepoch, **kwargs)
         if show:
             if save_as != "":
                 pl.save_as = save_as
