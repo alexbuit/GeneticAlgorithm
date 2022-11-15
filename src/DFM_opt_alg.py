@@ -12,9 +12,6 @@ from t_functions import *
 from log import log
 
 
-np.random.seed(10)
-
-
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
@@ -140,6 +137,8 @@ class genetic_algoritm:
 
         # self.seed: Callable = self.none
 
+        self.tstart = time()
+
         self.epochs = None
         self.shape: tuple = (0, 0)
         self.elitism: int = 10
@@ -204,12 +203,12 @@ class genetic_algoritm:
                 fitness = self.fitness(rank, **selargs)
 
                 self.log.ranking.update(rank, self.optimumfx)
-                self.log.time.update(time() - tsart)
+                self.log.time.update(time() - self.tstart)
                 self.log.fitness.update(fitness)
 
             elif self.dolog == 1:
                 self.log.ranking.update(rank, self.optimumfx)
-                self.log.time.update(time() - tsart)
+                self.log.time.update(time() - self.tstart)
 
 
 
@@ -237,7 +236,7 @@ class genetic_algoritm:
                 newgen.append(self.mutation(child2, **muargs))
 
             # Select top10
-            t10 = self.select(self.pop, **selargs)[:self.save_top]
+            t10 = parents[:self.save_top]
             self.genlist.append([])
             for ppair in t10:
                 self.genlist[epoch].append(self.pop[ppair[0]])
@@ -262,11 +261,19 @@ class genetic_algoritm:
                         j += 1
 
                     self.log.ranking.update(rank, self.optimumfx)
-                    self.log.time.update(time() - tsart)
+                    self.log.time.update(time() - self.tstart)
                     self.log.fitness.update(fitness)
                     self.log.value.update(self.pop, self.genlist[epoch])
 
-                    self.log.logdict[epoch] = {"time": time() - tsart,
+                    # if additional logs added by appending them after initiation of self.log
+                    # go through them and update with the population
+                    # other data can be found within other logs and data
+                    # can be added by using global statements or other.
+                    if len(self.log.add_logs) > 0:
+                        for l in self.log.add_logs:
+                            l.update(data=self.pop)
+
+                    self.log.logdict[epoch] = {"time": time() - self.tstart,
                                        "ranking": rank,
                                        "ranknum": self.b2n(rank, self.bitsize),
                                        "fitness": fitness,
@@ -278,7 +285,7 @@ class genetic_algoritm:
                     self.log.ranking.update(rank, self.optimumfx)
                     self.log.time.update(time() - tsart)
 
-                    self.log.logdict[epoch] = {"time": time() - tsart,
+                    self.log.logdict[epoch] = {"time": time() - self.tstart,
                                        "ranking": rank,
                                        "value": self.pop}
             # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
@@ -541,34 +548,38 @@ class genetic_algoritm:
 
         print("Log saved to: %s" % path)
 
-    def load_log(self, path:str):
+    def load_log(self, path:str, copy: bool = True):
         with open(path, "rb") as f:
             old_log = pickle.load(f)
 
-        self.log = log(old_log.pop, old_log.select, old_log.cross, old_log.mutation,
-                       old_log.fitness, old_log.b2n, old_log.elitism, old_log.savetop,
-                       old_log.bitsize, old_log.b2nkwargs)
+        if copy:
+            self.log = log(old_log.pop, old_log.select, old_log.cross, old_log.mutation,
+                           old_log.fitness, old_log.b2n, old_log.elitism, old_log.savetop,
+                           old_log.bitsize, old_log.b2nkwargs)
 
-        self.log.creation = old_log.creation
+            self.log.creation = old_log.creation
 
-        self.log.time.data = old_log.time.data
-        self.log.time.epoch = old_log.time.epoch
+            self.log.time.data = old_log.time.data
+            self.log.time.epoch = old_log.time.epoch
 
-        self.log.ranking.data = old_log.ranking.data
-        self.log.ranking.epoch = old_log.ranking.epoch
-        self.log.ranking.ranknum = old_log.ranking.ranknum
-        self.log.ranking.effectivity = old_log.ranking.effectivity
-        self.log.ranking.distance = old_log.ranking.distance
-        self.log.ranking.bestsol = old_log.ranking.bestsol
+            self.log.ranking.data = old_log.ranking.data
+            self.log.ranking.epoch = old_log.ranking.epoch
+            self.log.ranking.ranknum = old_log.ranking.ranknum
+            self.log.ranking.effectivity = old_log.ranking.effectivity
+            self.log.ranking.distance = old_log.ranking.distance
+            self.log.ranking.bestsol = old_log.ranking.bestsol
 
-        self.log.fitness.data = old_log.fitness.data
-        self.log.fitness.epoch = old_log.fitness.epoch
+            self.log.fitness.data = old_log.fitness.data
+            self.log.fitness.epoch = old_log.fitness.epoch
 
-        self.log.value.data = old_log.value.data
-        self.log.value.epoch = old_log.value.epoch
-        self.log.value.value = old_log.value.value
-        self.log.value.numvalue = old_log.value.numvalue
-        self.log.value.topx = old_log.value.topx
+            self.log.value.data = old_log.value.data
+            self.log.value.epoch = old_log.value.epoch
+            self.log.value.value = old_log.value.value
+            self.log.value.numvalue = old_log.value.numvalue
+            self.log.value.topx = old_log.value.topx
+
+        else:
+            self.log = old_log
 
         return self.log.copy()
 
@@ -581,50 +592,49 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [500, 2]
+    size = [250, 2]
     low, high = 0, 10
     bitsize = 32
     tfunc = michealewicz
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 50
+    epochs = 10
 
-    iteration = 0
+    iteration = 10
 
-    for ex in range(2, 11, 2):
-        p = 0.9
+    p = 0.9
 
-        k = np.e
-        ga = genetic_algoritm(bitsize=bitsize)
-        print(ga.log.creation)
-        ga.optimumfx = [2.20, 1.57]
-        ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
-        print(ga.pop.shape)
-        ga.b2nkwargs = {"factor": 10}
+    k = np.e
+    ga = genetic_algoritm(bitsize=bitsize)
+    print(ga.log.creation)
+    ga.optimumfx = [2.20, 1.57]
+    ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
+    print(ga.pop.shape)
+    ga.b2nkwargs = {"factor": 10}
 
-        ga.elitism = 25
+    ga.elitism = 25
 
-        ga.b2n = ndbit2int
-        ga.logdata(2)
+    ga.b2n = ndbit2int
+    ga.logdata(2)
 
-        # ga.seed = uniform_bit_pop_float
-        ga.set_cross(full_single_point)
-        ga.set_mutate(full_mutate)
-        ga.set_select(rank_selection)
+    # ga.seed = uniform_bit_pop_float
+    ga.set_cross(full_single_point)
+    ga.set_mutate(full_mutate)
+    ga.set_select(rank_selection)
 
-        ga.save_top = 10
+    ga.save_top = 10
 
-        ga.target_func(tfunc)
+    ga.target_func(tfunc)
 
-        print(p)
-        ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
-                                                                   "k": k, "fitness_func": exp_fitness,
-                                                                   "allow_duplicates": True,
-                                                                   "p": p},
-               verbosity=0)
+    print(p)
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
+                                                               "k": k, "fitness_func": exp_fitness,
+                                                               "allow_duplicates": True,
+                                                               "p": p},
+           verbosity=0)
 
-        ga.save_log("Micheal16b_p%s.pickle" % iteration)
-        iteration += 1
+    ga.save_log("Micheal16b_p%s.pickle" % iteration)
+    iteration += 0
 
 
 

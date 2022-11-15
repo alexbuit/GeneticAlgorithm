@@ -27,6 +27,8 @@ class log:
         self.fitness = log_fitness(b2n, bitsize, b2nkwargs)
         self.value = log_value(b2n, bitsize, b2nkwargs)
 
+        self.add_logs = []
+
         # Used methods
         self.select: Callable = select
         self.cross: Callable = cross
@@ -84,11 +86,17 @@ class log:
     def copy(self):
         return self.__copy__()
 
+    def __add__(self, other: "log_object"):
+        setattr(self, other.__class__.__name__, other)
+        self.add_logs.append(getattr(self, other.__class__.__name__))
+        return self.__copy__()
+
+    def append(self, other):
+        return self.__add__(other)
 
 class log_object:
 
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.epoch = []
         self.data = []
 
@@ -110,6 +118,9 @@ class log_object:
         object_copy.data = self.data
         object_copy.epoch = self.epoch
         return object_copy
+
+    def __len__(self):
+        return len(self.epoch)
 
     def copy(self):
         return self.__copy__()
@@ -168,7 +179,11 @@ class log_ranking(log_object):
         """
         self.data.append(data)
         self.epoch.append(len(self.data))
-        self.ranknum.append(self.b2n(data, self.bitsize, **self.b2nkwargs))
+
+        if "bitsize" not in self.b2nkwargs:
+            self.b2nkwargs["bitsize"] = self.bitsize
+
+        self.ranknum.append(self.b2n(data, **self.b2nkwargs))
 
         # Calculate the euclidian distance between the optimum and all pop values
         self.distance.append(np.apply_along_axis(pythagoras, 1, (np.absolute(self.ranknum[-1] - args[0]))**2))
@@ -242,9 +257,7 @@ class log_fitness(log_object):
         if show:
             if save_as != "":
                 pl.save_as = save_as
-
             pl()
-
 
         return pl
 
@@ -276,9 +289,12 @@ class log_value(log_object):
     def update(self, data, *args):
         self.value.append(data)
         self.epoch.append(len(self.data))
+
+        if "bitsize" not in self.b2nkwargs:
+            self.b2nkwargs["bitsize"] = self.bitsize
+
         self.numvalue.append(np.asarray(convertpop2n(bit2num=self.b2n,
                                                      target=list(data),
-                                                     bitsize=self.bitsize,
                                                      **self.b2nkwargs)))
         self.topx.append(args[0])
         return None
@@ -457,5 +473,8 @@ class log_value(log_object):
         animation.save(save_as, dpi=600, writer=PillowWriter(fps=1))
 
         return None
+
+if __name__ == "__main__":
+    pass
 
 
