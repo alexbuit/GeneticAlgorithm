@@ -206,6 +206,12 @@ class genetic_algoritm:
                 self.log.time.update(time() - self.tstart)
                 self.log.fitness.update(fitness)
 
+                if len(self.log.add_logs) > 0:
+                    for l in self.log.add_logs:
+                        l.update(data=self.pop)
+
+                    self.log.sync_logs()
+
             elif self.dolog == 1:
                 self.log.ranking.update(rank, self.optimumfx)
                 self.log.time.update(time() - self.tstart)
@@ -273,6 +279,8 @@ class genetic_algoritm:
                         for l in self.log.add_logs:
                             l.update(data=self.pop)
 
+                        self.log.sync_logs()
+
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
                                        "ranking": rank,
                                        "ranknum": self.b2n(rank, self.bitsize),
@@ -280,6 +288,7 @@ class genetic_algoritm:
                                        "value": self.pop,
                                        "valuetop%s" % self.save_top: self.genlist[epoch],
                                        "valuenum": np.asarray(self.get_numeric(target=list(self.pop), bitsize=self.bitsize))}
+
 
                 elif self.dolog == 1:
                     self.log.ranking.update(rank, self.optimumfx)
@@ -578,10 +587,15 @@ class genetic_algoritm:
             self.log.value.numvalue = old_log.value.numvalue
             self.log.value.topx = old_log.value.topx
 
+            if len(old_log.add_logs) > 0:
+                for l in old_log.add_logs:
+                    self.log.add_logs.append(l)
+                self.log.sync_logs()
+
         else:
             self.log = old_log
 
-        return self.log.copy()
+        return self.log
 
     @staticmethod
     def none(*args, **kwargs):

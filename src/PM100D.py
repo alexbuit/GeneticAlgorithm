@@ -166,7 +166,6 @@ def t():
     return time() - t0
 
 
-fx = mirror
 k = 1
 fx = mirror
 earg = 37

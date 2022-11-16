@@ -94,6 +94,12 @@ class log:
     def append(self, other):
         return self.__add__(other)
 
+    def sync_logs(self):
+        for lg in self.add_logs:
+            setattr(self, lg.__class__.__name__, lg.copy())
+
+        return None
+
 class log_object:
 
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
