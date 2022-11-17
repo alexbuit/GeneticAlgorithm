@@ -23,28 +23,27 @@ epoch = -1  # ??
 
 if __name__ == "__main__":
     # Opening the mirror handle
-    # import okotech_lib.okodm_sdk.python.okodm_class as oko
-    # import sys
-    #
-    # handle = oko.open("MMDM 39ch,15mm",
-    #                   "USB DAC 40ch, 12bit")  # handle for other functions
-    #
-    # if handle == 0:
-    #     sys.exit(("Error opening OKODM device: ", oko.lasterror()))
-    #
-    # # Get the number of channels
-    # n = oko.chan_n(handle) # Should be 39
-    n = 39
-    #
-    # ## Opening the DMMM
-    # import pyvisa
-    # from ThorlabsPM100 import ThorlabsPM100
-    #
-    # rm = pyvisa.ResourceManager()
-    # print(rm.list_resources())
-    # inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
-    #
-    # power_meter = ThorlabsPM100(inst=inst)
+    import okotech_lib.okodm_sdk.python.okodm_class as oko
+    import sys
+
+    handle = oko.open("MMDM 39ch,15mm",
+                      "USB DAC 40ch, 12bit")  # handle for other functions
+
+    if handle == 0:
+        sys.exit(("Error opening OKODM device: ", oko.lasterror()))
+
+    # Get the number of channels
+    n = oko.chan_n(handle) # Should be 39
+
+    ## Opening the DMMM
+    import pyvisa
+    from ThorlabsPM100 import ThorlabsPM100
+
+    rm = pyvisa.ResourceManager()
+    print(rm.list_resources())
+    inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
+
+    power_meter = ThorlabsPM100(inst=inst)
 
     def read_pm():
         return random.randint(0, 100)
@@ -79,8 +78,8 @@ def select(*args, **kwargs):
     for indiv in num_pop:
         voltages = indiv
 
-        # if not oko.set(handle, voltages):
-        #     sys.exit("Error writing to OKODM device: " + oko.lasterror())
+        if not oko.set(handle, voltages):
+            sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
 
         for j in range(points_per_indv):
@@ -123,8 +122,8 @@ def select(*args, **kwargs):
 
     voltages = np.zeros(shape=n)
 
-    # if not oko.set(handle, voltages):
-    #     sys.exit("Error writing to OKODM device: " + oko.lasterror())
+    if not oko.set(handle, voltages):
+        sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
     epoch += 1
     return pind
@@ -145,13 +144,11 @@ class log_intens(log_object):
 
     def update(self, data, *args):
         global intens
-
         self.data.append(data)
         self.epoch.append(len(self.data))
         # Todo: This doesnt work, for some reason
         #  the data saved is always the data from epoch N?
-        self.intensity.append(intens)
-        print(self.intensity[-1])
+        self.intensity.append(intens.copy())
 
 
     def __copy__(self):
