@@ -299,7 +299,6 @@ class genetic_algoritm:
                                        "value": self.pop}
             # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
             # self.min = np.min(y)
-        print(self.log.add_logs[0].intensity)
         self.results = self.genlist
 
     def run_threaded(self, threads, **kwargs):

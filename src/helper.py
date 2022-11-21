@@ -138,7 +138,7 @@ def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
 def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
               **kwargs):
 
-    factor: int = 10
+    factor: int = 1
     if "factor" in kwargs:
         factor = kwargs["factor"]
 

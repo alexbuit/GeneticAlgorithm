@@ -7,7 +7,7 @@ from AdrianPack.Aplot import LivePlot, Default
 from AdrianPack.Fileread import Fileread
 from helper import Ndbit2float
 
-from genetic_alg_mirror import log_intens, select, fitness
+from genetic_alg_mirror import log_intensity, select, fitness
 
 from DFM_opt_alg import *
 

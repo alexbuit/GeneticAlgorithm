@@ -1,7 +1,9 @@
 import random
 
 import numpy as np
+import matplotlib.pyplot as plt
 
+from typing import Union
 from time import sleep
 
 from DFM_opt_alg import genetic_algoritm, full_mutate
@@ -22,28 +24,29 @@ epochs = 20  # ??
 epoch = -1  # ??
 
 if __name__ == "__main__":
-    # Opening the mirror handle
-    import okotech_lib.okodm_sdk.python.okodm_class as oko
-    import sys
+    # # Opening the mirror handle
+    # import okotech_lib.okodm_sdk.python.okodm_class as oko
+    # import sys
+    #
+    # handle = oko.open("MMDM 39ch,15mm",
+    #                   "USB DAC 40ch, 12bit")  # handle for other functions
+    #
+    # if handle == 0:
+    #     sys.exit(("Error opening OKODM device: ", oko.lasterror()))
 
-    handle = oko.open("MMDM 39ch,15mm",
-                      "USB DAC 40ch, 12bit")  # handle for other functions
-
-    if handle == 0:
-        sys.exit(("Error opening OKODM device: ", oko.lasterror()))
-
-    # Get the number of channels
-    n = oko.chan_n(handle) # Should be 39
-
-    ## Opening the DMMM
-    import pyvisa
-    from ThorlabsPM100 import ThorlabsPM100
-
-    rm = pyvisa.ResourceManager()
-    print(rm.list_resources())
-    inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
-
-    power_meter = ThorlabsPM100(inst=inst)
+    # # Get the number of channels
+    # n = oko.chan_n(handle) # Should be 39
+    n = 39
+    #
+    # ## Opening the DMMM
+    # import pyvisa
+    # from ThorlabsPM100 import ThorlabsPM100
+    #
+    # rm = pyvisa.ResourceManager()
+    # print(rm.list_resources())
+    # inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
+    #
+    # power_meter = ThorlabsPM100(inst=inst)
 
     def read_pm():
         return random.randint(0, 100)
@@ -78,8 +81,8 @@ def select(*args, **kwargs):
     for indiv in num_pop:
         voltages = indiv
 
-        if not oko.set(handle, voltages):
-            sys.exit("Error writing to OKODM device: " + oko.lasterror())
+        # if not oko.set(handle, voltages):
+        #     sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
 
         for j in range(points_per_indv):
@@ -122,8 +125,8 @@ def select(*args, **kwargs):
 
     voltages = np.zeros(shape=n)
 
-    if not oko.set(handle, voltages):
-        sys.exit("Error writing to OKODM device: " + oko.lasterror())
+    # if not oko.set(handle, voltages):
+    #     sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
     epoch += 1
     return pind
@@ -137,7 +140,7 @@ def fitness(*args, **kwargs):
     else:
         return np.zeros(shape=[individuals])
 
-class log_intens(log_object):
+class log_intensity(log_object):
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         super().__init__(b2num, bitsize, b2nkwargs, *args, **kwargs)
         self.intensity = []
@@ -146,19 +149,48 @@ class log_intens(log_object):
         global intens
         self.data.append(data)
         self.epoch.append(len(self.data))
-        # Todo: This doesnt work, for some reason
-        #  the data saved is always the data from epoch N?
         self.intensity.append(intens.copy())
 
 
     def __copy__(self):
-        log_intens_c = log_intens(self.b2n, self.bitsize, self.b2nkwargs)
+        log_intens_c = log_intensity(self.b2n, self.bitsize, self.b2nkwargs)
         log_intens_c.intensity = self.intensity
         log_intens_c.data = self.data
         log_intens_c.epoch = self.epoch
 
         return log_intens_c
 
+    def plot(self, epoch: Union[slice, int] = slice(0, None),
+             individual: Union[slice, int] = slice(0, None),
+             data: Union[slice, int] = slice(0, None),
+             fmt_data: str = "average"):
+
+        if fmt_data.lower() == "raw":
+            int_mat = np.asarray(self.intensity)[epoch, individual, data]
+        else:
+            int_mat = np.apply_over_axes(np.average,
+                                         np.asarray(self.intensity)[epoch, individual, data],
+                                         2)
+
+        for line in range(int_mat.shape[1]):
+            print(int_mat.ndim)
+            x = np.array([np.full(int_mat.shape[2], i) for i in range(int_mat.shape[0])]).flatten()
+            y = int_mat[:, line].flatten()
+
+            plt.scatter(x, y)
+
+
+
+            print(x)
+            print("----")
+            print(y)
+
+        plt.show()
+        return None
+
+    def animate(self):
+
+        return None
 
 ## Algorithm
 if __name__ == "__main__":
@@ -178,7 +210,7 @@ if __name__ == "__main__":
     ga.b2n = ndbit2int
 
     ga.logdata(2)
-    ga.log.append(log_intens(ga.b2n, ga,bitsize, ga.b2nkwargs))
+    ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
 
 
     # ga.seed = uniform_bit_pop_float
@@ -200,4 +232,6 @@ if __name__ == "__main__":
            verbosity=1)
 
     i = 1
-    ga.save_log("dfmtest_nrnd%s.pickle" % i)
+
+    ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
+    ga.save_log("dfmtest_data%s.pickle" % i)
