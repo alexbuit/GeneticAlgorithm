@@ -27,6 +27,11 @@ class TestDFM(unittest.TestCase):
         for i in range(randarr.size):
             self.assertAlmostEqual(randarr[i], floatarr32[i], places=5)
 
+class test_alg(unittest.TestCase):
+
+    def testmichealoqicz(self):
+        pass
+
 
 def suite():
     suite = unittest.TestSuite()

@@ -75,7 +75,7 @@ def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: floa
     return np.array(blist)
 
 
-def bit8(shape: list, bitsize: int = 8):
+def bit8(shape: list, bitsize: int = 8, factor = 1.0, bias = 0.0):
 
     if isinstance(shape, int):
         shape = (shape, 1)

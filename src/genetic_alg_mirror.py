@@ -24,29 +24,28 @@ epochs = 20  # ??
 epoch = -1  # ??
 
 if __name__ == "__main__":
-    # # Opening the mirror handle
-    # import okotech_lib.okodm_sdk.python.okodm_class as oko
-    # import sys
-    #
-    # handle = oko.open("MMDM 39ch,15mm",
-    #                   "USB DAC 40ch, 12bit")  # handle for other functions
-    #
-    # if handle == 0:
-    #     sys.exit(("Error opening OKODM device: ", oko.lasterror()))
+    # Opening the mirror handle
+    import okotech_lib.okodm_sdk.python.okodm_class as oko
+    import sys
 
-    # # Get the number of channels
-    # n = oko.chan_n(handle) # Should be 39
-    n = 39
-    #
-    # ## Opening the DMMM
-    # import pyvisa
-    # from ThorlabsPM100 import ThorlabsPM100
-    #
-    # rm = pyvisa.ResourceManager()
-    # print(rm.list_resources())
-    # inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
-    #
-    # power_meter = ThorlabsPM100(inst=inst)
+    handle = oko.open("MMDM 39ch,15mm",
+                      "USB DAC 40ch, 12bit")  # handle for other functions
+
+    if handle == 0:
+        sys.exit(("Error opening OKODM device: ", oko.lasterror()))
+
+    # Get the number of channels
+    n = oko.chan_n(handle) # Should be 39
+
+    ## Opening the DMMM
+    import pyvisa
+    from ThorlabsPM100 import ThorlabsPM100
+
+    rm = pyvisa.ResourceManager()
+    print(rm.list_resources())
+    inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
+
+    power_meter = ThorlabsPM100(inst=inst)
 
     def read_pm():
         return random.randint(0, 100)
@@ -73,6 +72,11 @@ def select(*args, **kwargs):
             try:
                 assert -1 < var < 1
             except AssertionError:
+                voltages = np.zeros(shape=n)
+
+                if not oko.set(handle, voltages):
+                    sys.exit("Error writing to OKODM device: " + oko.lasterror())
+
                 raise ValueError("Input voltage can not be > 1 or < -1")
 
     fitness = np.zeros(num_pop.shape[0])
@@ -81,8 +85,8 @@ def select(*args, **kwargs):
     for indiv in num_pop:
         voltages = indiv
 
-        # if not oko.set(handle, voltages):
-        #     sys.exit("Error writing to OKODM device: " + oko.lasterror())
+        if not oko.set(handle, voltages):
+            sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
 
         for j in range(points_per_indv):
@@ -125,8 +129,8 @@ def select(*args, **kwargs):
 
     voltages = np.zeros(shape=n)
 
-    # if not oko.set(handle, voltages):
-    #     sys.exit("Error writing to OKODM device: " + oko.lasterror())
+    if not oko.set(handle, voltages):
+        sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
     epoch += 1
     return pind
@@ -205,7 +209,7 @@ if __name__ == "__main__":
     print(ga.pop.shape)
     ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8}
 
-    ga.elitism = 25
+    ga.elitism = 5
 
     ga.b2n = ndbit2int
 
@@ -223,15 +227,15 @@ if __name__ == "__main__":
     p = 0.1
     ga.log.ranking.epoch.append(0)
 
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 2},
-           selargs={"nbit2num": ndbit2int,
-                    "b2n": ga.b2n,
-                    "b2nkwargs" : ga.b2nkwargs,
-                    "p": p
-                    },
-           verbosity=1)
-
-    i = 1
-
-    ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
-    ga.save_log("dfmtest_data%s.pickle" % i)
+    # ga.run(epochs=epochs, muargs={"mutate_coeff": 2},
+    #        selargs={"nbit2num": ndbit2int,
+    #                 "b2n": ga.b2n,
+    #                 "b2nkwargs" : ga.b2nkwargs,
+    #                 "p": p
+    #                 },
+    #        verbosity=1)
+    #
+    # i = 1
+    #
+    # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
+    # ga.save_log("dfmtest_data%s.pickle" % i)

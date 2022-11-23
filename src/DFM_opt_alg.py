@@ -607,23 +607,23 @@ if __name__ == "__main__":
 
     size = [250, 2]
     low, high = 0, 10
-    bitsize = 32
-    tfunc = michealewicz
+    bitsize = 16
+    tfunc = booths_function
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 10
+    epochs = 50
 
     iteration = 10
 
-    p = 0.9
+    p = 0.5
 
-    k = np.e
+    k = 4
     ga = genetic_algoritm(bitsize=bitsize)
     print(ga.log.creation)
-    ga.optimumfx = [2.20, 1.57]
+    ga.optimumfx = [1, 3]
     ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
     print(ga.pop.shape)
-    ga.b2nkwargs = {"factor": 10}
+    ga.b2nkwargs = {"factor": 20, "bias": 50}
 
     ga.elitism = 25
 
@@ -640,13 +640,13 @@ if __name__ == "__main__":
     ga.target_func(tfunc)
 
     print(p)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 6}, selargs={"nbit2num": ndbit2int,
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 10}, selargs={"nbit2num": ndbit2int,
                                                                "k": k, "fitness_func": exp_fitness,
                                                                "allow_duplicates": True,
                                                                "p": p},
            verbosity=0)
 
-    ga.save_log("Micheal16b_p%s.pickle" % iteration)
+    ga.save_log("Booth16b_p%s.pickle" % iteration)
     iteration += 0
 
 

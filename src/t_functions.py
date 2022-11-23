@@ -42,3 +42,6 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
     x = np.array(x, dtype=float)
     return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
 
+def booths_function(x, **kwargs):
+    return (x[0] + 2*x[1] - 7)**2 + (2 * x[0] + x[1] - 5)**2
+

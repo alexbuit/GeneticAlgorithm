@@ -214,7 +214,12 @@ class log_ranking(log_object):
             top = len(self.effectivity[0])
         print(top)
         if datasource == None:
-            datasource = self.effectivity
+            datasource = self.distance
+
+        if datasource == self.bestsol:
+
+            pass
+
 
         avgpepoch = [np.average(i) for i in datasource]
 

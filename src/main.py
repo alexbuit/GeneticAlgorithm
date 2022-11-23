@@ -14,18 +14,13 @@ from DFM_opt_alg import *
 tstart = time()
 low, high = 0, 5
 
-gea = genetic_algoritm(bitsize=8)
+gea = genetic_algoritm(bitsize=9)
 gea.b2n = ndbit2int
 
-gea.load_log("dfmtest_nrnd1.pickle", False)
-
-
-
-intens = np.apply_over_axes(np.average, gea.log.add_logs[0].intensity[-1], 1)
-intens1 = np.apply_over_axes(np.average, gea.log.add_logs[0].intensity[0], 1)
-
-plt.plot(intens, linestyle="--", marker="o")
-plt.plot(intens1, linestyle="--", marker="o")
+gea.load_log("Booth16b_p10.pickle", True)
+lg = gea.log
+print(lg.ranking.bestsol)
+plt.scatter(np.linspace(0, 250, 250), lg.fitness[4])
 plt.show()
-
+# lg.value.animate2d(booths_function, -50, 50)
 print("time: %s" % (time() - tstart))

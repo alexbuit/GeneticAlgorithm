@@ -138,9 +138,13 @@ def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
 def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
               **kwargs):
 
-    factor: int = 1
+    factor: float = 1.0
     if "factor" in kwargs:
         factor = kwargs["factor"]
+
+    bias: float = 0.0
+    if "bias" in kwargs:
+        bias = kwargs["bias"]
 
     if valarr.ndim == 1:
         valarr = valarr[np.newaxis, :]
@@ -164,11 +168,27 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
         res = res[:, 1:]
 
         if normalised:
-            resmat[b] = sign * b2int(res)/2**(bitsize - 1) * factor
+            resmat[b] = sign * b2int(res)/2**(bitsize - 1) * factor + bias
         else:
             resmat[b] = sign * b2int(res)
 
     return resmat
+
+
+def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwargs):
+    factor: float = 1.0
+    if "factor" in kwargs:
+        factor = kwargs["factor"]
+
+    bias: float = 0.0
+    if "bias" in kwargs:
+        bias = kwargs["bias"]
+
+    valarr = np.array((valarr - bias)/factor * 2**bitsize, dtype=int)
+    # print(valarr)
+    res = np.apply_over_axes(lambda x, y: print(np.array(list("".join(format(i, "#0%sb" % bitsize)[2:] for i in x)))), valarr, 0)
+    print(ndbit2int(res, bitsize, bias=bias, factor=factor))
+
 
 def convertpop2n(bit2num = None, target = None, **kwargs):
         """
@@ -208,8 +228,9 @@ if __name__ == "__main__":
     from population_initatilisation import *
 
     pop = bit8([100, 37])
-    print(pop)
-    print(ndbit2int(pop, 8, normalised=True))
+    # print(pop)
+    pop = ndbit2int(pop, 8, normalised=True)
+    print(int2ndbit(pop, 8, normalised=True))
     # start, stop = 0, 100
     # tlist = []
     # tstart = time()
