@@ -16,11 +16,13 @@ low, high = 0, 5
 
 gea = genetic_algoritm(bitsize=9)
 gea.b2n = ndbit2int
+gea.b2nkwargs = {"factor": 50}
 
 gea.load_log("Booth16b_p10.pickle", True)
 lg = gea.log
 print(lg.ranking.bestsol)
-plt.scatter(np.linspace(0, 250, 250), lg.fitness[4])
+plt.scatter(np.linspace(0, 100, 100), lg.fitness[-1])
 plt.show()
-# lg.value.animate2d(booths_function, -50, 50)
+
+lg.value.animate2d(booths_function, -100, 100)
 print("time: %s" % (time() - tstart))

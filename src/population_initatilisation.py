@@ -4,6 +4,8 @@ import numpy as np
 from typing import Union, Iterable
 from scipy.stats import cauchy
 from helper import *
+from src.helper import int2ndbit
+
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
     """
@@ -90,4 +92,22 @@ def bit8(shape: list, bitsize: int = 8, factor = 1.0, bias = 0.0):
 
     return np.array(blist, dtype=np.uint8)
 
-# print(bit8([10, 2]))
+def uniform_bit_pop(shape: Iterable, bitsize: int, lower: float, upper: float,
+                    factor: float = 1.0, bias: float = 0.0) -> np.ndarray:
+    """
+    Generate a uniform bit population
+    :param shape: Population size dtype tuple
+    :param bitsize: Bitsize dtype int
+    :param lower: Lower bound dtype float
+    :param upper: Upper bound dtype float
+    :return: List of random bits with a bit being a ndarray array of 0 and 1.
+    """
+    pop_float = np.vstack(np.array_split(np.random.uniform(lower, upper, shape[0] * shape[1]), shape[0]))
+
+    if factor < np.abs(lower) or factor < np.abs(upper):
+        factor = np.abs(lower) if np.abs(lower) > np.abs(upper) else np.abs(upper)
+
+    return int2ndbit(pop_float, bitsize, factor=factor, bias=bias)
+
+if __name__ == "__main__":
+    print(ndbit2int(uniform_bit_pop([10, 4], 8, 4, 12, factor=10), bitsize=8, factor=10))

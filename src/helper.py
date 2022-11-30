@@ -22,13 +22,15 @@ def bitdict():
     return {8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64}
 
 def int_to_binary(integer, size):
-    binary_string = np.zeros(shape=size, dtype=np.uint8)
+    binary_arr = np.zeros(shape=size, dtype=np.uint8)
+    i = 0
     while(integer > 0):
         digit = integer % 2
-        binary_string += str(digit)
+        binary_arr[i] = digit
         integer = integer // 2
-    binary_string = binary_string[::-1]
-    return binary_string
+        i += 1
+    # binary_arr = np.flip(binary_arr)
+    return binary_arr
 
 
 def b2int(bit: np.ndarray) -> np.ndarray:
@@ -224,28 +226,24 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwarg
         bias = kwargs["bias"]
 
     valarr = np.array((valarr - bias)/factor * 2**(bitsize - 1), dtype=int)
-    # print(valarr)
-    # res = np.apply_over_axes(lambda x, y: print(np.array(list("".join(format(i, "#0%sb" % bitsize)[2:] for i in x)))), valarr, 0)
 
     shape = list(valarr.shape)
+    if len(shape) == 1:
+        shape.append(1)
+
     shape[-1] = int(np.ceil(shape[-1]*bitsize))
 
     res = np.zeros(shape, dtype = np.uint8)
-    print(valarr)
     for arr in range(shape[0]):
         bit = np.zeros(shape[1])
         for val in range(valarr.shape[1]):
-            print([abs(valarr[arr, val]), b2int(np.array([int(i) for i in "".join(format(abs(valarr[arr, val]), "%sb" % (bitsize - 1))).replace(" ", "0")]))])
-            print("".join(format(abs(valarr[arr, val]), "%sb" % (bitsize - 1))))
-            bit[val * bitsize + 1: (val + 1) * bitsize] = np.array([int(i) for i in "".join(format(abs(valarr[arr, val]), "%sb" % (bitsize - 1))).replace(" ", "0")])
-            # print(np.unpackbits(np.array(np.abs([valarr[arr, val]]), dtype=bitdict(bitsize - 1)), bitorder="big", count=bitsize - 1))
+            # convert int to binary numpy array and add to bit array with sign bit in pos 0
+            bit[val * bitsize + 1: (val + 1) * bitsize] = int_to_binary(abs(valarr[arr, val]), bitsize - 1)
             # assign the signed bit, 0 if >0 1 if < 0
             bit[val * bitsize] = (lambda x: 0 if x > 0 else 1)(valarr[arr, val])
 
         res[arr] = bit
 
-    print(res)
-    # print(ndbit2int(res, bitsize, bias=bias, factor=factor))
     return res
 
 
@@ -288,11 +286,11 @@ if __name__ == "__main__":
 
     np.random.seed(8)
 
-    pop = bit8([5, 2], bitsize=8)
-    # print(pop)
-    pop = ndbit2int(pop, 8, normalised=True)
-    print(pop)
-    print(ndbit2int(int2ndbit(pop, 8, normalised=True), 8, normalised=True))
+    linsp = np.linspace(0, 10, 100)[:, np.newaxis]
+    print(linsp.flatten())
+    bit = int2ndbit(linsp, 16, normalised=True, factor=20, bias=0)
+    print(ndbit2int(bit, 16, normalised=True, factor=20, bias=0).flatten())
+
     # start, stop = 0, 100
     # tlist = []
     # tstart = time()

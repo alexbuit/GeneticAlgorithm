@@ -1,4 +1,4 @@
-
+import matplotlib.pyplot as plt
 import numpy as np
 from helper import *
 from typing import Iterable
@@ -12,6 +12,7 @@ def lin_fitness(y, a, b):
 
 
 def exp_fitness(y, k):
+    y = y/np.max(y)
     return 1 / (k ** y)
 
 def simple_fitness(y, *args):
@@ -23,7 +24,7 @@ def sigmoid_fitness(x, k, x0 = 0):
     return 1 / (1 + np.exp(-k * (x - x0)))
 
 
-def sort_list(y, p, allow_duplicates=False, **kwargs):
+def probability_sort_list(y, p, allow_duplicates=False, **kwargs):
     """
     Select parents out the pool pop represented by their  (in same order as pop in ga) from their
     corresponding
@@ -53,6 +54,22 @@ def sort_list(y, p, allow_duplicates=False, **kwargs):
                 p = y / sum(y)
 
     return pind
+
+def sort_list(y, p, **kwargs):
+    pind = []
+
+    for i in range(int(y.size / 2)):
+        par = np.flip(np.argsort(p))[0:2]
+        par = list(sorted(par).__reversed__())
+        pind.append(par)
+        try:
+            y = np.delete(y, np.where(par == pind[-1][0])[0][0])
+            y = np.delete(y, np.where(par == pind[-1][1])[0][0])
+        except IndexError:
+            pass
+
+    return pind
+
 
 # def roulette_select(pop, fx, bitsize, nbit2num = Ndbit2float):
 #

@@ -5,7 +5,6 @@ import numpy as np
 def tfx(x):
     return 3 * x**2 + 2 * x + 1
 
-
 def wheelers_ridge(x: Union[np.ndarray, list], a: float = 1.5) -> float:
     """
     Compute the Wheelersridge function for given x1 and x2
@@ -41,6 +40,16 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
     ndim = len(x)
     x = np.array(x, dtype=float)
     return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
+
+
+def Styblinski_Tang(x: list):
+    """
+    Compute Ackley' function for x1, x2, x...
+    :param x: list of x inputs where N-dimension = len(x)
+    :return:
+    """
+    x = np.array(x, dtype=float)
+    return sum(x**4) - 16 * sum(x**2) + 5 * sum(x)/2
 
 def booths_function(x, **kwargs):
     return (x[0] + 2*x[1] - 7)**2 + (2 * x[0] + x[1] - 5)**2

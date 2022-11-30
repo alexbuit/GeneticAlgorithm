@@ -151,7 +151,7 @@ class genetic_algoritm:
         self.b2n: Callable = Ndbit2float
         self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
-                              self.fitness, self.b2n,self.elitism, self.save_top,
+                              self.fitness, self.b2n, self.elitism, self.save_top,
                               self.bitsize, self.b2nkwargs)
 
 
@@ -283,7 +283,7 @@ class genetic_algoritm:
 
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
                                        "ranking": rank,
-                                       "ranknum": self.b2n(rank, self.bitsize),
+                                       "ranknum": self.b2n(rank, self.bitsize, self.b2nkwargs),
                                        "fitness": fitness,
                                        "value": self.pop,
                                        "valuetop%s" % self.save_top: self.genlist[epoch],
@@ -324,7 +324,7 @@ class genetic_algoritm:
         :return: None
         """
         if method == "uniform":
-            self.pop = uniform_bit_pop_float(**kwargs)
+            self.pop = uniform_bit_pop(**kwargs)
         elif method == "cauchy":
             self.pop = cauchyrand_bit_pop_float(**kwargs)
         elif method == "nbit":
@@ -605,9 +605,9 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [250, 2]
-    low, high = 0, 10
-    bitsize = 16
+    size = [100, 2]
+    low, high = 10, 20
+    bitsize = 6
     tfunc = booths_function
 
     # epochs = int(np.floor(np.log2(size[0])))
@@ -615,16 +615,16 @@ if __name__ == "__main__":
 
     iteration = 10
 
-    p = 0.5
+    p = 0.01
 
-    k = 4
+    k = np.e
     ga = genetic_algoritm(bitsize=bitsize)
     print(ga.log.creation)
     ga.optimumfx = [1, 3]
-    ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
-    print(ga.pop.shape)
-    ga.b2nkwargs = {"factor": 20, "bias": 50}
+    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=50)
+    ga.b2nkwargs = {"factor": 50}
 
+    print(ga.pop)
     ga.elitism = 25
 
     ga.b2n = ndbit2int
@@ -633,7 +633,7 @@ if __name__ == "__main__":
     # ga.seed = uniform_bit_pop_float
     ga.set_cross(full_single_point)
     ga.set_mutate(full_mutate)
-    ga.set_select(rank_selection)
+    ga.set_select(roulette_selection)
 
     ga.save_top = 10
 
@@ -642,100 +642,13 @@ if __name__ == "__main__":
     print(p)
     ga.run(epochs=epochs, muargs={"mutate_coeff": 10}, selargs={"nbit2num": ndbit2int,
                                                                "k": k, "fitness_func": exp_fitness,
-                                                               "allow_duplicates": True,
-                                                               "p": p},
+                                                               "allow_duplicates": True},
            verbosity=0)
+
+    print(ga.log.value.value[0])
 
     ga.save_log("Booth16b_p%s.pickle" % iteration)
     iteration += 0
-
-
-
-    # ga.save_log()
-
-    # print(ga.log.fitness)
-    # print(ga.log[3]["ranknum"])
-    # print(ga.log[3]["fitness"])
-
-    # print(ga.log[1])
-
-    # ga.log2txt("hier.txt")
-    #
-    # ga.save_results("wheeler8bit1.txt")
-
-
-    # print(Ndbit2float(ga[-1], 64))
-    # print(ga.load_results("GAmult_5_tfuncwheelers_ridge_bsize64_sim0.txt"))
-    # print(ga.get_numeric(bitsize=64)[-1])
-
-    # for sim in range(1):
-    #     genlist = []
-    # # rpop = normalrand_bit_pop_float(10000, 64, -5, 5)
-    #     rpop = uniform_bit_pop_float(size, bitsize, low, high)
-    #     parents = roulette_select(rpop, tfunc, bitsize)
-    #
-    #     for j in range(epochs):
-    #         print("%s/%s" % (j+1, epochs))
-    #
-    #         newgen = uniform_bit_pop_float([int(size[0]/2), size[1]], bitsize, low, high).tolist()
-    #         for ppair in parents:
-    #             child = cross_parents(rpop[ppair[0]], rpop[ppair[1]], bitsize)
-    #
-    #             newgen.append(cross_parents(rpop[ppair[0]], rpop[ppair[1]], bitsize))
-    #
-    #         # Select top10
-    #         t10 = roulette_select(rpop, tfunc, 64)[:5]
-    #         genlist.append([])
-    #         for ppair in t10:
-    #             genlist[j].append(rpop[ppair[0]])
-    #             genlist[j].append(rpop[ppair[1]])
-    #
-    #         genlist[j] = np.array(genlist[j])
-    #
-    #         # genlist.append(rpop)
-    #         rpop = np.array(newgen)
-    #         parents = roulette_select(np.array(newgen), tfunc, bitsize)
-    #
-    #     # genlist.append(rpop)
-    #     genarr = np.empty((size[0], epochs), dtype=object)
-    #
-    #     k = 0
-    #     for i in genlist:
-    #         for j in range(i.shape[0] - 1):
-    #
-    #             strbit = "".join(str(s) for s in i[j])
-    #             # print("~~~~~~")
-    #             # print("strbit: %s" % strbit)
-    #             # print("i: %s, k: %s" % (j, k))
-    #             # print(genarr[j, k])
-    #             genarr[j, k] = strbit
-    #             # print(genarr[j, k])
-    #         k += 1
-    #
-    #     genarr = genarr.T
-    #     # print(genarr)
-    #     # print(Ndbit2float(rpop[0], bitsize))
-    #
-    #     dataind = 5
-    #     with open("GAmult_%s_tfunc%s_bsize%s_sim%s.txt" % (dataind, tfunc.__name__, bitsize, sim), 'w') as f:
-    #         f.write(';'.join([str(i) for i in range(genarr.shape[0])]) + "\n")
-    #         genarr = genarr.T
-    #         for i in range(genarr.shape[0]):
-    #             f.write(";".join([str(item) for item in genarr[i]]) + "\n")
-
-    # np.savetxt("tdataGAmult_%s.txt" % dataind, genarr, delimiter=";",
-    #            header="".join("%s;" %i for i in range(len(genlist) + 1)))
-
-    # from AdrianPack.Aplot import LivePlot
-    #
-    # print(genlist)
-    #
-    # def livefunc(i):
-    #     print(i)
-    #     return tfx(genlist[i])
-    #
-    # LP = LivePlot(x=genlist, x_label="x data", y_label="y data")
-    # LP.run(interval=100)
 
 
     print("t: ", time() - tsart)
