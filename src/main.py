@@ -14,15 +14,27 @@ from DFM_opt_alg import *
 tstart = time()
 low, high = 0, 5
 
-gea = genetic_algoritm(bitsize=9)
-gea.b2n = ndbit2int
-gea.b2nkwargs = {"factor": 50}
+gea = genetic_algoritm(bitsize=32)
+
 
 gea.load_log("Booth16b_p10.pickle", True)
 lg = gea.log
-print(lg.ranking.bestsol)
-plt.scatter(np.linspace(0, 100, 100), lg.fitness[-1])
-plt.show()
 
-lg.value.animate2d(booths_function, -100, 100)
+gea.b2n = lg.b2n
+gea.b2nkwargs = lg.b2nkwargs
+
+print(lg.ranking.bestsol)
+print(lg.selection.fitness[-1].size)
+
+# lg.ranking.plot()
+#
+
+print(lg.value.numvalue[0])
+print(np.apply_along_axis(ackley, 1, lg.value.numvalue[0]))
+
+
+
+print([np.min(np.apply_along_axis(ackley, 1, lg.value.numvalue[i])) for i in range(10)])
+
+lg.value.animate2d(ackley, -4, 4, save_as="michealewicz.gif")
 print("time: %s" % (time() - tstart))

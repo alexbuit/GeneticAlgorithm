@@ -129,11 +129,8 @@ class genetic_algoritm:
         self.targs: dict = {}
 
         self.select: Callable = roulette_selection
-        self.cross: Callable = equal_prob_cross
+        self.cross: Callable = full_equal_prob
         self.mutation: Callable = mutate
-
-        # Calculate the fitness of the population
-        self.fitness: Callable = fitness_method
 
         # self.seed: Callable = self.none
 
@@ -151,7 +148,7 @@ class genetic_algoritm:
         self.b2n: Callable = Ndbit2float
         self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
-                              self.fitness, self.b2n, self.elitism, self.save_top,
+                               self.b2n, self.elitism, self.save_top,
                               self.bitsize, self.b2nkwargs)
 
 
@@ -184,9 +181,11 @@ class genetic_algoritm:
 
         selargs["fx"] = self.tfunc
         selargs["bitsize"] = self.bitsize
+        selargs["b2n"] = self.b2n
+        selargs["b2nkwargs"] = self.b2nkwargs
         selargs["verbosity"] = verbosity
 
-        parents = self.select(self.pop, **selargs)
+        parents, fitness, p = self.select(self.pop, **selargs)
 
         # if self.seed.__name__ == "none":
         #     self.epochs = int(np.floor(np.log2(self.shape[0])))
@@ -200,11 +199,10 @@ class genetic_algoritm:
             rank = np.asarray(rank)
 
             if self.dolog == 2:
-                fitness = self.fitness(rank, **selargs)
 
                 self.log.ranking.update(rank, self.optimumfx)
                 self.log.time.update(time() - self.tstart)
-                self.log.fitness.update(fitness)
+                self.log.selection.update(parents, p, fitness)
 
                 if len(self.log.add_logs) > 0:
                     for l in self.log.add_logs:
@@ -219,7 +217,6 @@ class genetic_algoritm:
 
 
         for epoch in range(self.epochs):
-            # seedargs["low"] = self.min
             newgen = []
             if verbosity:
                 print("%s/%s" % (epoch + 1, self.epochs))
@@ -227,19 +224,48 @@ class genetic_algoritm:
             cargs["bitsize"] = self.bitsize
             muargs["bitsize"] = self.bitsize
 
-            for ppair in parents[:self.elitism]:
+            for ppair in parents[self.elitism:]:
                 # child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
                 child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 newgen.append(child1)
                 newgen.append(child2)
 
-            for ppair in parents[self.elitism:]:
+                # print("**********")
+                #
+                # print(self.pop[ppair[0]] == newgen[-2])
+                # print(self.pop[ppair[1]] == newgen[-1])
+                #
+                # print("Ppair", ppair)
+                #
+                # print("Parent:")
+                # # print(self.pop[ppair[0]])
+                # # print(self.pop[ppair[1]])
+                # print("Parent 1: ",
+                #       self.b2n(self.pop[ppair[0]], **self.b2nkwargs), self.tfunc(self.b2n(self.pop[ppair[0]], **self.b2nkwargs)))
+                # print("Parent 2: ",
+                #       self.b2n(self.pop[ppair[1]], **self.b2nkwargs), self.tfunc(self.b2n(self.pop[ppair[1]], **self.b2nkwargs)))
+                #
+                # print("Child: ")
+                # # print(child1, "|" ,child2)
+                # print(self.b2n(child1, **self.b2nkwargs),
+                #       self.b2n(child2, **self.b2nkwargs))
+
+                # print("Child mutated: ")
+                # # print(newgen[-2], "|" ,newgen[-1])
+                # print(self.b2n(newgen[-2], **self.b2nkwargs),
+                #       self.b2n(newgen[-1], **self.b2nkwargs))
+
+
+
+            for ppair in parents[:self.elitism]:
                 child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
                 # print("~~~~~~")
                 # print(Ndbit2float(child, 32) - Ndbit2float(self.mutation(child, **muargs), 32))
                 # print(Ndbit2float(child1, self.bitsize), Ndbit2float(child2, self.bitsize))
                 newgen.append(self.mutation(child1, **muargs))
                 newgen.append(self.mutation(child2, **muargs))
+
+
 
             # Select top10
             t10 = parents[:self.save_top]
@@ -252,13 +278,12 @@ class genetic_algoritm:
 
             # genlist.append(rpop)
             self.pop = np.array(newgen)
-            parents = self.select(np.array(newgen), **selargs)
+            parents, fitness, p = self.select(np.array(newgen), **selargs)
 
             if self.dolog:
                 # Highest log level
                 rank = np.zeros(self.pop.shape)
                 if self.dolog == 2:
-                    fitness = self.fitness(self.pop, **selargs)
                     rankind = np.argsort(fitness)
 
                     j = 0
@@ -268,7 +293,7 @@ class genetic_algoritm:
 
                     self.log.ranking.update(rank, self.optimumfx)
                     self.log.time.update(time() - self.tstart)
-                    self.log.fitness.update(fitness)
+                    self.log.selection.update(parents, p, fitness)
                     self.log.value.update(self.pop, self.genlist[epoch])
 
                     # if additional logs added by appending them after initiation of self.log
@@ -387,7 +412,7 @@ class genetic_algoritm:
         self.cross = cross
         return None
 
-    def set_select(self, select: Callable, fitness: Callable = fitness_method):
+    def set_select(self, select: Callable):
         """
         Set the parent selection method used in GA, method should take an
         np.ndarray of dim mx1 as an argument + kwargs and return a list of lists with
@@ -408,7 +433,6 @@ class genetic_algoritm:
         :return: None
         """
         self.select = select
-        self.fitness = fitness
         return None
 
     def set_mutate(self, mutation: Callable):
@@ -534,7 +558,7 @@ class genetic_algoritm:
         :return: None
         """
         self.log = log(self.pop, self.select, self.cross, self.mutation,
-                              self.fitness, self.b2n,self.elitism, self.save_top,
+                               self.b2n,self.elitism, self.save_top,
                               self.bitsize, self.b2nkwargs)
 
         self.dolog = verbosity
@@ -562,7 +586,7 @@ class genetic_algoritm:
 
         if copy:
             self.log = log(old_log.pop, old_log.select, old_log.cross, old_log.mutation,
-                           old_log.fitness, old_log.b2n, old_log.elitism, old_log.savetop,
+                            old_log.b2n, old_log.elitism, old_log.savetop,
                            old_log.bitsize, old_log.b2nkwargs)
 
             self.log.creation = old_log.creation
@@ -577,8 +601,7 @@ class genetic_algoritm:
             self.log.ranking.distance = old_log.ranking.distance
             self.log.ranking.bestsol = old_log.ranking.bestsol
 
-            self.log.fitness.data = old_log.fitness.data
-            self.log.fitness.epoch = old_log.fitness.epoch
+            self.log.selection = old_log.selection.copy()
 
             self.log.value.data = old_log.value.data
             self.log.value.epoch = old_log.value.epoch
@@ -605,13 +628,13 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [100, 2]
-    low, high = 10, 20
-    bitsize = 6
-    tfunc = booths_function
+    size = [25, 2]
+    low, high = -4, 4
+    bitsize = 32
+    tfunc = ackley
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 50
+    epochs = 20
 
     iteration = 10
 
@@ -620,28 +643,29 @@ if __name__ == "__main__":
     k = np.e
     ga = genetic_algoritm(bitsize=bitsize)
     print(ga.log.creation)
-    ga.optimumfx = [1, 3]
-    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=50)
-    ga.b2nkwargs = {"factor": 50}
+
+    ga.optimumfx = [2.2,1.57]
+    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=6)
+    ga.b2nkwargs = {"factor": 6}
 
     print(ga.pop)
-    ga.elitism = 25
+    ga.elitism = 5
 
     ga.b2n = ndbit2int
     ga.logdata(2)
 
     # ga.seed = uniform_bit_pop_float
-    ga.set_cross(full_single_point)
+    ga.set_cross(full_equal_prob)
     ga.set_mutate(full_mutate)
-    ga.set_select(roulette_selection)
+    ga.set_select(rank_selection)
 
     ga.save_top = 10
 
     ga.target_func(tfunc)
 
     print(p)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 10}, selargs={"nbit2num": ndbit2int,
-                                                               "k": k, "fitness_func": exp_fitness,
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 5}, selargs={"nbit2num": ndbit2int,
+                                                               "k": k, "fitness_func": sigmoid_fitness,
                                                                "allow_duplicates": True},
            verbosity=0)
 

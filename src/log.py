@@ -15,7 +15,7 @@ def pythagoras(x):
 
 class log:
 
-    def __init__(self, pop, select, cross, mutate, fitness, b2n, elitism, savetop,
+    def __init__(self, pop, select, cross, mutate, b2n, elitism, savetop,
                  bitsize: int, b2nkwargs: dict):
         # Pop
         self.pop = pop
@@ -24,7 +24,7 @@ class log:
         # Logs
         self.time = log_time(b2n, bitsize, b2nkwargs)
         self.ranking = log_ranking(b2n, bitsize, b2nkwargs)
-        self.fitness = log_fitness(b2n, bitsize, b2nkwargs)
+        self.selection = log_selection(b2n, bitsize, b2nkwargs)
         self.value = log_value(b2n, bitsize, b2nkwargs)
 
         self.add_logs = []
@@ -33,7 +33,6 @@ class log:
         self.select: Callable = select
         self.cross: Callable = cross
         self.mutation: Callable = mutate
-        self.fitnessfunc: Callable = fitness
 
         # Used variables
         self.elitism = elitism
@@ -157,6 +156,55 @@ class log_time(log_object):
         pass
 
 
+class log_selection(log_object):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.probabilty = []
+        self.fitness = []
+
+    def __copy__(self):
+        object_copy = log_selection(self.b2n, self.bitsize, self.b2nkwargs, *self.args, **self.kwargs)
+        object_copy.data = self.data
+        object_copy.epoch = self.epoch
+        object_copy.probabilty = self.probabilty
+        object_copy.fitness = self.fitness
+        return object_copy
+
+    def update(self, data, *args):
+        self.data.append(data)
+        self.epoch.append(len(self.data))
+        self.probabilty.append(args[0])
+        self.fitness.append(args[1])
+        return None
+
+    def __getitem__(self, item):
+        return self.fitness[item]
+
+    def plot(self, top: int = None, show: bool = True, save_as: str = "",**kwargs):
+        if top == None:
+            top = len(self.data[0])
+
+        avgpepoch = [np.average(i[:top]) for i in self.fitness]
+
+        # plt.plot(self.epoch, avgpepoch, linestyle="-", marker="o", label="Fitness")
+        #
+        # plt.ylabel("Fitness coefficient")
+        # plt.xlabel("Epochs")
+        #
+        # plt.grid()
+        #
+        # plt.legend()
+        # plt.show()
+
+        pl = Default(self.epoch, avgpepoch, linestyle="-", marker="o", **kwargs)
+        if show:
+            if save_as != "":
+                pl.save_as = save_as
+            pl()
+
+        return pl
+
 class log_ranking(log_object):
 
     def __init__(self,*args, **kwargs):
@@ -237,43 +285,6 @@ class log_ranking(log_object):
         return pl
 
 
-class log_fitness(log_object):
-
-    def __init__(self,*args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __copy__(self):
-        object_copy = log_fitness(self.b2n, self.bitsize, *self.args, **self.kwargs)
-        object_copy.data = self.data
-        object_copy.epoch = self.epoch
-        return object_copy
-
-    def plot(self, top: int = None, show: bool = True, save_as: str = "",**kwargs):
-        if top == None:
-            top = len(self.data[0])
-
-        avgpepoch = [np.average(i[:top]) for i in self.data]
-
-        # plt.plot(self.epoch, avgpepoch, linestyle="-", marker="o", label="Fitness")
-        #
-        # plt.ylabel("Fitness coefficient")
-        # plt.xlabel("Epochs")
-        #
-        # plt.grid()
-        #
-        # plt.legend()
-        # plt.show()
-
-        pl = Default(self.epoch, avgpepoch, linestyle="-", marker="o", **kwargs)
-        if show:
-            if save_as != "":
-                pl.save_as = save_as
-            pl()
-
-        return pl
-
-
-
 class log_value(log_object):
 
     def __init__(self,*args, **kwargs):
@@ -306,7 +317,7 @@ class log_value(log_object):
 
         self.numvalue.append(np.asarray(convertpop2n(bit2num=self.b2n,
                                                      target=list(data),
-                                                     **self.b2nkwargs)))
+                                                     **self.b2nkwargs))[:, 0])
         self.topx.append(args[0])
         return None
 
@@ -370,7 +381,7 @@ class log_value(log_object):
         """
         plt.figure()
 
-        plt.plot(self.numvalue[epoch][:, 0][:, 0], self.numvalue[epoch][:, 0][:, 1],
+        plt.plot(self.numvalue[epoch][:, 0], self.numvalue[epoch][:, 1],
                          linestyle="",
                          marker="o", label="Algortithm")
 
@@ -451,7 +462,7 @@ class log_value(log_object):
 
         figure = plt.figure()
 
-        line, = plt.plot(self.numvalue[0][:, 0][:, 0], self.numvalue[0][:, 0][:, 1],
+        line, = plt.plot(self.numvalue[0][:, 0], self.numvalue[0][:, 1],
                          linestyle="",
                          marker="o", label="Algortithm")
 
@@ -469,7 +480,7 @@ class log_value(log_object):
 
         def update(frame):
             print(frame)
-            line.set_data(self.numvalue[frame][:, 0][:, 0], self.numvalue[frame][:, 0][:, 1])
+            line.set_data(self.numvalue[frame][:, 0], self.numvalue[frame][:, 1])
 
             plt.title("Iteration: %s" % frame)
             return None

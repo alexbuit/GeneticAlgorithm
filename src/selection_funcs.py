@@ -4,7 +4,18 @@ from helper import *
 from typing import Iterable
 
 def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs):
-    return np.apply_along_axis(fx, 1, nbit2num(pop, bitsize, **kwargs))
+    """ Calculate the fitness of a population.
+    :param pop: Population of individuals
+    :param fx: Function to calculate the fitness of an individual
+    :param bitsize: Bitsize of an individual
+    :param nbit2num: Function to convert a ndarray of bits to a number
+    :param kwargs: Additional arguments for nbit2num
+    :return: Fitness of the population
+    """
+    if "bitsize" in kwargs["b2nkwargs"]:
+        kwargs["b2nkwargs"].pop("bitsize")
+
+    return np.apply_along_axis(fx, 1, nbit2num(pop, bitsize, **kwargs["b2nkwargs"]))
 
 
 def lin_fitness(y, a, b):
@@ -108,36 +119,7 @@ def roulette_selection(*args, **kwargs):
 
     p = fitness / sum(fitness)
 
-    return sort_list(fitness, p, **kwargs)
-
-
-
-def fitness_method(*args, **kwargs):
-    """
-
-    :param args:
-        args, kwargs passed onto the calc_fx function
-    :param kwargs:
-        k => parameteres passed onto the fitness function
-        fitness_func => the function to determine the fitness of a value y
-        calculated from input population
-    :return:
-    """
-    y = calc_fx(*args, **kwargs)
-
-    k = [1.5]
-    if "k" in kwargs:
-        k = kwargs["k"]
-
-    if not isinstance(k, Iterable):
-        k = [k]
-
-    fitness_func = exp_fitness
-    if "fitness_func" in kwargs:
-        fitness_func = kwargs["fitness_func"]
-
-    fitness = fitness_func(y, *k)
-    return fitness
+    return sort_list(fitness, p, **kwargs), fitness, p
 
 
 def rank_selection(*args, **kwargs):
@@ -170,10 +152,13 @@ def rank_selection(*args, **kwargs):
     if "fitness_func" in kwargs:
         fitness_func = kwargs["fitness_func"]
 
-    fitness = fitness_func(y, *k)
-    fit_rng = np.flip(np.argsort(fitness))
+    fitness = y
 
-    p = (prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1))
+    fit_rng = np.argsort(fitness)
+
+    print(np.sort(y))
+
+    p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
     p = p/np.sum(p)
 
     selection_array = np.zeros(fit_rng.shape)
@@ -196,8 +181,7 @@ def rank_selection(*args, **kwargs):
 
             pind.append(list(sorted(par).__reversed__()))
 
-
-    return pind
+    return pind,fitness, p
 
 
 def rank_space_selection(*args, **kwargs):

@@ -113,8 +113,18 @@ def full_single_point(parent1, parent2, **kwargs):
     child1[:c1] = parent1[:c1]
     child1[c1:] = parent2[c1:]
 
-    child1[:c1] = parent2[:c1]
-    child1[c1:] = parent1[c1:]
+    child2[:c1] = parent2[:c1]
+    child2[c1:] = parent1[c1:]
+
+    print("**********")
+
+    print(parent1)
+    print(parent2)
+
+    print("-----")
+
+    print(child1)
+    print(child2)
 
     return [child1, child2]
 
@@ -153,7 +163,7 @@ def full_equal_prob(parent1, parent2, **kwargs):
     child2 = np.zeros(parent1.shape, dtype=np.uint8)
 
     for i in range(0, parent1.size):
-        if np.random.randint(0, 1):
+        if np.random.randint(0, 2):
             child1[i] = parent2[i]
             child2[i] = parent1[i]
         else:
