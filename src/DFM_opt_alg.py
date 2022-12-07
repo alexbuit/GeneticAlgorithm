@@ -628,8 +628,8 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [25, 2]
-    low, high = -4, 4
+    size = [100, 2]
+    low, high = -5, 5
     bitsize = 32
     tfunc = ackley
 

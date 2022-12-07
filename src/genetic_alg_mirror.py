@@ -133,16 +133,8 @@ def select(*args, **kwargs):
         sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
     epoch += 1
-    return pind
+    return pind, fitness, p
 
-def fitness(*args, **kwargs):
-    global intens, optimum, epoch
-
-    if epoch is not None and epoch < epochs:
-        intens_copy = np.average(intens[epoch])
-        return intens_copy / optimum
-    else:
-        return np.zeros(shape=[individuals])
 
 class log_intensity(log_object):
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
@@ -198,7 +190,7 @@ class log_intensity(log_object):
 
 ## Algorithm
 if __name__ == "__main__":
-    bitsize = 8
+    bitsize = 9
     size = [individuals, n]
 
     ga = genetic_algoritm(bitsize=bitsize)
@@ -207,7 +199,7 @@ if __name__ == "__main__":
     ga.optimumfx = optimum
     ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
     print(ga.pop.shape)
-    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8}
+    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
 
     ga.elitism = 5
 
@@ -221,7 +213,6 @@ if __name__ == "__main__":
     ga.set_cross(full_single_point)
     ga.set_mutate(full_mutate)
     ga.set_select(select)
-    ga.fitness = fitness
 
     # P value for population of 20?
     p = 0.1

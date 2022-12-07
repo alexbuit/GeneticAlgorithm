@@ -3,11 +3,9 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from time import time
 
 import numpy as np
-from AdrianPack.Aplot import LivePlot, Default
-from AdrianPack.Fileread import Fileread
 from helper import Ndbit2float
 
-from genetic_alg_mirror import log_intensity, select, fitness
+from genetic_alg_mirror import log_intensity, select
 
 from DFM_opt_alg import *
 
@@ -36,5 +34,13 @@ print(np.apply_along_axis(ackley, 1, lg.value.numvalue[0]))
 
 print([np.min(np.apply_along_axis(ackley, 1, lg.value.numvalue[i])) for i in range(10)])
 
-lg.value.animate2d(ackley, -4, 4, save_as="michealewicz.gif")
+print(lg.pop.shape)
+
+# lg.selection.plot(x_label="Individuals", y_label="Fitness", title="Fitness of individuals", fmt_data="raw")
+print(lg.ranking.bestsol)
+
+
+lg.time.plot()
+
+lg.value.animate2d(booths_function, -5, 5, epochs=range(0, 5))
 print("time: %s" % (time() - tstart))

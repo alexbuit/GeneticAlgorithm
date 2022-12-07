@@ -6,8 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 
-from AdrianPack.Aplot import Default
-
+from AdrianPackv402.Aplot import Default
 
 def pythagoras(x):
     return np.sqrt(sum(x))
@@ -152,8 +151,33 @@ class log_time(log_object):
         object_copy.epoch = self.epoch
         return object_copy
 
-    def plot(self):
-        pass
+    def plot(self, save_as="", show=True, *args, **kwargs):
+
+        linestyle = "-"
+        if "linestyle" in kwargs:
+            linestyle = kwargs["linestyle"]
+            kwargs["linestyle"].pop()
+
+        marker = "o"
+        if "marker" in kwargs:
+            marker = kwargs["marker"]
+            kwargs["marker"].pop()
+
+        kwargs["x_label"] = "epoch"
+        kwargs["y_label"] = "time"
+
+
+        pl = Default(self.epoch, self.data, *args, linestyle=linestyle, marker=marker, **kwargs)
+
+        plt.title("Time: %s s" % sum(self.data))
+
+        if show:
+            if save_as != "":
+                pl.save_as = save_as
+            pl()
+
+        return pl
+
 
 
 class log_selection(log_object):
@@ -450,7 +474,7 @@ class log_value(log_object):
 
         return None
 
-    def animate2d(self, tfx: Callable, low: int, high: int, save_as=""):
+    def animate2d(self, tfx: Callable, low: int, high: int, save_as="", epochs=0):
         """
 
         :param tfx:
@@ -485,8 +509,11 @@ class log_value(log_object):
             plt.title("Iteration: %s" % frame)
             return None
 
+        if epochs == 0:
+            epochs = range(len(self.epoch))
+
         animation = FuncAnimation(figure, update, interval=500,
-                                  frames=range(len(self.epoch)))
+                                  frames=epochs)
 
         if save_as == "":
             plt.show()

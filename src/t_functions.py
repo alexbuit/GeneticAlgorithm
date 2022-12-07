@@ -1,5 +1,7 @@
 
 from typing import Union
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 def tfx(x):
@@ -53,4 +55,34 @@ def Styblinski_Tang(x: list):
 
 def booths_function(x, **kwargs):
     return (x[0] + 2*x[1] - 7)**2 + (2 * x[0] + x[1] - 5)**2
+
+
+if __name__ == "__main__":
+    from helper import sigmoid,sigmoid2
+    # plt.plot(np.linspace(30, 60, 100), [sigmoid2(x, 0, 1, d=50, Q=1, nu=2) for x in np.linspace(30, 60, 100)],
+    #          label="$f(x) =  \dfrac{1}{(1 + e^{-1 \cdot (x - 50)})^{1 / 2}}$")
+    # plt.xlabel("Power [$mW$]")
+    # plt.ylabel("Fitness")
+
+    low, high = -5, 5
+    func = ackley
+
+    x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
+    X1, X2 = np.meshgrid(x1, x2)
+    y = func([X1, X2])
+
+    plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
+
+    plt.xlim(low, high)
+    plt.ylim(low, high)
+
+    plt.xlabel("$x_1$")
+    plt.ylabel("$x_2$")
+
+    plt.legend(loc="upper right")
+    plt.colorbar(label="f(x1, x2)")
+
+    plt.tight_layout()
+
+    plt.show()
 

@@ -21,6 +21,7 @@ def floatdict():
 def bitdict():
     return {8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64}
 
+
 def int_to_binary(integer, size):
     binary_arr = np.zeros(shape=size, dtype=np.uint8)
     i = 0
@@ -278,6 +279,13 @@ def convertpop2n(bit2num = None, target = None, **kwargs):
 
 def sigmoid(x):
     return 1 / (1 + pow(np.e, -x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+def sigmoid2(x, a = 1, b = -1, c = 0.5, d=0 ,Q = 0.5, nu = 1):
+    return a + (b - a) / (1 + Q * np.exp(-c * (x - d)))**(1/nu)
+
 
 if __name__ == "__main__":
     from time import time
