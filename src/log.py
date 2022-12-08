@@ -1,5 +1,8 @@
 from typing import Callable
 from datetime import datetime
+
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 from helper import convertpop2n
 import numpy as np
 
@@ -166,10 +169,11 @@ class log_time(log_object):
         kwargs["x_label"] = "epoch"
         kwargs["y_label"] = "time"
 
+        kwargs["data_label"] = "avg per epoch: %s s" % (sum(np.array(self.data)[1:] - np.array(self.data)[:-1]) / len(self.data))
 
         pl = Default(self.epoch, self.data, *args, linestyle=linestyle, marker=marker, **kwargs)
 
-        plt.title("Time: %s s" % sum(self.data))
+        plt.title("Time: %s s" % self.data[-1])
 
         if show:
             if save_as != "":
@@ -284,16 +288,15 @@ class log_ranking(log_object):
 
         if top == None:
             top = len(self.effectivity[0])
-        print(top)
+
         if datasource == None:
             datasource = self.distance
 
         if datasource == self.bestsol:
-
             pass
 
 
-        avgpepoch = [np.average(i) for i in datasource]
+        avgpepoch = [np.average(i[top:]) for i in datasource]
 
         if not "linestyle" in kwargs:
             kwargs["linestyle"] = "-"
@@ -474,7 +477,8 @@ class log_value(log_object):
 
         return None
 
-    def animate2d(self, tfx: Callable, low: int, high: int, save_as="", epochs=0):
+    def animate2d(self, tfx: Callable, low: int, high: int, save_as="", epochs=0,
+                  fitness=None ):
         """
 
         :param tfx:
@@ -484,28 +488,41 @@ class log_value(log_object):
         :return:
         """
 
-        figure = plt.figure()
+        figure, [axis1, axis2] = plt.subplots(1, 2)
 
-        line, = plt.plot(self.numvalue[0][:, 0], self.numvalue[0][:, 1],
+        line, = axis1.plot(self.numvalue[0][:, 0], self.numvalue[0][:, 1],
                          linestyle="",
                          marker="o", label="Algortithm")
+
+        print(self.numvalue[1][:, 0])
+
+        line2, = axis2.plot(range(self.numvalue[0][:, 0].shape[0]), np.sort(self.numvalue[0][:, 1]))
 
         x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
         X1, X2 = np.meshgrid(x1, x2)
         y = tfx([X1, X2])
 
-        plt.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
+        pcmesh = axis1.pcolormesh(X1, X2, y, cmap='RdBu', shading="auto")
 
-        plt.xlim(low, high)
-        plt.ylim(low, high)
+        axis1.set_xlim(low, high)
+        axis1.set_ylim(low, high)
 
-        plt.legend(loc="upper right")
-        plt.colorbar()
+        axis1.legend(loc="upper right")
+
+        divider = make_axes_locatable(axis1)
+        cax = divider.append_axes('right', size='5%', pad=0.05)
+
+        figure.colorbar(pcmesh, cax=cax, orientation='vertical')
 
         def update(frame):
             print(frame)
             line.set_data(self.numvalue[frame][:, 0], self.numvalue[frame][:, 1])
 
+            line2.set_data(range(self.numvalue[0][:, 0].shape[0]),
+                                np.sort(self.numvalue[frame][:, 1]))
+
+            axis1.set_title("2D plot")
+            axis2.set_title("fitness of individuals")
             plt.title("Iteration: %s" % frame)
             return None
 

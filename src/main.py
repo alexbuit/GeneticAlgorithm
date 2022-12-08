@@ -12,7 +12,7 @@ from DFM_opt_alg import *
 tstart = time()
 low, high = 0, 5
 
-gea = genetic_algoritm(bitsize=32)
+gea = genetic_algoritm(bitsize=16)
 
 
 gea.load_log("Booth16b_p10.pickle", True)
@@ -21,26 +21,19 @@ lg = gea.log
 gea.b2n = lg.b2n
 gea.b2nkwargs = lg.b2nkwargs
 
-print(lg.ranking.bestsol)
-print(lg.selection.fitness[-1].size)
 
 # lg.ranking.plot()
-#
-
-print(lg.value.numvalue[0])
-print(np.apply_along_axis(ackley, 1, lg.value.numvalue[0]))
-
-
-
-print([np.min(np.apply_along_axis(ackley, 1, lg.value.numvalue[i])) for i in range(10)])
-
-print(lg.pop.shape)
 
 # lg.selection.plot(x_label="Individuals", y_label="Fitness", title="Fitness of individuals", fmt_data="raw")
+
+lg.ranking.plot(top=2)
+
 print(lg.ranking.bestsol)
 
+def inv_ackley(x):
+    return -ackley(x)
 
 lg.time.plot()
 
-lg.value.animate2d(booths_function, -5, 5, epochs=range(0, 5))
+lg.value.animate2d(inv_ackley, -5, 5)
 print("time: %s" % (time() - tstart))

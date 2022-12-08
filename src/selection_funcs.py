@@ -154,9 +154,7 @@ def rank_selection(*args, **kwargs):
 
     fitness = y
 
-    fit_rng = np.argsort(fitness)
-
-    print(np.sort(y))
+    fit_rng = np.flip(np.argsort(fitness))
 
     p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
     p = p/np.sum(p)

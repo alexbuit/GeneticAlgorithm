@@ -628,13 +628,16 @@ if __name__ == "__main__":
     tsart = time()
 
 
-    size = [100, 2]
-    low, high = -5, 5
-    bitsize = 32
-    tfunc = ackley
+    def inv_ackley(x):
+        return -ackley(x)
+
+    size = [10, 2]
+    low, high = 2, 5
+    bitsize = 16
+    tfunc = inv_ackley
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 20
+    epochs = 40
 
     iteration = 10
 
@@ -644,12 +647,11 @@ if __name__ == "__main__":
     ga = genetic_algoritm(bitsize=bitsize)
     print(ga.log.creation)
 
-    ga.optimumfx = [2.2,1.57]
+    ga.optimumfx = [0, 0]
     ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=6)
     ga.b2nkwargs = {"factor": 6}
 
-    print(ga.pop)
-    ga.elitism = 5
+    ga.elitism = 3
 
     ga.b2n = ndbit2int
     ga.logdata(2)
@@ -663,13 +665,10 @@ if __name__ == "__main__":
 
     ga.target_func(tfunc)
 
-    print(p)
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 5}, selargs={"nbit2num": ndbit2int,
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 3}, selargs={"nbit2num": ndbit2int,
                                                                "k": k, "fitness_func": sigmoid_fitness,
                                                                "allow_duplicates": True},
-           verbosity=0)
-
-    print(ga.log.value.value[0])
+           verbosity=1)
 
     ga.save_log("Booth16b_p%s.pickle" % iteration)
     iteration += 0
