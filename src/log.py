@@ -478,7 +478,7 @@ class log_value(log_object):
         return None
 
     def animate2d(self, tfx: Callable, low: int, high: int, save_as="", epochs=0,
-                  fitness=None ):
+                  fitness=None):
         """
 
         :param tfx:
@@ -490,13 +490,15 @@ class log_value(log_object):
 
         figure, [axis1, axis2] = plt.subplots(1, 2)
 
+        line2data = np.array(fitness)
+        if fitness==None:
+            line2data = self.numvalue
+
         line, = axis1.plot(self.numvalue[0][:, 0], self.numvalue[0][:, 1],
                          linestyle="",
                          marker="o", label="Algortithm")
 
-        print(self.numvalue[1][:, 0])
-
-        line2, = axis2.plot(range(self.numvalue[0][:, 0].shape[0]), np.sort(self.numvalue[0][:, 1]))
+        line2 = axis2.bar(range(len(np.sort(line2data[0, :]))), np.sort(line2data[0, :]))
 
         x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
         X1, X2 = np.meshgrid(x1, x2)
@@ -518,8 +520,11 @@ class log_value(log_object):
             print(frame)
             line.set_data(self.numvalue[frame][:, 0], self.numvalue[frame][:, 1])
 
-            line2.set_data(range(self.numvalue[0][:, 0].shape[0]),
-                                np.sort(self.numvalue[frame][:, 1]))
+            sorted_fitness = np.sort(line2data[frame, :])
+
+            for i, b in enumerate(line2):
+                b.set_height(sorted_fitness[i])
+
 
             axis1.set_title("2D plot")
             axis2.set_title("fitness of individuals")

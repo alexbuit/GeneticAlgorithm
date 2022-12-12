@@ -6,6 +6,7 @@ import pickle
 from time import time
 
 from population_initatilisation import *
+from gradient_descent import gd
 from selection_funcs import *
 from cross_funcs import *
 from t_functions import *
@@ -227,6 +228,7 @@ class genetic_algoritm:
             for ppair in parents[self.elitism:]:
                 # child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
                 child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+
                 newgen.append(child1)
                 newgen.append(child2)
 
@@ -629,15 +631,15 @@ if __name__ == "__main__":
 
 
     def inv_ackley(x):
-        return -ackley(x)
+        return booths_function(x)
 
-    size = [10, 2]
-    low, high = 2, 5
+    size = [100, 2]
+    low, high = -5, 5
     bitsize = 16
-    tfunc = inv_ackley
+    tfunc = michealewicz
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 40
+    epochs = 5
 
     iteration = 10
 

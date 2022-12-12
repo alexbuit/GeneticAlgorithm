@@ -26,14 +26,13 @@ gea.b2nkwargs = lg.b2nkwargs
 
 # lg.selection.plot(x_label="Individuals", y_label="Fitness", title="Fitness of individuals", fmt_data="raw")
 
-lg.ranking.plot(top=2)
+# lg.ranking.plot(top=2)
 
 print(lg.ranking.bestsol)
 
 def inv_ackley(x):
-    return -ackley(x)
+    return booths_function(x)
 
-lg.time.plot()
-
-lg.value.animate2d(inv_ackley, -5, 5)
+print(np.array(lg.selection.fitness))
+lg.value.animate2d(michealewicz, -5, 5, fitness=lg.selection.fitness)
 print("time: %s" % (time() - tstart))

@@ -51,6 +51,18 @@ if __name__ == "__main__":
         return random.randint(0, 100)
 
 ## Additional functions for the algorithm
+
+def tfmirror(individual: np.ndarray, handle: int, n: int):
+    """
+    Takes an individual and sets the mirror to the corresponding voltage
+
+    :param individual: Individual to be set
+    :param handle: Handle for the mirror
+    :param n: Number of channels
+    :return: None
+    """
+
+
 def select(*args, **kwargs):
     global intens, optimum, points_per_indv, epoch
 
