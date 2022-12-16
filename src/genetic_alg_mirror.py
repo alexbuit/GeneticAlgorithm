@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
 ## Additional functions for the algorithm
 
-def tfmirror(individual: np.ndarray, handle: int, n: int):
+def tfmirror(*args, **kwargs):
     """
     Takes an individual and sets the mirror to the corresponding voltage
 
@@ -61,20 +61,12 @@ def tfmirror(individual: np.ndarray, handle: int, n: int):
     :param n: Number of channels
     :return: None
     """
-
-
-def select(*args, **kwargs):
     global intens, optimum, points_per_indv, epoch
 
     pop = args[0]
 
     b2n = kwargs["b2n"]
     b2nkwargs = kwargs["b2nkwargs"]
-
-    # probability paramter for rank selection
-    prob_param = 1.9
-    if "p" in kwargs:
-        prob_param = kwargs["p"]
 
     num_pop = b2n(pop, **b2nkwargs)
 
@@ -91,7 +83,7 @@ def select(*args, **kwargs):
 
                 raise ValueError("Input voltage can not be > 1 or < -1")
 
-    fitness = np.zeros(num_pop.shape[0])
+    avg_read = np.zeros(num_pop.shape[0])
 
     i = 0
     for indiv in num_pop:
@@ -105,11 +97,24 @@ def select(*args, **kwargs):
             intens[i, j] = read_pm()
 
 
-        fitness[i] = np.average(intens[:, i])/optimum
+        avg_read[i] = np.average(intens[:, i])/optimum
 
         i += 1
         # Test out on DFM and append intensity
         # Divide intensity by global var optimum
+
+    return avg_read
+
+
+def select(*args, **kwargs):
+    global intens, optimum, points_per_indv, epoch
+
+    fitness = tfmirror(*args, **kwargs)
+
+    # probability paramter for rank selection
+    prob_param = 1.9
+    if "p" in kwargs:
+        prob_param = kwargs["p"]
 
     fit_rng = np.flip(np.argsort(fitness))
 
@@ -211,7 +216,7 @@ if __name__ == "__main__":
     ga.optimumfx = optimum
     ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
     print(ga.pop.shape)
-    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
+    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 9, "bias": 0.0}
 
     ga.elitism = 5
 
