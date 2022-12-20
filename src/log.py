@@ -59,7 +59,7 @@ class log:
 
     def __copy__(self):
         logcopy = log(self.pop, self.select, self.cross, self.mutation,
-                       self.fitness, self.b2n, self.elitism, self.savetop,
+                       self.b2n, self.elitism, self.savetop,
                        self.bitsize, self.b2nkwargs)
 
         logcopy.creation = self.creation
@@ -73,9 +73,6 @@ class log:
         logcopy.ranking.effectivity = self.ranking.effectivity
         logcopy.ranking.distance = self.ranking.distance
         logcopy.ranking.bestsol = self.ranking.bestsol
-
-        logcopy.fitness.data = self.fitness.data
-        logcopy.fitness.epoch = self.fitness.epoch
 
         logcopy.value.data = self.value.data
         logcopy.value.epoch = self.value.epoch
@@ -304,7 +301,9 @@ class log_ranking(log_object):
         if not "marker" in kwargs:
             kwargs["marker"] = "o"
 
-        pl = Default(self.epoch, avgpepoch, **kwargs)
+        print(len(self.epoch), len(avgpepoch))
+
+        pl = Default(self.epoch[0:-1], avgpepoch, **kwargs)
         if show:
             if save_as != "":
                 pl.save_as = save_as

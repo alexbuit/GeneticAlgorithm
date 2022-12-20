@@ -100,7 +100,7 @@ def mirror(a):
 
 rm = pyvisa.ResourceManager()
 print(rm.list_resources())
-inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
+inst = rm.open_resource('USB0::0x1313::0x8078::P0000874::INSTR', timeout=1)
 
 power_meter = ThorlabsPM100(inst=inst)
 

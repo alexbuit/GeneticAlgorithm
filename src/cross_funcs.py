@@ -116,12 +116,12 @@ def full_single_point(parent1, parent2, **kwargs):
     child2[:c1] = parent2[:c1]
     child2[c1:] = parent1[c1:]
 
-    print("**********")
-
-    print(parent1)
-    print(parent2)
-
-    print("-----")
+    # print("**********")
+    #
+    # print(parent1)
+    # print(parent2)
+    #
+    # print("-----")
 
     print(child1)
     print(child2)

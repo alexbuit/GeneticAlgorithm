@@ -7,7 +7,7 @@ from typing import Union
 from time import sleep
 
 from DFM_opt_alg import genetic_algoritm, full_mutate
-from src.cross_funcs import full_single_point
+from src.cross_funcs import full_equal_prob
 from src.helper import ndbit2int
 from src.selection_funcs import *
 from src.log import log_object
@@ -16,12 +16,14 @@ from src.log import log_object
 ## global variables
 individuals: int = 20
 points_per_indv: int = 100
-
-intens: np.ndarray = np.zeros(shape=[individuals, points_per_indv])
-optimum: float = 50e-6
+points_stability_test = 500
 
 epochs = 20  # ??
 epoch = -1  # ??
+
+intens: np.ndarray = np.zeros(shape=[individuals, points_per_indv])
+bestintens: np.ndarray = np.zeros(shape=[points_stability_test])
+optimum: float = 1
 
 if __name__ == "__main__":
     # Opening the mirror handle
@@ -43,12 +45,13 @@ if __name__ == "__main__":
 
     rm = pyvisa.ResourceManager()
     print(rm.list_resources())
-    inst = rm.open_resource('USB0::0x1313::0x8078::PM001464::INSTR', timeout=1)
+    inst = rm.open_resource('USB0::0x1313::0x8078::P0000874::INSTR', timeout=1)
 
     power_meter = ThorlabsPM100(inst=inst)
 
     def read_pm():
-        return random.randint(0, 100)
+        return power_meter.read
+
 
 ## Additional functions for the algorithm
 
@@ -61,12 +64,19 @@ def tfmirror(*args, **kwargs):
     :param n: Number of channels
     :return: None
     """
-    global intens, optimum, points_per_indv, epoch
+    global intens, optimum, epoch
 
-    pop = args[0]
+    print(args)
+    if "pop" in kwargs:
+        pop = kwargs["pop"]
+    else:
+        pop: np.ndarray = args[0]
 
-    b2n = kwargs["b2n"]
-    b2nkwargs = kwargs["b2nkwargs"]
+    b2n: Callable = kwargs["b2n"]
+    b2nkwargs: dict = kwargs["b2nkwargs"]
+
+    points_per_indv: int = kwargs.get("points_per_indv", 100)
+    stability: bool = kwargs.get("stability", False)
 
     num_pop = b2n(pop, **b2nkwargs)
 
@@ -94,10 +104,17 @@ def tfmirror(*args, **kwargs):
 
 
         for j in range(points_per_indv):
-            intens[i, j] = read_pm()
+            if stability:
+                bestintens[j] = read_pm()
+            else:
+                intens[i, j] = read_pm()
 
 
-        avg_read[i] = np.average(intens[:, i])/optimum
+
+        if stability:
+            avg_read[0] = np.average(bestintens)
+        else:
+            avg_read[i] = np.average(intens[:, i])/optimum
 
         i += 1
         # Test out on DFM and append intensity
@@ -107,7 +124,12 @@ def tfmirror(*args, **kwargs):
 
 
 def select(*args, **kwargs):
-    global intens, optimum, points_per_indv, epoch
+    global intens, optimum, points_per_indv, epoch, points_stability_test
+
+    pop = args[0]
+
+    kwargs["points_per_indv"] = points_per_indv
+    kwargs["stability"] = False
 
     fitness = tfmirror(*args, **kwargs)
 
@@ -117,6 +139,13 @@ def select(*args, **kwargs):
         prob_param = kwargs["p"]
 
     fit_rng = np.flip(np.argsort(fitness))
+
+    # Test the best individual for stability
+    kwargs["points_per_indv"] = points_stability_test
+    kwargs["stability"] = True
+    kwargs["pop"] = pop[fit_rng[0]]
+
+    tfmirror(**kwargs)
 
     p = (prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1))
     p = p/np.sum(p)
@@ -157,18 +186,21 @@ class log_intensity(log_object):
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         super().__init__(b2num, bitsize, b2nkwargs, *args, **kwargs)
         self.intensity = []
+        self.bestsol = []
 
     def update(self, data, *args):
         global intens
         self.data.append(data)
         self.epoch.append(len(self.data))
         self.intensity.append(intens.copy())
+        self.bestsol.append(bestintens.copy())
 
 
     def __copy__(self):
         log_intens_c = log_intensity(self.b2n, self.bitsize, self.b2nkwargs)
         log_intens_c.intensity = self.intensity
         log_intens_c.data = self.data
+        log_intens_c.bestsol = self.bestsol
         log_intens_c.epoch = self.epoch
 
         return log_intens_c
@@ -176,7 +208,7 @@ class log_intensity(log_object):
     def plot(self, epoch: Union[slice, int] = slice(0, None),
              individual: Union[slice, int] = slice(0, None),
              data: Union[slice, int] = slice(0, None),
-             fmt_data: str = "average"):
+             fmt_data: str = "average", linefmt="scatter"):
 
         if fmt_data.lower() == "raw":
             int_mat = np.asarray(self.intensity)[epoch, individual, data]
@@ -185,18 +217,25 @@ class log_intensity(log_object):
                                          np.asarray(self.intensity)[epoch, individual, data],
                                          2)
 
+        # for each individual
         for line in range(int_mat.shape[1]):
-            print(int_mat.ndim)
+            # take the amount of epochs
             x = np.array([np.full(int_mat.shape[2], i) for i in range(int_mat.shape[0])]).flatten()
+            # plot their intensity at each epoch
+            # x = [0, 1, ... epoch n]
+            # y = [intens of indv 'line' @ epoch 0, @ epoch 1, @ epoch 2, ... @ epoch n]
             y = int_mat[:, line].flatten()
 
-            plt.scatter(x, y)
 
+            if linefmt == "scatter":
+                plt.scatter(x, y, label = "individual %s" % line)
+            else:
+                plt.plot(x, y, label = "individual %s" % line)
 
+        plt.xlabel("epoch")
+        plt.ylabel("Intensity")
 
-            print(x)
-            print("----")
-            print(y)
+        plt.legend()
 
         plt.show()
         return None
@@ -207,43 +246,78 @@ class log_intensity(log_object):
 
 ## Algorithm
 if __name__ == "__main__":
-    bitsize = 9
-    size = [individuals, n]
 
-    ga = genetic_algoritm(bitsize=bitsize)
+    from src.AdrianPackv402.Aplot import LivePlot
+    from time import time
 
-    print(ga.log.creation)
-    ga.optimumfx = optimum
-    ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
-    print(ga.pop.shape)
-    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 9, "bias": 0.0}
+    try:
+        t0 = time()
 
-    ga.elitism = 5
+        def t():
+            return time() - t0
 
-    ga.b2n = ndbit2int
+        def main():
+            bitsize = 9
+            size = [individuals, n]
 
-    ga.logdata(2)
-    ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
+            ga = genetic_algoritm(bitsize=bitsize)
+
+            print(ga.log.creation)
+            ga.optimumfx = optimum
+            ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
+            print(ga.pop.shape)
+            ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 9, "bias": 0.0}
+
+            ga.elitism = 5
+
+            ga.b2n = ndbit2int
+
+            ga.logdata(2)
+            ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
 
 
-    # ga.seed = uniform_bit_pop_float
-    ga.set_cross(full_single_point)
-    ga.set_mutate(full_mutate)
-    ga.set_select(select)
+            # ga.seed = uniform_bit_pop_float
+            ga.set_cross(full_equal_prob)
+            ga.set_mutate(full_mutate)
+            ga.set_select(select)
 
-    # P value for population of 20?
-    p = 0.1
-    ga.log.ranking.epoch.append(0)
+            # P value for population of 20?
+            p = 0.1
+            ga.log.ranking.epoch.append(0)
 
-    # ga.run(epochs=epochs, muargs={"mutate_coeff": 2},
-    #        selargs={"nbit2num": ndbit2int,
-    #                 "b2n": ga.b2n,
-    #                 "b2nkwargs" : ga.b2nkwargs,
-    #                 "p": p
-    #                 },
-    #        verbosity=1)
+            print("start run")
+            ga.run(epochs=epochs, muargs={"mutate_coeff": 2},
+                   selargs={"nbit2num": ndbit2int,
+                            "b2n": ga.b2n,
+                            "b2nkwargs" : ga.b2nkwargs,
+                            "p": p
+                            },
+                   verbosity=1)
+
+            i = 2
+
+            # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
+            ga.save_log("dfmtest_data%s.pickle" % i)
+
+
+        main()
+
+
+
+    # except:
+    #     voltages = np.zeros(shape=n)
     #
-    # i = 1
+    #     if not oko.set(handle, voltages):
+    #         sys.exit("Error writing to OKODM device: " + oko.lasterror())
     #
-    # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
-    # ga.save_log("dfmtest_data%s.pickle" % i)
+    #     print("Voltages set to zero")
+
+    finally:
+        voltages = np.zeros(shape=n)
+
+        if not oko.set(handle, voltages):
+            sys.exit("Error writing to OKODM device: " + oko.lasterror())
+
+        print("Voltages set to zero")
+
+
