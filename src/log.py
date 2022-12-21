@@ -303,7 +303,7 @@ class log_ranking(log_object):
 
         print(len(self.epoch), len(avgpepoch))
 
-        pl = Default(self.epoch[0:-1], avgpepoch, **kwargs)
+        pl = Default(self.epoch, avgpepoch, **kwargs)
         if show:
             if save_as != "":
                 pl.save_as = save_as

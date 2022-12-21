@@ -14,7 +14,7 @@ from src.log import log_object
 
 
 ## global variables
-individuals: int = 20
+individuals: int = 25
 points_per_indv: int = 100
 points_stability_test = 500
 
@@ -117,7 +117,8 @@ def tfmirror(*args, **kwargs):
         if stability:
             avg_read[0] = np.average(bestintens)
         else:
-            avg_read[i] = np.average(intens[:, i])/optimum
+            print(np.average(intens[:, i, 0])/optimum)
+            avg_read[i] = np.average(intens[:, i, 0])/optimum
 
         i += 1
         # Test out on DFM and append intensity
@@ -387,60 +388,60 @@ if __name__ == "__main__":
     from src.AdrianPackv402.Aplot import LivePlot
     from time import time
 
-    for i in np.linspace(0.01, 0.1, 10):
-        try:
-            t0 = time()
+# for i in np.linspace(0.01, 0.1, 10):
+    try:
+        t0 = time()
 
-            def t():
-                return time() - t0
+        def t():
+            return time() - t0
 
-            def main():
-                bitsize = 9
-                size = [individuals, n]
+        def main():
+            bitsize = 8
+            size = [individuals, n]
 
-                ga = genetic_algoritm(bitsize=bitsize)
+            ga = genetic_algoritm(bitsize=bitsize)
 
-                print(ga.log.creation)
-                ga.optimumfx = optimum
-                ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
-                print(ga.pop.shape)
-                ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 9, "bias": 0.0}
+            print(ga.log.creation)
+            ga.optimumfx = optimum
+            ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
+            print(ga.pop.shape)
+            ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
 
-                ga.elitism = 5
+            ga.elitism = 4
 
-                ga.b2n = ndbit2int
+            ga.b2n = ndbit2int
 
-                ga.logdata(2)
-                ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
-
-
-                # ga.seed = uniform_bit_pop_float
-                ga.set_cross(full_equal_prob)
-                ga.set_mutate(full_mutate)
-                ga.set_select(select)
-
-                # P value for population of 20?
-                p = 0.01
-                ga.log.ranking.epoch.append(0)
-
-                print("start run")
-                ga.run(epochs=epochs, muargs={"mutate_coeff": 2},
-                       selargs={"nbit2num": ndbit2int,
-                                "b2n": ga.b2n,
-                                "b2nkwargs" : ga.b2nkwargs,
-                                "p": p
-                                },
-                       verbosity=1)
-
-                k = 3
-
-                # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
-                ga.save_log("dfmtest_data%sp%s.pickle" % (k, i))
-
-                k += 1
+            ga.logdata(2)
+            ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
 
 
-            main()
+            # ga.seed = uniform_bit_pop_float
+            ga.set_cross(full_equal_prob)
+            ga.set_mutate(full_mutate)
+            ga.set_select(select)
+
+            # P value for population of 20?
+            p = 0.01
+            ga.log.ranking.epoch.append(0)
+
+            print("start run")
+            ga.run(epochs=epochs, muargs={"mutate_coeff": 3},
+                   selargs={"nbit2num": ndbit2int,
+                            "b2n": ga.b2n,
+                            "b2nkwargs" : ga.b2nkwargs,
+                            "p": p
+                            },
+                   verbosity=1)
+
+            k = 4
+
+            # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
+            ga.save_log("dfmtest_data%s.pickle" % k)
+
+            k += 1
+
+
+        main()
 
 
 
@@ -452,12 +453,12 @@ if __name__ == "__main__":
         #
         #     print("Voltages set to zero")
 
-        finally:
-            voltages = np.zeros(shape=n)
+    finally:
+        voltages = np.zeros(shape=n)
 
-            if not oko.set(handle, voltages):
-                sys.exit("Error writing to OKODM device: " + oko.lasterror())
+        if not oko.set(handle, voltages):
+            sys.exit("Error writing to OKODM device: " + oko.lasterror())
 
-            print("Voltages set to zero")
+        print("Voltages set to zero")
 
 

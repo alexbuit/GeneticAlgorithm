@@ -604,13 +604,15 @@ if __name__ == "__main__":
     def inv_ackley(x):
         return booths_function(x)
 
-    size = [20, 2]
+    d = 39
+
+    size = [20, d]
     low, high = -5, 5
-    bitsize = 9
-    tfunc = michealewicz
+    bitsize = 8
+    tfunc = Styblinski_Tang
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 20
+    epochs = 100
 
     iteration = 10
 
@@ -620,11 +622,11 @@ if __name__ == "__main__":
     ga = genetic_algoritm(bitsize=bitsize)
     print(ga.log.creation)
 
-    ga.optimumfx = [0, 0]
-    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=6)
-    ga.b2nkwargs = {"factor": 6}
+    ga.optimumfx = np.full(d, -2.903534)
+    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=5)
+    ga.b2nkwargs = {"factor": 5}
 
-    ga.elitism = 3
+    ga.elitism = 2
 
     ga.b2n = ndbit2int
     ga.logdata(2)
