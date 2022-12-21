@@ -232,38 +232,9 @@ class genetic_algoritm:
                 newgen.append(child1)
                 newgen.append(child2)
 
-                # print("**********")
-                #
-                # print(self.pop[ppair[0]] == newgen[-2])
-                # print(self.pop[ppair[1]] == newgen[-1])
-                #
-                # print("Ppair", ppair)
-                #
-                # print("Parent:")
-                # # print(self.pop[ppair[0]])
-                # # print(self.pop[ppair[1]])
-                # print("Parent 1: ",
-                #       self.b2n(self.pop[ppair[0]], **self.b2nkwargs), self.tfunc(self.b2n(self.pop[ppair[0]], **self.b2nkwargs)))
-                # print("Parent 2: ",
-                #       self.b2n(self.pop[ppair[1]], **self.b2nkwargs), self.tfunc(self.b2n(self.pop[ppair[1]], **self.b2nkwargs)))
-                #
-                # print("Child: ")
-                # # print(child1, "|" ,child2)
-                # print(self.b2n(child1, **self.b2nkwargs),
-                #       self.b2n(child2, **self.b2nkwargs))
-
-                # print("Child mutated: ")
-                # # print(newgen[-2], "|" ,newgen[-1])
-                # print(self.b2n(newgen[-2], **self.b2nkwargs),
-                #       self.b2n(newgen[-1], **self.b2nkwargs))
-
-
 
             for ppair in parents[:self.elitism]:
                 child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
-                # print("~~~~~~")
-                # print(Ndbit2float(child, 32) - Ndbit2float(self.mutation(child, **muargs), 32))
-                # print(Ndbit2float(child1, self.bitsize), Ndbit2float(child2, self.bitsize))
                 newgen.append(self.mutation(child1, **muargs))
                 newgen.append(self.mutation(child2, **muargs))
 
@@ -633,13 +604,13 @@ if __name__ == "__main__":
     def inv_ackley(x):
         return booths_function(x)
 
-    size = [100, 2]
+    size = [20, 2]
     low, high = -5, 5
-    bitsize = 16
+    bitsize = 9
     tfunc = michealewicz
 
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 5
+    epochs = 20
 
     iteration = 10
 

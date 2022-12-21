@@ -15,7 +15,7 @@ low, high = 0, 5
 gea = genetic_algoritm(bitsize=16)
 
 
-gea.load_log("dfmtest_data2.pickle", True)
+gea.load_log("Booth16b_p10.pickle", True)
 lg = gea.log
 
 gea.b2n = lg.b2n
@@ -27,15 +27,21 @@ gea.b2nkwargs = lg.b2nkwargs
 # lg.selection.plot(x_label="Individuals", y_label="Fitness", title="Fitness of individuals", fmt_data="raw", top=5)
 
 # lg.log_intensity.plot(linefmt="plot")
-bestsl = np.array(lg.log_intensity.bestsol)
-print(np.apply_over_axes(np.average, bestsl, 1))
-plt.plot(np.arange(0, 21), np.apply_over_axes(np.average, bestsl, 1).flatten())
-plt.show()
-# print(lg.ranking.distance)
+# bestsl = np.array(lg.log_intensity.bestsol)[:, :, 0]
+
+# print(bestsl)
+
+# print(np.apply_over_axes(np.average, bestsl, 1))
+# plt.plot(np.arange(0, 21), np.apply_over_axes(np.average, bestsl, 1).flatten())
+
+# lg.selection
+# plt.plot(np.arange(0, 21), np.apply_over_axes(np.max, np.array(lg.ranking.effectivity), 1).flatten())#
 #
+#
+# plt.show()
 # def inv_ackley(x):
 #     return booths_function(x)
 #
 # print(np.array(lg.selection.fitness))
-# lg.value.animate2d(michealewicz, -5, 5, fitness=lg.selection.fitness)
+lg.value.animate2d(michealewicz, -5, 5, fitness=lg.selection.fitness)
 print("time: %s" % (time() - tstart))
