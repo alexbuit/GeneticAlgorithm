@@ -86,6 +86,7 @@ class log:
 
     def __add__(self, other: "log_object"):
         setattr(self, other.__class__.__name__, other)
+        print("add:", getattr(self, other.__class__.__name__), other.__class__.__name__) # hier gaat fout
         self.add_logs.append(getattr(self, other.__class__.__name__))
         return self.__copy__()
 

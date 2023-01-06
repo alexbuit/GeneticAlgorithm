@@ -12,27 +12,23 @@ from DFM_opt_alg import *
 tstart = time()
 low, high = 0, 5
 
-gea = genetic_algoritm(bitsize=16)
+gea = genetic_algoritm(bitsize=8)
 
 
 # gea.load_log("Booth16b_p10.pickle", True)
-gea.load_log("dfmtest_data4.pickle", True)
+gea.load_log("dfmfake_data5.pickle", True)
 lg = gea.log
 
 gea.b2n = lg.b2n
 gea.b2nkwargs = lg.b2nkwargs
 
 
-lg.selection.plot(x_label="Iteration", y_label="avg Fitness", title="Fitness of individuals", fmt_data="raw", top=1)
-plt.plot(np.arange(0, 24), lg.selection.probabilty[-1])
-plt.plot(np.arange(0, 24), lg.selection.probabilty[-2])
-plt.plot(np.arange(0, 24), lg.selection.probabilty[-3])
+# lg.selection.plot(x_label="Iteration", y_label="avg Fitness", title="Fitness of individuals", fmt_data="raw", top=1)
 
 
+print(lg.add_logs)
 
-plt.show()
-plt.cla()
-
+print(lg.log_intensity)
 lg.log_intensity.plot(linefmt="plot")
 bestsl = np.array(lg.log_intensity.bestsol)[:, :, 0]
 

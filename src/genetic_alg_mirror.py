@@ -2,6 +2,8 @@ import random
 
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing as mp
+import sys
 
 from typing import Union, Callable
 from time import sleep, time
@@ -18,16 +20,21 @@ individuals: int = 25
 points_per_indv: int = 100
 points_stability_test = 500
 
-epochs = 20  # ??
-epoch = -1  # ??
+runtime = 1 # runtime in seconds
+epoch = 0  # ??
+
+test_setup = True
 
 intens: np.ndarray = np.zeros(shape=[individuals, points_per_indv, 2])
+# bestintensity log [intensity, time]
 bestintens: np.ndarray = np.zeros(shape=[points_stability_test, 2])
-optimum: float = 1
+optimum: float = 8.2e-6
 
 t0 = time()
 
-if __name__ == "__main__":
+if __name__ == "__main__" and not test_setup:
+    print("start")
+
     # Opening the mirror handle
     import okotech_lib.okodm_sdk.python.okodm_class as oko
     import sys
@@ -41,11 +48,14 @@ if __name__ == "__main__":
     # Get the number of channels
     n = oko.chan_n(handle) # Should be 39
 
+    print("n channels= ", n)
+
     ## Opening the DMMM
     import pyvisa
     from ThorlabsPM100 import ThorlabsPM100
 
     rm = pyvisa.ResourceManager()
+
     print(rm.list_resources())
     inst = rm.open_resource('USB0::0x1313::0x8078::P0000874::INSTR', timeout=1)
 
@@ -53,6 +63,27 @@ if __name__ == "__main__":
 
     def read_pm():
         return power_meter.read
+
+
+    def set_voltage(voltages):
+        try:
+            if not oko.set(handle, voltages):
+                sys.exit("Error writing to OKODM device: " + oko.lasterror())
+        except:
+            voltages = np.zeros(shape=n)
+            if not oko.set(handle, voltages):
+                sys.exit("Error writing to OKODM device: " + oko.lasterror())
+
+elif test_setup:
+    n = 39
+
+    def read_pm():
+        return -np.exp(random.random()/ 100)
+
+    def set_voltage(voltages):
+        pass
+
+
 
 
 ## Additional functions for the algorithm
@@ -88,9 +119,7 @@ def tfmirror(*args, **kwargs):
                 assert -1 < var < 1
             except AssertionError:
                 voltages = np.zeros(shape=n)
-
-                if not oko.set(handle, voltages):
-                    sys.exit("Error writing to OKODM device: " + oko.lasterror())
+                set_voltage(voltages)
 
                 raise ValueError("Input voltage can not be > 1 or < -1")
 
@@ -100,8 +129,7 @@ def tfmirror(*args, **kwargs):
     for indiv in num_pop:
         voltages = indiv
 
-        if not oko.set(handle, voltages):
-            sys.exit("Error writing to OKODM device: " + oko.lasterror())
+        set_voltage(voltages)
 
 
         for j in range(points_per_indv):
@@ -117,7 +145,6 @@ def tfmirror(*args, **kwargs):
         if stability:
             avg_read[0] = np.average(bestintens)
         else:
-            print(np.average(intens[:, i, 0])/optimum)
             avg_read[i] = np.average(intens[:, i, 0])/optimum
 
         i += 1
@@ -177,12 +204,8 @@ def select(*args, **kwargs):
 
             pind.append(list(sorted(par).__reversed__()))
 
-    voltages = np.zeros(shape=n)
+    set_voltage(np.zeros(shape=n))
 
-    if not oko.set(handle, voltages):
-        sys.exit("Error writing to OKODM device: " + oko.lasterror())
-
-    epoch += 1
     return pind, fitness, p
 
 
@@ -196,8 +219,8 @@ class log_intensity(log_object):
         global intens
         self.data.append(data)
         self.epoch.append(len(self.data))
-        self.intensity.append(intens.copy())
-        self.bestsol.append(bestintens.copy())
+        self.intensity.append(*args[0])
+        self.bestsol.append(*args[1])
 
 
     def __copy__(self):
@@ -253,6 +276,8 @@ class mirror_alg(genetic_algoritm):
                  endianness: str = "big"):
         super().__init__(dtype, bitsize, endianness)
 
+        self.log.__add__(log_intensity(self.b2n, self.bitsize, self.b2nkwargs))
+
     def run(self, selargs: dict = {},
             cargs: dict = {}, muargs: dict = {},
             target: float = 1, verbosity: int = 1):
@@ -265,6 +290,7 @@ class mirror_alg(genetic_algoritm):
         :param verbosity:
         :return:
         """
+        global epoch, optimum, points_per_indv, points_stability_test
 
         if len(self.pop) == 0:
             self.init_pop()
@@ -295,6 +321,7 @@ class mirror_alg(genetic_algoritm):
                 self.log.ranking.update(rank, self.optimumfx)
                 self.log.time.update(time() - self.tstart)
                 self.log.selection.update(parents, p, fitness)
+                self.log.log_intensity.update(self.pop, intens.copy(), bestintens.copy())
 
                 if len(self.log.add_logs) > 0:
                     for l in self.log.add_logs:
@@ -308,157 +335,179 @@ class mirror_alg(genetic_algoritm):
 
 
 
-        while best < target:
-            newgen = []
-            if verbosity:
-                print("%s/%s" % (epoch + 1, self.epochs))
+        while True:
+            if bestintens[-1, 0] < self.target:
+                newgen = []
+                if verbosity:
+                    print("%s/%s" % (epoch + 1, self.epochs))
 
-            cargs["bitsize"] = self.bitsize
-            muargs["bitsize"] = self.bitsize
+                cargs["bitsize"] = self.bitsize
+                muargs["bitsize"] = self.bitsize
 
-            for ppair in parents[self.elitism:]:
-                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                for ppair in parents[self.elitism:]:
+                    child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
 
-                newgen.append(child1)
-                newgen.append(child2)
-
-
-            for ppair in parents[:self.elitism]:
-                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
-                newgen.append(self.mutation(child1, **muargs))
-                newgen.append(self.mutation(child2, **muargs))
+                    newgen.append(child1)
+                    newgen.append(child2)
 
 
-
-            # Select top10
-            t10 = parents[:self.save_top]
-            self.genlist.append([])
-            for ppair in t10:
-                self.genlist[epoch].append(self.pop[ppair[0]])
-                self.genlist[epoch].append(self.pop[ppair[1]])
-
-            self.genlist[epoch] = np.array(self.genlist[epoch])
-
-            # genlist.append(rpop)
-            self.pop = np.array(newgen)
-            parents, fitness, p = self.select(np.array(newgen), **selargs)
-
-            if self.dolog:
-                # Highest log level
-                rank = np.zeros(self.pop.shape)
-                if self.dolog == 2:
-                    rankind = np.argsort(fitness)
-
-                    j = 0
-                    for i in rankind:
-                        rank[j] = self.pop[i]
-                        j += 1
-
-                    self.log.ranking.update(rank, self.optimumfx)
-                    self.log.time.update(time() - self.tstart)
-                    self.log.selection.update(parents, p, fitness)
-                    self.log.value.update(self.pop, self.genlist[epoch])
-
-                    # if additional logs added by appending them after initiation of self.log
-                    # go through them and update with the population
-                    # other data can be found within other logs and data
-                    # can be added by using global statements or other.
-                    if len(self.log.add_logs) > 0:
-                        for l in self.log.add_logs:
-                            l.update(data=self.pop)
-
-                        self.log.sync_logs()
+                for ppair in parents[:self.elitism]:
+                    child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                    newgen.append(self.mutation(child1, **muargs))
+                    newgen.append(self.mutation(child2, **muargs))
 
 
-                elif self.dolog == 1:
-                    self.log.ranking.update(rank, self.optimumfx)
-                    self.log.time.update(time() - self.tstart)
 
-                    self.log.logdict[epoch] = {"time": time() - self.tstart,
-                                       "ranking": rank,
-                                       "value": self.pop}
-            # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
-            # self.min = np.min(y)
-        self.results = self.genlist
+                # Select top10
+                t10 = parents[:self.save_top]
+
+                self.genlist.append([])
+
+                for ppair in t10:
+                    self.genlist[epoch].append(self.pop[ppair[0]])
+                    self.genlist[epoch].append(self.pop[ppair[1]])
+
+                self.genlist[epoch] = np.array(self.genlist[epoch])
+
+                # genlist.append(rpop)
+                self.pop = np.array(newgen)
+                parents, fitness, p = self.select(np.array(newgen), **selargs)
+
+                if self.dolog:
+                    # Highest log level
+                    rank = np.zeros(self.pop.shape)
+                    if self.dolog == 2:
+                        rankind = np.argsort(fitness)
+
+                        j = 0
+                        for i in rankind:
+                            rank[j] = self.pop[i]
+                            j += 1
+
+                        self.log.ranking.update(rank, self.optimumfx)
+                        self.log.time.update(time() - self.tstart)
+                        self.log.selection.update(parents, p, fitness)
+                        self.log.value.update(self.pop, self.genlist[epoch])
+                        self.log.log_intensity.update(self.pop, intens.copy(),
+                                                      bestintens.copy())
+
+                        # if additional logs added by appending them after initiation of self.log
+                        # go through them and update with the population
+                        # other data can be found within other logs and data
+                        # can be added by using global statements or other.
+                        if len(self.log.add_logs) > 0:
+                            for l in self.log.add_logs:
+                                l.update(data=self.pop)
+
+                            self.log.sync_logs()
+
+
+                    elif self.dolog == 1:
+                        self.log.ranking.update(rank, self.optimumfx)
+                        self.log.time.update(time() - self.tstart)
+
+                epoch += 1
+                self.results = self.genlist
+
+            else:
+                set_voltage(bestintens[-1, 0])
 
 
 ## Algorithm
-if __name__ == "__main__":
 
-    from src.AdrianPackv402.Aplot import LivePlot
-    from time import time
+from src.AdrianPackv402.Aplot import LivePlot
+from time import time
+
+k = 4
+bitsize = 8
+n = 39
+size = [individuals, n]
+
+ga = mirror_alg(bitsize=bitsize)
 
 # for i in np.linspace(0.01, 0.1, 10):
-    try:
-        t0 = time()
+try:
+    t0 = time()
 
-        def t():
-            return time() - t0
+    def t():
+        return time() - t0
 
-        def main():
-            bitsize = 8
-            size = [individuals, n]
-
-            ga = genetic_algoritm(bitsize=bitsize)
-
-            print(ga.log.creation)
-            ga.optimumfx = optimum
-            ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
-            print(ga.pop.shape)
-            ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
-
-            ga.elitism = 4
-
-            ga.b2n = ndbit2int
-
-            ga.logdata(2)
-            ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
+    def main():
 
 
-            # ga.seed = uniform_bit_pop_float
-            ga.set_cross(full_equal_prob)
-            ga.set_mutate(full_mutate)
-            ga.set_select(select)
+        ga.optimumfx = optimum
+        ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
 
-            # P value for population of 20?
-            p = 0.01
-            ga.log.ranking.epoch.append(0)
+        print(ga.log.creation)
+        print(ga.pop.shape)
+        ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
 
-            print("start run")
-            ga.run(epochs=epochs, muargs={"mutate_coeff": 3},
-                   selargs={"nbit2num": ndbit2int,
-                            "b2n": ga.b2n,
-                            "b2nkwargs" : ga.b2nkwargs,
-                            "p": p
-                            },
-                   verbosity=1)
+        ga.elitism = 4
 
-            k = 4
+        ga.b2n = ndbit2int
 
-            # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
-            ga.save_log("dfmtest_data%s.pickle" % k)
+        ga.logdata(2)
+        # ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
 
-            k += 1
+        # ga.seed = uniform_bit_pop_float
+        ga.set_cross(full_equal_prob)
+        ga.set_mutate(full_mutate)
+        ga.set_select(select)
 
+        # P value for population of 20?
+        p = 0.01
+        ga.log.ranking.epoch.append(0)
 
-        main()
+        print("start run")
+        ga.run(muargs={"mutate_coeff": 3},
+               selargs={"nbit2num": ndbit2int,
+                        "b2n": ga.b2n,
+                        "b2nkwargs" : ga.b2nkwargs,
+                        "p": p
+                        },
+               verbosity=1)
+
+        # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
+        # ga.save_log("dfmtest_data%s.pickle" % k)
 
 
 
-        # except:
-        #     voltages = np.zeros(shape=n)
-        #
-        #     if not oko.set(handle, voltages):
-        #         sys.exit("Error writing to OKODM device: " + oko.lasterror())
-        #
-        #     print("Voltages set to zero")
+    def checkruntime():
+        sleep(runtime)
+        return True
 
-    finally:
-        voltages = np.zeros(shape=n)
 
-        if not oko.set(handle, voltages):
-            sys.exit("Error writing to OKODM device: " + oko.lasterror())
+    if __name__ == "__main__":
+        print("time: ", time() - t0)
+        with mp.Pool(2) as p:
+            worker1 = p.apply_async(main, [])
+            worker2 = p.apply_async(checkruntime, [])
 
-        print("Voltages set to zero")
+            worker2.wait()
+            p.close()
+
+
+    # except:
+    #     voltages = np.zeros(shape=n)
+    #
+    #     if not oko.set(handle, voltages):
+    #         sys.exit("Error writing to OKODM device: " + oko.lasterror())
+    #
+    #     print("Voltages set to zero")
+
+finally:
+    if __name__ == "__main__":
+        k += 1
+
+        ga.save_log("dfmfake_data%s.pickle" % k)
+
+        set_voltage(np.zeros(shape=n))
+
+        print("Mirror voltages set to zero")
+        print("Final best intensity: %s" % bestintens[-1, 0])
+        print("Execution time: %s" % (time() - t0))
+        print(r"Log saved to src\dfmtest_data%s.pickle" % k)
+        print("Done")
+        sys.exit()
 
 

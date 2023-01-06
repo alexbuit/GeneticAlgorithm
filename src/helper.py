@@ -2,6 +2,11 @@
 import numpy as np
 import struct
 
+from matplotlib import pyplot as plt
+from matplotlib import cm
+
+from src.test_functions import allfx, dim2fx, ndimfx
+
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
@@ -286,18 +291,43 @@ def sigmoid_derivative(x):
 def sigmoid2(x, a = 1, b = -1, c = 0.5, d=0 ,Q = 0.5, nu = 1):
     return a + (b - a) / (1 + Q * np.exp(-c * (x - d)))**(1/nu)
 
+def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    points = np.zeros(shape=(resolution, resolution, 3))
+
+    linsp = np.linspace(min, max, resolution)
+
+    X, Y = np.meshgrid(linsp, linsp)
+    Z = fx([X, Y])
+
+    plot = getattr(ax, mode)(X, Y, Z, **kwargs)
+    fig.colorbar(plot, shrink=0.5, aspect=5)
+
+    ax.set_xlabel("$x_1$")
+    ax.set_ylabel("$x_2$")
+    ax.set_zlabel("$f(x_1, x_2)$")
+
+    ax.title.set_text(f"$f(x_1, x_2) = ${fx.__name__}")
+
+    plt.show()
+
+    return None
+
 
 if __name__ == "__main__":
     from time import time
     from AdrianPack.Aplot import Default
     from population_initatilisation import *
 
-    np.random.seed(8)
+    from test_functions import *
 
-    linsp = np.linspace(0, 10, 100)[:, np.newaxis]
-    print(linsp.flatten())
-    bit = int2ndbit(linsp, 16, normalised=True, factor=20, bias=0)
-    print(ndbit2int(bit, 16, normalised=True, factor=20, bias=0).flatten())
+    def z(x):
+        return x[0] + x[1]
+
+    for fx in ndimfx + dim2fx:
+        plot3d(fx, -5, 5, resolution= 500, mode= "plot_surface", cmap=cm.coolwarm)
 
     # start, stop = 0, 100
     # tlist = []

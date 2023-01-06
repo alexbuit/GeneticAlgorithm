@@ -8,6 +8,8 @@ import threading as th
 
 # np.random.seed(12424)
 
+import minima
+
 
 
 class _tfx_decorator:
@@ -26,10 +28,9 @@ class _tfx_decorator:
             self.optima, self.minima = self.calcoptmin()
 
         else:
-            if func.__name__ in ["wheelers_ridge", "booths_function", "michealewicz", "ackley", "Styblinski_tang"]:
+            if func.__name__ in ["wheelers_ridge", "booths_function", "michealewicz", "ackley", "Styblinski_Tang"]:
                 # minima = {"wheelers_ridge": [], "booths_function", "michealewicz", "ackley", "Styblinski_tang"}
-                pass
-
+                self.minima = {"x": getattr(minima, "min" +  func.__name__ + "loc")(self.ndim), "fx": getattr(minima, "min" + func.__name__)(self.ndim)}
             else:
                 self.optima = kwargs.get("optima", None)
                 self.minima = kwargs.get("minima", None)
@@ -59,6 +60,10 @@ class _tfx_decorator:
         self.ndim = ndim
         return None
 
+    def get_optima(self):
+        return self.optima
+
+    # expensive and doesnt work for higher dim functions only recommended for 1d/2d functions
     def calcoptmin(self):
 
         # Create a grid of points
@@ -92,9 +97,9 @@ class _tfx_decorator:
             optfx = np.apply_along_axis(self.func, 1, np.array(opt))
             minfx = np.apply_along_axis(self.func, 1, np.array(mini))
 
-            print(np.apply_along_axis(self.func, 1, np.array(opt)))
+            # print(np.apply_along_axis(self.func, 1, np.array(opt)))
 
-            return {"x": opt[np.argmax(optfx)], "fx": np.max(optfx)}, {"x": mini[np.argmin(minfx)], "fx": np.min(minfx)}
+            # return {"x": opt[np.argmax(optfx)], "fx": np.max(optfx)}, {"x": mini[np.argmin(minfx)], "fx": np.min(minfx)}
 
         else:
             x = [x]
@@ -110,7 +115,6 @@ class _tfx_decorator:
             optfx = self.func(opt)
             minfx = self.func(mini)
 
-            print(mini)
             return {"x": opt, "fx": np.max(optfx)}, {"x": mini, "fx": np.min(minfx)}
 
 
@@ -118,7 +122,7 @@ class _tfx_decorator:
         return self.func(x + stepsize, *args, **kwargs)
 
 
-def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_analytical: bool = True, **kwargs):
+def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):
     # If a function is given as an argument, return the decorator
     print(func)
 
@@ -144,7 +148,12 @@ def wheelers_ridge(x: Union[np.ndarray, list], a: float = 1.5) -> float:
     x1, x2 = x
     return -np.exp(-(x1 * x2 - a) ** 2 - (x2 - a) ** 2)
 
-def booths_function(x, **kwargs):
+def booths_function(x: Union[np.ndarray, list]) -> float:
+    """
+    Compute the Booths function for given x1 and x2
+    :param x: list with x1 (otype: float) and x2 (otype: float)
+    :return: Value f(x1, x2), real float
+    """
     return (x[0] + 2*x[1] - 7)**2 + (2 * x[0] + x[1] - 5)**2
 
 ## N-d functions
@@ -169,7 +178,7 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
     :param c:
     :return:
     """
-    ndim = len(x)
+    ndim = (lambda i: len(i) if isinstance(i, list) else i.ndim)(x)
     x = np.array(x, dtype=float)
     return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
 
@@ -185,21 +194,21 @@ def Styblinski_Tang(x: list):
 
 
 if __name__ == "__main__":
-    from helper import sigmoid,sigmoid2
+    from src.helper import sigmoid,sigmoid2
     # plt.plot(np.linspace(30, 60, 100), [sigmoid2(x, 0, 1, d=50, Q=1, nu=2) for x in np.linspace(30, 60, 100)],
     #          label="$f(x) =  \dfrac{1}{(1 + e^{-1 \cdot (x - 50)})^{1 / 2}}$")
     # plt.xlabel("Power [$mW$]")
     # plt.ylabel("Fitness")
 
     low, high = -5, 5
-    func = tfx_decorator(func=Styblinski_Tang, ndim=40, high=high, low=low, cores=6, sample_size=1000000)
+    func = tfx_decorator(func=Styblinski_Tang, ndim=2)
 
     # x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
     # X1, X2 = np.meshgrid(x1, x2)
     # y = func([X1, X2])
 
     print(func.minima["x"], func.minima["fx"])
-    print(func(np.full(40, -2.903534)))
+    # print(func(np.full(40, -2.903534)))
 
     # x = np.random.random_sample(int(1e6))
     # x *= (high) * np.random.choice([-1, 1], int(1e6))
