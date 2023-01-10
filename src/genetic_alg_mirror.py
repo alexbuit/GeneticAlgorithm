@@ -21,13 +21,13 @@ individuals: int = 25
 points_per_indv: int = 100
 points_stability_test = 500
 
-runtime = 4 # runtime in seconds
+runtime = 10 # runtime in seconds
 epoch = 0  # ??
 
 # Hardcoded value for 39ch mirror
 individual_size = 39
 
-test_setup = True
+test_setup = False
 
 # Logs intensity of stability test and algorithm
 # array of dim 4, saved as dim 5 after run [epochs, 2: [stability, test], individuals, 3: [intensity, time, bin combination], sample size]
@@ -87,8 +87,8 @@ if __name__ == "__main__" and not test_setup:
 
     def read_pm():
         global time_intens
-        time_intens.append(np.ndarray([power_meter.read, time() - t0]))
-        return time_intens[-1][1]
+        time_intens.append(np.array([power_meter.read, time() - t0]))
+        return time_intens[-1][0]
 
     def set_voltage(voltages):
         try:
@@ -104,8 +104,8 @@ elif test_setup:
 
     def read_pm():
         global time_intens
-        time_intens.append(np.array([-np.exp(random.random()/ 100), time() - t0]))
-        return time_intens[-1][1]
+        time_intens.append(np.array([np.exp(random.random()), time() - t0]))
+        return time_intens[-1][0]
 
     def set_voltage(voltages):
         pass
@@ -446,6 +446,7 @@ class mirror_alg(genetic_algoritm):
                 individual_table.append(individual_table_blueprint)
 
             else:
+                print(np.average(intens[epoch][0, 0, 0, :]))
                 break
                 set_voltage(individual_table[int(intens[epoch][0, 0, 2, 0])])
 
@@ -475,6 +476,7 @@ try:
         return time() - t0
 
     def main():
+        global time_intens
 
         ga.optimumfx = optimum
         print(size)
@@ -508,7 +510,13 @@ try:
                         "p": p
                         },
                verbosity=1,
-               target=4)
+               target=8e-5)
+
+        time_intens = np.array(time_intens)
+        print(time_intens)
+        plt.plot(time_intens[:, 1], time_intens[:, 0])
+        plt.show()
+
 
         # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
         # ga.save_log("dfmtest_data%s.pickle" % k)
@@ -558,12 +566,8 @@ finally:
         print("Execution time: %s" % (time() - t0))
         print(r"Log saved to src\dfmtest_data%s.pickle" % k)
         print("Done")
-        # sys.exit()
 
+        # sys.exit()
 main()
 
-time_intens = np.array(time_intens)
-print(time_intens)
-plt.plot(time_intens[:, 0], time_intens[:, 1])
-plt.show()
 
