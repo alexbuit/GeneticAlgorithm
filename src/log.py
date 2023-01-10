@@ -71,7 +71,8 @@ class log:
         logcopy.ranking.epoch = self.ranking.epoch
         logcopy.ranking.ranknum = self.ranking.ranknum
         logcopy.ranking.effectivity = self.ranking.effectivity
-        logcopy.ranking.distance = self.ranking.distance
+        logcopy.ranking.distancex = self.ranking.distancex
+        logcopy.ranking.distancefx = self.ranking.distancefx
         logcopy.ranking.bestsol = self.ranking.bestsol
 
         logcopy.value.data = self.value.data
@@ -86,8 +87,9 @@ class log:
 
     def __add__(self, other: "log_object"):
         setattr(self, other.__class__.__name__, other)
-        print("add:", getattr(self, other.__class__.__name__), other.__class__.__name__) # hier gaat fout
-        self.add_logs.append(getattr(self, other.__class__.__name__))
+        print(other)
+        print("add:", getattr(self, other.__class__.__name__)) # hier gaat fout
+        self.add_logs.append(other)
         return self.__copy__()
 
     def append(self, other):
@@ -115,8 +117,8 @@ class log_object:
     def __getitem__(self, item: int):
         return self.data[item]
 
-    def __repr__(self):
-        return str(self.data)
+    # def __repr__(self):
+    #     return str(self.data)
 
     def __copy__(self):
         object_copy = log_object(self.b2n, self.bitsize, *self.args, **self.kwargs)
@@ -237,7 +239,8 @@ class log_ranking(log_object):
         super().__init__(*args, **kwargs)
         self.ranknum = []
         self.effectivity = []
-        self.distance = []
+        self.distancex = []
+        self.distancefx = []
         self.bestsol = []
 
     def __copy__(self):
@@ -246,7 +249,7 @@ class log_ranking(log_object):
         object_copy.epoch = self.epoch
         object_copy.ranknum = self.ranknum
         object_copy.effectivity = self.effectivity
-        object_copy.distance = self.distance
+        object_copy.distancex = self.distancex
         object_copy.bestsol = self.bestsol
         return object_copy
 
@@ -254,11 +257,13 @@ class log_ranking(log_object):
         """
 
         :param data:
-        :param args: the optimum, highest effectivity
+        :param args: fx, the optimum, highest effectivity[x coordinates, fx]
+
         :return:
         """
         self.data.append(data)
         self.epoch.append(len(self.data))
+        self.fx = args[0]
 
         if "bitsize" not in self.b2nkwargs:
             self.b2nkwargs["bitsize"] = self.bitsize
@@ -266,10 +271,11 @@ class log_ranking(log_object):
         self.ranknum.append(self.b2n(data, **self.b2nkwargs))
 
         # Calculate the euclidian distance between the optimum and all pop values
-        self.distance.append(np.apply_along_axis(pythagoras, 1, (np.absolute(self.ranknum[-1] - args[0]))**2))
+        self.distancex.append(np.apply_along_axis(pythagoras, 1, (np.absolute(self.ranknum[-1] - args[1]))**2))
+        self.distancefx.append(self.fx - args[2])
 
-        # Determine the effectivity relative to the larges distcance after the first epoch.
-        self.effectivity.append(1 - self.distance[-1] / max(self.distance[0]))
+        # Determine the effectivity relative to the largest distcance after the first epoch.
+        self.effectivity.append(1 - self.distancex[-1] / max(self.distancex[0]))
 
         # Find the best solution of this iteration and append it to the list
         ind = np.where(self.effectivity[-1] == max(self.effectivity[-1]))[0]
@@ -288,13 +294,13 @@ class log_ranking(log_object):
             top = len(self.effectivity[0])
 
         if datasource == None:
-            datasource = self.distance
+            datasource = self.distancefx
 
-        if datasource == self.bestsol:
+        elif datasource == self.bestsol:
             pass
 
-
-        avgpepoch = [np.average(i[top:]) for i in datasource]
+        avgpepoch = [np.average(i[0:]) for i in datasource]
+        print(avgpepoch)
 
         if not "linestyle" in kwargs:
             kwargs["linestyle"] = "-"

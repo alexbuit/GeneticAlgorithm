@@ -118,8 +118,7 @@ def roulette_selection(*args, **kwargs):
     fitness = fitness_func(y, *k)
 
     p = fitness / sum(fitness)
-
-    return sort_list(fitness, p, **kwargs), fitness, p
+    return sort_list(fitness, p, **kwargs), fitness, p, y
 
 
 def rank_selection(*args, **kwargs):
@@ -179,7 +178,7 @@ def rank_selection(*args, **kwargs):
 
             pind.append(list(sorted(par).__reversed__()))
 
-    return pind,fitness, p
+    return pind, fitness, p, y
 
 
 def rank_space_selection(*args, **kwargs):
@@ -229,7 +228,7 @@ def rank_space_selection(*args, **kwargs):
 
 if __name__ == "__main__":
     from population_initatilisation import *
-    from t_functions import *
+    from test_functions import *
 
     pop = bit8([16, 4], 16)
     pop_float = ndbit2int(pop, 16, factor=5)

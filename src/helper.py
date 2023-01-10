@@ -217,7 +217,8 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
             resmat[b] = sign * b2int(res)/2**(bitsize - 1) * factor + bias
         else:
             # return a number between -1 * 2 ** bitsize-1 or 1 * 2 ** bitsize-1
-            resmat[b] = sign * b2int(res)
+            resmat.dtype = np.int64
+            resmat[b] = int(sign * b2int(res))
 
     return resmat
 
@@ -238,6 +239,8 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwarg
         shape.append(1)
 
     shape[-1] = int(np.ceil(shape[-1]*bitsize))
+    print(shape)
+
 
     res = np.zeros(shape, dtype = np.uint8)
     for arr in range(shape[0]):
@@ -290,6 +293,12 @@ def sigmoid_derivative(x):
 
 def sigmoid2(x, a = 1, b = -1, c = 0.5, d=0 ,Q = 0.5, nu = 1):
     return a + (b - a) / (1 + Q * np.exp(-c * (x - d)))**(1/nu)
+
+def is_decorated(func):
+    try:
+        return hasattr(func, '__wrapped__') or func.__name__ not in globals()
+    except AttributeError:
+        return hasattr(func, "__wrapped__") or func.__class__.__name__ not in globals()
 
 def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
     fig = plt.figure()

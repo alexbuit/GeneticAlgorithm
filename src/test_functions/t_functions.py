@@ -8,15 +8,13 @@ import threading as th
 
 # np.random.seed(12424)
 
-import minima
-
-
+import src.test_functions.minima as tf
 
 class _tfx_decorator:
     def __init__(self, func: Callable, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):
         self.func: Callable = func
         self.cores = cores
-        self.ndim = ndim # only necessary for computing minimal and maximal values
+        self.ndim: int = ndim # only necessary for computing minimal and maximal values
 
         self.samplesize = kwargs.get("sample_size", int(1e5) * cores)
 
@@ -29,11 +27,11 @@ class _tfx_decorator:
 
         else:
             if func.__name__ in ["wheelers_ridge", "booths_function", "michealewicz", "ackley", "Styblinski_Tang"]:
-                # minima = {"wheelers_ridge": [], "booths_function", "michealewicz", "ackley", "Styblinski_tang"}
-                self.minima = {"x": getattr(minima, "min" +  func.__name__ + "loc")(self.ndim), "fx": getattr(minima, "min" + func.__name__)(self.ndim)}
+                self.minima = {"x": getattr(tf, "min" +  func.__name__ + "loc")(self.ndim), "fx": getattr(tf, "min" + func.__name__)(self.ndim)}
+                self.optima = {"x": None, "fx": None}
             else:
-                self.optima = kwargs.get("optima", None)
-                self.minima = kwargs.get("minima", None)
+                self.optima = kwargs.get("optima", {"x": None, "fx": None}) # {"x": [x1, x2, ... , xn], "fx": []}
+                self.minima = kwargs.get("minima", {"x": None, "fx": None})
 
 
     def __call__(self, x, *args, **kwargs):
@@ -56,12 +54,34 @@ class _tfx_decorator:
     def compute(self, x, *args, **kwargs):
         return self.__call__(x, *args, **kwargs)
 
-    def set_dimension(self, ndim):
-        self.ndim = ndim
+    def set_dimension(self, ndim: int):
+        self.ndim = int(ndim)
+        self.update_optmin()
         return None
 
-    def get_optima(self):
+    def dim(self, ndim: int):
+        self.set_dimension(ndim)
+        return None
+
+    def set_minima(self, **kwargs):
+        self.update_optmin(**kwargs)
+        return self.minima
+
+    def set_optima(self, **kwargs):
+        self.update_optmin(**kwargs)
         return self.optima
+
+    def update_optmin(self, **kwargs):
+        if self.func.__name__ in ["wheelers_ridge", "booths_function",
+                             "michealewicz", "ackley", "Styblinski_Tang"]:
+            self.minima = {
+                "x": getattr(tf, "min" + self.func.__name__ + "loc")(self.ndim),
+                "fx": getattr(tf, "min" + self.func.__name__)(self.ndim)}
+            self.optima = {"x": None, "fx": None}
+        else:
+            self.optima = kwargs.get("optima", {"x": None,
+                                                "fx": None})  # {"x": [x1, x2, ... , xn], "fx": []}
+            self.minima = kwargs.get("minima", {"x": None, "fx": None})
 
     # expensive and doesnt work for higher dim functions only recommended for 1d/2d functions
     def calcoptmin(self):
@@ -124,8 +144,6 @@ class _tfx_decorator:
 
 def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):
     # If a function is given as an argument, return the decorator
-    print(func)
-
     if func is not None:
         return _tfx_decorator(func, ndim, cores, compute_analytical, **kwargs)
 
@@ -134,10 +152,12 @@ def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_an
         return lambda f: _tfx_decorator(f, ndim, cores, compute_analytical, **kwargs)
 
 # 1D functions
+@tfx_decorator
 def tfx(x):
     return 3 * x**2 + 2 * x + 1
 
 ## 2D functions
+@tfx_decorator
 def wheelers_ridge(x: Union[np.ndarray, list], a: float = 1.5) -> float:
     """
     Compute the Wheelersridge function for given x1 and x2
@@ -148,6 +168,7 @@ def wheelers_ridge(x: Union[np.ndarray, list], a: float = 1.5) -> float:
     x1, x2 = x
     return -np.exp(-(x1 * x2 - a) ** 2 - (x2 - a) ** 2)
 
+@tfx_decorator
 def booths_function(x: Union[np.ndarray, list]) -> float:
     """
     Compute the Booths function for given x1 and x2
@@ -157,6 +178,7 @@ def booths_function(x: Union[np.ndarray, list]) -> float:
     return (x[0] + 2*x[1] - 7)**2 + (2 * x[0] + x[1] - 5)**2
 
 ## N-d functions
+@tfx_decorator
 def michealewicz(x: list, m: float = 10.0) -> float:
     """
     Compute the Micealewicz function for x1, x2, x...
@@ -168,7 +190,7 @@ def michealewicz(x: list, m: float = 10.0) -> float:
         [np.sin(x[i - 1]) * np.sin((i * x[i - 1] ** 2) / np.pi) ** (2 * m) for i in
          range(1, len(x)+1)])
 
-
+@tfx_decorator
 def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
     """
     Compute Ackley' function for x1, x2, x...
@@ -182,6 +204,7 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
     x = np.array(x, dtype=float)
     return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
 
+@tfx_decorator
 def Styblinski_Tang(x: list):
     """
     Compute Ackley' function for x1, x2, x...
@@ -201,12 +224,14 @@ if __name__ == "__main__":
     # plt.ylabel("Fitness")
 
     low, high = -5, 5
-    func = tfx_decorator(func=Styblinski_Tang, ndim=2)
+    func = michealewicz
+    func.set_dimension(3)
 
     # x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
     # X1, X2 = np.meshgrid(x1, x2)
     # y = func([X1, X2])
 
+    print(func)
     print(func.minima["x"], func.minima["fx"])
     # print(func(np.full(40, -2.903534)))
 

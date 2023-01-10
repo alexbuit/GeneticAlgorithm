@@ -14,7 +14,7 @@ def minbooths_functionloc(n: int = 2):
     return np.array([1, 3])
 
 # cite optimizers
-def minwheelersridge(n: int = 2):
+def minwheelers_ridge(n: int = 2):
     return -1
 
 def minwheelers_ridgeloc(n: int = 2):
@@ -56,6 +56,4 @@ def minStyblinski_Tang(n: int):
     return -39.16616570377142 * n
 
 def minStyblinski_Tangloc(n: int):
-    return np.full(n, -2.903534)
-
-
+    return np.full(n, -2.903534, float)

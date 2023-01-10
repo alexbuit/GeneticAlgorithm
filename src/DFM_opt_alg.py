@@ -9,7 +9,7 @@ from population_initatilisation import *
 from gradient_descent import gd
 from selection_funcs import *
 from cross_funcs import *
-from t_functions import *
+from test_functions import *
 from log import log
 
 
@@ -129,6 +129,9 @@ class genetic_algoritm:
         self.tfunc: Callable = self.none
         self.targs: dict = {}
 
+        if not is_decorated(self.tfunc):
+            self.tfunc = tfx_decorator(self.tfunc)
+
         self.select: Callable = roulette_selection
         self.cross: Callable = full_equal_prob
         self.mutation: Callable = mutate
@@ -142,7 +145,7 @@ class genetic_algoritm:
         self.elitism: int = 10
         self.save_top: int = 10
 
-        self.optimumfx: Union[Iterable, float] = 1.0
+        self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
         self.results: list = []
 
         self.dolog: int = 0
@@ -178,6 +181,11 @@ class genetic_algoritm:
         if len(self.pop) == 0:
             self.init_pop()
 
+        if not is_decorated(self.tfunc):
+            self.tfunc = tfx_decorator(self.tfunc)
+
+        self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
+
         self.epochs = epochs
 
         selargs["fx"] = self.tfunc
@@ -186,7 +194,8 @@ class genetic_algoritm:
         selargs["b2nkwargs"] = self.b2nkwargs
         selargs["verbosity"] = verbosity
 
-        parents, fitness, p = self.select(self.pop, **selargs)
+        self.tfunc.set_dimension(self.shape[1])
+        parents, fitness, p, fx = self.select(self.pop, **selargs)
 
         # if self.seed.__name__ == "none":
         #     self.epochs = int(np.floor(np.log2(self.shape[0])))
@@ -201,7 +210,7 @@ class genetic_algoritm:
 
             if self.dolog == 2:
 
-                self.log.ranking.update(rank, self.optimumfx)
+                self.log.ranking.update(rank, fx, self.tfunc.minima["x"], 0)
                 self.log.time.update(time() - self.tstart)
                 self.log.selection.update(parents, p, fitness)
 
@@ -212,7 +221,7 @@ class genetic_algoritm:
                     self.log.sync_logs()
 
             elif self.dolog == 1:
-                self.log.ranking.update(rank, self.optimumfx)
+                self.log.ranking.update(rank, self.tfunc.minima["x"])
                 self.log.time.update(time() - self.tstart)
 
 
@@ -251,7 +260,7 @@ class genetic_algoritm:
 
             # genlist.append(rpop)
             self.pop = np.array(newgen)
-            parents, fitness, p = self.select(np.array(newgen), **selargs)
+            parents, fitness, p, fx = self.select(np.array(newgen), **selargs)
 
             if self.dolog:
                 # Highest log level
@@ -264,7 +273,8 @@ class genetic_algoritm:
                         rank[j] = self.pop[i]
                         j += 1
 
-                    self.log.ranking.update(rank, self.optimumfx)
+                    print(fx, self.tfunc.minima["fx"])
+                    self.log.ranking.update(rank, fx, self.tfunc.minima["x"], self.tfunc.minima["fx"])
                     self.log.time.update(time() - self.tstart)
                     self.log.selection.update(parents, p, fitness)
                     self.log.value.update(self.pop, self.genlist[epoch])
@@ -279,6 +289,7 @@ class genetic_algoritm:
 
                         self.log.sync_logs()
 
+                    # Deprecated
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
                                        "ranking": rank,
                                        "ranknum": self.b2n(rank, self.bitsize, self.b2nkwargs),
@@ -289,7 +300,7 @@ class genetic_algoritm:
 
 
                 elif self.dolog == 1:
-                    self.log.ranking.update(rank, self.optimumfx)
+                    self.log.ranking.update(rank, self.tfunc.minima["x"])
                     self.log.time.update(time() - tsart)
 
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
@@ -300,7 +311,6 @@ class genetic_algoritm:
         self.results = self.genlist
 
     def run_threaded(self, threads, **kwargs):
-
         pass
 
     def init_pop(self, method: Union[str, Callable] = "uniform", **kwargs):
@@ -571,7 +581,8 @@ class genetic_algoritm:
             self.log.ranking.epoch = old_log.ranking.epoch
             self.log.ranking.ranknum = old_log.ranking.ranknum
             self.log.ranking.effectivity = old_log.ranking.effectivity
-            self.log.ranking.distance = old_log.ranking.distance
+            self.log.ranking.distancex = old_log.ranking.distancex
+            self.log.ranking.distancefx = old_log.ranking.distancefx
             self.log.ranking.bestsol = old_log.ranking.bestsol
 
             self.log.selection = old_log.selection.copy()
@@ -593,6 +604,7 @@ class genetic_algoritm:
         return self.log
 
     @staticmethod
+    @tfx_decorator
     def none(*args, **kwargs):
         return None
 
@@ -610,7 +622,6 @@ if __name__ == "__main__":
     low, high = -5, 5
     bitsize = 8
     tfunc = Styblinski_Tang
-
     # epochs = int(np.floor(np.log2(size[0])))
     epochs = 100
 

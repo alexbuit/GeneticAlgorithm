@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import sys
 
-from typing import Union, Callable
+from typing import Union, Callable, List
 from time import sleep, time
 
 from DFM_opt_alg import genetic_algoritm, full_mutate
@@ -14,21 +14,45 @@ from src.helper import ndbit2int
 from src.selection_funcs import *
 from src.log import log_object
 
+from AdrianPackv402.Helper import compress_ind
 
 ## global variables
 individuals: int = 25
 points_per_indv: int = 100
 points_stability_test = 500
 
-runtime = 1 # runtime in seconds
+runtime = 4 # runtime in seconds
 epoch = 0  # ??
+
+# Hardcoded value for 39ch mirror
+individual_size = 39
 
 test_setup = True
 
-intens: np.ndarray = np.zeros(shape=[individuals, points_per_indv, 2])
-# bestintensity log [intensity, time]
-bestintens: np.ndarray = np.zeros(shape=[points_stability_test, 2])
-optimum: float = 8.2e-6
+# Logs intensity of stability test and algorithm
+# array of dim 4, saved as dim 5 after run [epochs, 2: [stability, test], individuals, 3: [intensity, time, bin combination], sample size]
+# sample size for algorithm -> points_per_indiv
+# sample size of stability test -> points_stability_test (uses floating point average to compress to length sample size algorithm)
+intens_blueprint = np.zeros(shape=[2, individuals, 3, points_per_indv])
+intens: List[np.ndarray] = [intens_blueprint.copy()]
+# Lookup table for voltages indexed in array "intens"
+individual_table_blueprint = np.zeros(shape=[individuals, 2, individual_size])
+individual_table: List[np.ndarray] = [np.zeros(shape=[individuals, 2, individual_size])]
+
+"""How to find a voltage:
+# Find the number of the individual in intens;
+idx = intens[epoch, testtype, individual, 3, sample] ## sample # doesnt matter since for each sample the combination is the same
+# Use this index to find the voltage combination in individuals;
+indv = individuals[epoch][idx, testtype, :] ## this is the voltage combination
+# Convert to binary using the ga.b2n() method;
+ga.b2n(indv, **ga.b2nkwargs)
+"""
+
+# time intensity logs the intensity each time read_pm is called and logs the according time
+# array of dim 1 saved as dim 2 after run [entries, 2: [intens, time]]
+time_intens: List[np.ndarray] = [np.zeros(2)]
+
+optimum: float = 100
 
 t0 = time()
 
@@ -62,8 +86,9 @@ if __name__ == "__main__" and not test_setup:
     power_meter = ThorlabsPM100(inst=inst)
 
     def read_pm():
-        return power_meter.read
-
+        global time_intens
+        time_intens.append(np.ndarray([power_meter.read, time() - t0]))
+        return time_intens[-1][1]
 
     def set_voltage(voltages):
         try:
@@ -78,7 +103,9 @@ elif test_setup:
     n = 39
 
     def read_pm():
-        return -np.exp(random.random()/ 100)
+        global time_intens
+        time_intens.append(np.array([-np.exp(random.random()/ 100), time() - t0]))
+        return time_intens[-1][1]
 
     def set_voltage(voltages):
         pass
@@ -97,7 +124,7 @@ def tfmirror(*args, **kwargs):
     :param n: Number of channels
     :return: None
     """
-    global intens, optimum, epoch
+    global intens, optimum, epoch, points_per_indv
 
     if "pop" in kwargs:
         pop = kwargs["pop"]
@@ -107,7 +134,7 @@ def tfmirror(*args, **kwargs):
     b2n: Callable = kwargs["b2n"]
     b2nkwargs: dict = kwargs["b2nkwargs"]
 
-    points_per_indv: int = kwargs.get("points_per_indv", 100)
+    ppi: int = kwargs.get("points_per_indv", 100)
     stability: bool = kwargs.get("stability", False)
 
     num_pop = b2n(pop, **b2nkwargs)
@@ -131,21 +158,30 @@ def tfmirror(*args, **kwargs):
 
         set_voltage(voltages)
 
-
-        for j in range(points_per_indv):
+        # Read the power meter
+        compress_this = np.zeros([2, ppi])
+        for j in range(ppi):
             if stability:
-                bestintens[j, 0] = read_pm()
-                bestintens[j, 1] = time() - t0
+                compress_this[0, j] = read_pm()
+                compress_this[1, j] = time() - t0
             else:
-                intens[i, j, 0] = read_pm()
-                intens[i, j, 1] = time() - t0
-
-
+                intens[epoch][1, i, 0, j] = read_pm()
+                intens[epoch][1, i, 1, j] = time() - t0
+                intens[epoch][1, i, 2, j] = i
+                individual_table[epoch][i, 1, :] = indiv
 
         if stability:
-            avg_read[0] = np.average(bestintens)
+            this_compressed_intens = compress_ind(compress_this[0, :], points_per_indv)[0]
+            this_compressed_time = compress_ind(compress_this[1, :], points_per_indv)[0]
+            intens[epoch][0, i, 0, :] = this_compressed_intens
+            intens[epoch][0, i, 1, :] = this_compressed_time
+            intens[epoch][0, i, 2, :] = np.full(points_per_indv, i, dtype=int)
+            individual_table[epoch][i, 0,:] = indiv
+
+        if stability:
+            avg_read[0] = np.average(intens[epoch][0, i, 0, :])
         else:
-            avg_read[i] = np.average(intens[:, i, 0])/optimum
+            avg_read[i] = np.average(intens[epoch][1, i, 0, :])/optimum
 
         i += 1
         # Test out on DFM and append intensity
@@ -206,28 +242,27 @@ def select(*args, **kwargs):
 
     set_voltage(np.zeros(shape=n))
 
-    return pind, fitness, p
+    return pind, fitness, p, fitness
 
 
 class log_intensity(log_object):
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         super().__init__(b2num, bitsize, b2nkwargs, *args, **kwargs)
         self.intensity = []
-        self.bestsol = []
+        self.indivuals = []
 
     def update(self, data, *args):
         global intens
         self.data.append(data)
         self.epoch.append(len(self.data))
         self.intensity.append(*args[0])
-        self.bestsol.append(*args[1])
 
 
     def __copy__(self):
         log_intens_c = log_intensity(self.b2n, self.bitsize, self.b2nkwargs)
         log_intens_c.intensity = self.intensity
         log_intens_c.data = self.data
-        log_intens_c.bestsol = self.bestsol
+        log_intens_c.indivuals = self.indivuals
         log_intens_c.epoch = self.epoch
 
         return log_intens_c
@@ -238,10 +273,10 @@ class log_intensity(log_object):
              fmt_data: str = "average", linefmt="scatter"):
 
         if fmt_data.lower() == "raw":
-            int_mat = np.asarray(self.intensity)[epoch, individual, data, 0]
+            int_mat = np.asarray(self.intensity)[epoch, 1, individual, data, 0]
         else:
             int_mat = np.apply_over_axes(np.average,
-                                         np.asarray(self.intensity)[epoch, individual, data, 0],
+                                         np.asarray(self.intensity)[epoch, 1, individual, data, 0],
                                          2)
 
         # for each individual
@@ -276,7 +311,7 @@ class mirror_alg(genetic_algoritm):
                  endianness: str = "big"):
         super().__init__(dtype, bitsize, endianness)
 
-        self.log.__add__(log_intensity(self.b2n, self.bitsize, self.b2nkwargs))
+        # self.log.__add__(log_intensity(self.b2n, self.bitsize, self.b2nkwargs))
 
     def run(self, selargs: dict = {},
             cargs: dict = {}, muargs: dict = {},
@@ -303,7 +338,7 @@ class mirror_alg(genetic_algoritm):
         selargs["b2nkwargs"] = self.b2nkwargs
         selargs["verbosity"] = verbosity
 
-        parents, fitness, p = self.select(self.pop, **selargs)
+        parents, fitness, p, fx = self.select(self.pop, **selargs)
 
         # if self.seed.__name__ == "none":
         #     self.epochs = int(np.floor(np.log2(self.shape[0])))
@@ -317,11 +352,10 @@ class mirror_alg(genetic_algoritm):
             rank = np.asarray(rank)
 
             if self.dolog == 2:
-
-                self.log.ranking.update(rank, self.optimumfx)
+                self.log.ranking.update(rank, fx, np.full(39, 0), 0)
                 self.log.time.update(time() - self.tstart)
                 self.log.selection.update(parents, p, fitness)
-                self.log.log_intensity.update(self.pop, intens.copy(), bestintens.copy())
+                # self.log.log_intensity.update(self.pop, intens.copy())
 
                 if len(self.log.add_logs) > 0:
                     for l in self.log.add_logs:
@@ -330,13 +364,11 @@ class mirror_alg(genetic_algoritm):
                     self.log.sync_logs()
 
             elif self.dolog == 1:
-                self.log.ranking.update(rank, self.optimumfx)
+                self.log.ranking.update(rank, fx, np.full(39, 0), 0)
                 self.log.time.update(time() - self.tstart)
 
-
-
         while True:
-            if bestintens[-1, 0] < self.target:
+            if np.average(intens[epoch][0, 0, 0, :]) < self.target:
                 newgen = []
                 if verbosity:
                     print("%s/%s" % (epoch + 1, self.epochs))
@@ -371,7 +403,7 @@ class mirror_alg(genetic_algoritm):
 
                 # genlist.append(rpop)
                 self.pop = np.array(newgen)
-                parents, fitness, p = self.select(np.array(newgen), **selargs)
+                parents, fitness, p, fx = self.select(np.array(newgen), **selargs)
 
                 if self.dolog:
                     # Highest log level
@@ -384,12 +416,11 @@ class mirror_alg(genetic_algoritm):
                             rank[j] = self.pop[i]
                             j += 1
 
-                        self.log.ranking.update(rank, self.optimumfx)
+                        self.log.ranking.update(rank, fx, np.full(39, 0), self.target)
                         self.log.time.update(time() - self.tstart)
                         self.log.selection.update(parents, p, fitness)
                         self.log.value.update(self.pop, self.genlist[epoch])
-                        self.log.log_intensity.update(self.pop, intens.copy(),
-                                                      bestintens.copy())
+                        # self.log.log_intensity.update(self.pop, intens.copy())
 
                         # if additional logs added by appending them after initiation of self.log
                         # go through them and update with the population
@@ -403,14 +434,27 @@ class mirror_alg(genetic_algoritm):
 
 
                     elif self.dolog == 1:
-                        self.log.ranking.update(rank, self.optimumfx)
+                        self.log.ranking.update(rank, fx, self.tfunc.minima["x"], self.tfunc.minima["fx"])
                         self.log.time.update(time() - self.tstart)
+
+                print(np.average(intens[epoch][0, 0, 0, :]))
 
                 epoch += 1
                 self.results = self.genlist
 
+                intens.append(intens_blueprint)
+                individual_table.append(individual_table_blueprint)
+
             else:
-                set_voltage(bestintens[-1, 0])
+                break
+                set_voltage(individual_table[int(intens[epoch][0, 0, 2, 0])])
+
+
+class Process(mp.Process):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 
 
 ## Algorithm
@@ -427,15 +471,13 @@ ga = mirror_alg(bitsize=bitsize)
 
 # for i in np.linspace(0.01, 0.1, 10):
 try:
-    t0 = time()
-
     def t():
         return time() - t0
 
     def main():
 
-
         ga.optimumfx = optimum
+        print(size)
         ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
 
         print(ga.log.creation)
@@ -465,7 +507,8 @@ try:
                         "b2nkwargs" : ga.b2nkwargs,
                         "p": p
                         },
-               verbosity=1)
+               verbosity=1,
+               target=4)
 
         # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
         # ga.save_log("dfmtest_data%s.pickle" % k)
@@ -479,14 +522,15 @@ try:
 
     if __name__ == "__main__":
         print("time: ", time() - t0)
-        with mp.Pool(2) as p:
-            worker1 = p.apply_async(main, [])
-            worker2 = p.apply_async(checkruntime, [])
 
-            worker2.wait()
-            p.close()
+        # with mp.Pool(2) as p:
+        #     worker1 = p.apply_async(main, [])
+        #     worker2 = p.apply_async(checkruntime, [])
+        #
+        #     worker2.wait()
+        #     p.close()
 
-
+    # main()
     # except:
     #     voltages = np.zeros(shape=n)
     #
@@ -495,19 +539,31 @@ try:
     #
     #     print("Voltages set to zero")
 
+except Exception as e:
+    print('\x1b[33m' + "Exception: %s " % e + '\x1b[0m')
+
 finally:
     if __name__ == "__main__":
+        k = 6
         k += 1
 
         ga.save_log("dfmfake_data%s.pickle" % k)
 
+        # print(intens)
+
         set_voltage(np.zeros(shape=n))
 
         print("Mirror voltages set to zero")
-        print("Final best intensity: %s" % bestintens[-1, 0])
+        # print("Final best intensity: %s" % bestintens[-1, 0])
         print("Execution time: %s" % (time() - t0))
         print(r"Log saved to src\dfmtest_data%s.pickle" % k)
         print("Done")
-        sys.exit()
+        # sys.exit()
 
+main()
+
+time_intens = np.array(time_intens)
+print(time_intens)
+plt.plot(time_intens[:, 0], time_intens[:, 1])
+plt.show()
 
