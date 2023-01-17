@@ -17,39 +17,6 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
 
-
-def cross_parents64(parent1, parent2):
-    # parent1, parent2 = np.flip(parent1), np.flip(parent2)
-    child = np.zeros(parent1.size, dtype=np.uint8)
-    # print(parent1, parent2)
-    # print(child)
-    p1sign = parent1[0]
-    p2sign = parent2[0]
-
-    if np.random.randint(0, 1):
-        child[0] = p2sign
-    else:
-        child[0] = p1sign
-
-
-    #
-    # for i in range(1, 11):
-    #     if np.random.randint(0, 1):
-    #         child[i] = p2exp[i]
-    #     else:
-    #         child[i] = p1exp[i]
-    child[1:12] = parent1[1:12]
-
-    c1 = np.random.randint(12, parent1.size-1)
-    c2 = np.random.randint(c1 + 1, parent1.size)
-
-    child[12:c1] = parent1[12:c1]
-    child[c1:c2] = parent2[c1:c2]
-    child[c2:] = parent1[c2:]
-
-    return child
-
-
 def mutate(bit, bitsize, **kwargs):
     global bdict
 
@@ -148,7 +115,7 @@ class genetic_algoritm:
         self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
         self.results: list = []
 
-        self.dolog: int = 0
+        self.dolog: int = 2
         self.b2n: Callable = Ndbit2float
         self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,

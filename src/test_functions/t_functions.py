@@ -8,7 +8,7 @@ import threading as th
 
 # np.random.seed(12424)
 
-import src.test_functions.minima as tf
+import test_functions.minima as tf
 
 class _tfx_decorator:
     def __init__(self, func: Callable, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):

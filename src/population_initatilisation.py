@@ -4,7 +4,7 @@ import numpy as np
 from typing import Union, Iterable
 from scipy.stats import cauchy
 from helper import *
-from src.helper import int2ndbit
+from helper import int2ndbit
 
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:

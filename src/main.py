@@ -16,7 +16,7 @@ gea = genetic_algoritm(bitsize=8)
 
 
 # gea.load_log("Booth16b_p10.pickle", True)
-gea.load_log("dfmfake_data7.pickle", True)
+gea.load_log("dfmtest_data7.pickle", True)
 lg = gea.log
 
 gea.b2n = lg.b2n
@@ -25,7 +25,7 @@ gea.b2nkwargs = lg.b2nkwargs
 
 # lg.selection.plot(x_label="Iteration", y_label="avg Fitness", title="Fitness of individuals", fmt_data="raw", top=1)
 
-print(lg.ranking)
+print(lg.selection.data)
 
 # print(lg.add_logs)
 #

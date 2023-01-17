@@ -9,10 +9,10 @@ from typing import Union, Callable, List
 from time import sleep, time
 
 from DFM_opt_alg import genetic_algoritm, full_mutate
-from src.cross_funcs import full_equal_prob
-from src.helper import ndbit2int
-from src.selection_funcs import *
-from src.log import log_object
+from cross_funcs import full_equal_prob
+from helper import ndbit2int
+from selection_funcs import *
+from log import log_object
 
 from AdrianPackv402.Helper import compress_ind
 
@@ -27,7 +27,7 @@ epoch = 0  # ??
 # Hardcoded value for 39ch mirror
 individual_size = 39
 
-test_setup = False
+test_setup = True
 
 # Logs intensity of stability test and algorithm
 # array of dim 4, saved as dim 5 after run [epochs, 2: [stability, test], individuals, 3: [intensity, time, bin combination], sample size]
@@ -460,7 +460,7 @@ class Process(mp.Process):
 
 ## Algorithm
 
-from src.AdrianPackv402.Aplot import LivePlot
+from AdrianPackv402.Aplot import LivePlot
 from time import time
 
 k = 4
@@ -512,11 +512,7 @@ try:
                verbosity=1,
                target=8e-5)
 
-        time_intens = np.array(time_intens)
-        print(time_intens)
-        plt.plot(time_intens[:, 1], time_intens[:, 0])
-        plt.show()
-
+        print(ga.log.ranking.epoch)
 
         # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
         # ga.save_log("dfmtest_data%s.pickle" % k)
@@ -531,12 +527,7 @@ try:
     if __name__ == "__main__":
         print("time: ", time() - t0)
 
-        # with mp.Pool(2) as p:
-        #     worker1 = p.apply_async(main, [])
-        #     worker2 = p.apply_async(checkruntime, [])
-        #
-        #     worker2.wait()
-        #     p.close()
+        main()
 
     # main()
     # except:
@@ -555,7 +546,7 @@ finally:
         k = 6
         k += 1
 
-        ga.save_log("dfmfake_data%s.pickle" % k)
+        ga.save_log("dfmtest_data%s.pickle" % k)
 
         # print(intens)
 
@@ -567,7 +558,6 @@ finally:
         print(r"Log saved to src\dfmtest_data%s.pickle" % k)
         print("Done")
 
-        # sys.exit()
-main()
+        sys.exit()
 
 
