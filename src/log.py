@@ -3,7 +3,7 @@ from datetime import datetime
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from helper import convertpop2n
+from .helper import convertpop2n
 import numpy as np
 
 import matplotlib.pyplot as plt

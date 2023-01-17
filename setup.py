@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="genetic_algorithm",
+    name="src",
     author="Adrian v Eik",
     version="0.1",
     license="MIT",

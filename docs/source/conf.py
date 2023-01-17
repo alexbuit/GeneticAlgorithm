@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'KTH_dfm_control'
+project = 'KTH_dfm_control\src'
 copyright = '2023, Adrian van Eik'
 author = 'Adrian van Eik'
 release = '0.1'
@@ -14,7 +14,7 @@ release = '0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon']
 
 templates_path = ['_templates']
 exclude_patterns = []

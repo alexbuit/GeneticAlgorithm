@@ -18,3 +18,12 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+Module contents
+===============
+.. automodule:: KTH_dfm_control
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
