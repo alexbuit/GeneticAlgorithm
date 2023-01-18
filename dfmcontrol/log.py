@@ -264,7 +264,7 @@ class log_time(log_object):
         object_copy.epoch = self.epoch
         return object_copy
 
-    def plot(self, save_as="", show=True, *args, **kwargs) -> Default:
+    def plot(self, save_as="", show=True, *args, **kwargs):
         """
         Plot the time data.
         :param save_as: The path to save the plot to.
@@ -272,7 +272,7 @@ class log_time(log_object):
         :param args: Arguments for the plot.
         :param kwargs: Keyword arguments for the plot.
 
-        :return: The plot in a AdrianPack.Default object.
+        :return: The plot in a AdrianPackv402.Default object.
         See documentation (AdrianPack on github) for more information.
         """
         linestyle = "-"
