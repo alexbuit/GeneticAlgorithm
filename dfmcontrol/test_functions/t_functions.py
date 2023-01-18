@@ -11,6 +11,35 @@ import threading as th
 from dfmcontrol.test_functions import minima as tf
 
 class _tfx_decorator:
+    """
+    Decorator class for test functions.
+    This class decorates the test functions with the following methods:
+    - compute
+    - set_dimension
+    - dim
+    - set_minima
+    - set_optima
+    - update_optmin
+    - gradient
+
+    And the following attributes:
+    - func
+    - cores
+    - ndim
+    - samplesize
+    - optima
+    - minima
+
+    For which it is possible to call the test functions with the same arguments as the original functions.
+    The attributes are all initialised with standard values set in the __init__ method. When the function
+    is within the list of functions for which the analytical optima and minima are known, the optima and
+    minima are calculated and stored in the attributes. Otherwise, the optima and minima are set to None.
+
+    These minima and maxima can either be set manually by calling the set_minima and set_optima methods,
+    or they can be calculated by calling the update_optmin method. This method will check if the optima
+    and minima are known for given function, if not the optima and minima are calculated by sampling the
+    function over a grid of points.
+    """
     def __init__(self, func: Callable, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):
         self.func: Callable = func
         self.cores = cores
@@ -49,25 +78,55 @@ class _tfx_decorator:
                ", optima: " + str(self.optima) + ", minima: " + str(self.minima)
 
     def __repr__(self):
+        """
+        :return: function name
+        """
         return self.func.__name__
 
-    def compute(self, x, *args, **kwargs):
+    def compute(self, x, *args, **kwargs) -> Union[float, np.ndarray]:
+        """
+        Compute the function value at x.
+        :param x: np.ndarray
+        :param args: *args
+        :param kwargs: **kwargs
+        :return: np.ndarray
+        """
         return self.__call__(x, *args, **kwargs)
 
     def set_dimension(self, ndim: int):
+        """
+        Set the dimension of the function.
+        :param ndim: int
+        :return: None
+        """
         self.ndim = int(ndim)
         self.update_optmin()
         return None
 
     def dim(self, ndim: int):
+        """
+        Alias for set_dimension.
+        :param ndim: int
+        :return: None
+        """
         self.set_dimension(ndim)
         return None
 
     def set_minima(self, **kwargs):
+        """
+        Set the minima of the function.
+        :param kwargs: minima: {"x": [x1, x2, ... , xn], "fx": []}
+        :return: None
+        """
         self.update_optmin(**kwargs)
         return self.minima
 
     def set_optima(self, **kwargs):
+        """
+        Set the optima of the function.
+        :param kwargs: optima: {"x": [x1, x2, ... , xn], "fx": []}
+        :return: None
+        """
         self.update_optmin(**kwargs)
         return self.optima
 
@@ -85,6 +144,12 @@ class _tfx_decorator:
 
     # expensive and doesnt work for higher dim functions only recommended for 1d/2d functions
     def calcoptmin(self):
+        """
+        Calculate the optima and minima of the function by iterating the function of a large grid of points.
+        the grid is defined by the high and low attributes.
+        This method is unreliable and expensive for higher dimensional functions.
+        :return: optima: {"x": [x1, x2, ... , xn], "fx": []}, minima: {"x": [x1, x2, ... , xn], "fx": []}
+        """
 
         # Create a grid of points
         x = np.random.random_sample(self.samplesize)
@@ -139,10 +204,27 @@ class _tfx_decorator:
 
 
     def gradient(self, x, stepsize: float = 0.01, *args, **kwargs):
+        """
+        Calculate the gradient of the function at x.
+        :param x: Input point at which to calculate the gradient.
+        :param stepsize: The stepsize to use for the gradient calculation.
+        :param args:  function arguments
+        :param kwargs: dictionary of function arguments
+        :return: The gradient of the function at x.
+        """
         return self.func(x + stepsize, *args, **kwargs)
 
 
 def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):
+    """
+    Decorator for creating a TFx object.
+    :param func: Callable function to be decorated.
+    :param ndim: int, dimension of the function.
+    :param cores: int, number of cores to use for the calculation of the optima and minima.
+    :param compute_analytical: bool, whether to compute the analytical optima and minima.
+    :param kwargs: minima: {"x": [x1, x2, ... , xn], "fx": []}, optima: {"x": [x1, x2, ... , xn], "fx": []}
+    :return: TFx object
+    """
     # If a function is given as an argument, return the decorator
     if func is not None:
         return _tfx_decorator(func, ndim, cores, compute_analytical, **kwargs)
@@ -154,6 +236,11 @@ def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_an
 # 1D functions
 @tfx_decorator
 def tfx(x):
+    """
+    Test function.
+    :param x: Input point.
+    :return: The value of the function at x.
+    """
     return 3 * x**2 + 2 * x + 1
 
 ## 2D functions
@@ -191,7 +278,7 @@ def michealewicz(x: list, m: float = 10.0) -> float:
          range(1, len(x)+1)])
 
 @tfx_decorator
-def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
+def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2):
     """
     Compute Ackley' function for x1, x2, x...
     :param x: list of x inputs where N-dimension = len(x)
@@ -200,6 +287,8 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2 * np.pi):
     :param c:
     :return:
     """
+    c *= np.pi  # Needed for autodoc, maybe find a workaround?
+
     ndim = (lambda i: len(i) if isinstance(i, list) else i.ndim)(x)
     x = np.array(x, dtype=float)
     return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
