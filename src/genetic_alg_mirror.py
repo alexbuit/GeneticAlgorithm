@@ -9,17 +9,17 @@ from typing import Union, Callable, List
 from time import sleep, time
 
 from DFM_opt_alg import genetic_algoritm, full_mutate
-from cross_funcs import full_equal_prob
-from helper import ndbit2int
-from selection_funcs import *
-from log import log_object
+from src.cross_funcs import full_equal_prob
+from src.helper import ndbit2int
+from src.selection_funcs import *
+from src.log import log_object, log
 
 from AdrianPackv402.Helper import compress_ind
 
 ## global variables
-individuals: int = 25
-points_per_indv: int = 100
-points_stability_test = 500
+individuals: int = 30
+points_per_indv: int = 10
+points_stability_test = 20
 
 runtime = 10 # runtime in seconds
 epoch = 0  # ??
@@ -27,7 +27,7 @@ epoch = 0  # ??
 # Hardcoded value for 39ch mirror
 individual_size = 39
 
-test_setup = True
+test_setup = False
 
 # Logs intensity of stability test and algorithm
 # array of dim 4, saved as dim 5 after run [epochs, 2: [stability, test], individuals, 3: [intensity, time, bin combination], sample size]
@@ -153,6 +153,7 @@ def tfmirror(*args, **kwargs):
     avg_read = np.zeros(num_pop.shape[0])
 
     i = 0
+
     for indiv in num_pop:
         voltages = indiv
 
@@ -249,13 +250,18 @@ class log_intensity(log_object):
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         super().__init__(b2num, bitsize, b2nkwargs, *args, **kwargs)
         self.intensity = []
+        self.intens_time = []
         self.indivuals = []
 
     def update(self, data, *args):
         global intens
         self.data.append(data)
         self.epoch.append(len(self.data))
-        self.intensity.append(*args[0])
+        print("saves:", np.asarray(intens.copy()).shape)
+
+        self.intensity = intens.copy()
+        self.intens_time = time_intens.copy()
+        self.indivuals = individual_table.copy()
 
 
     def __copy__(self):
@@ -263,23 +269,26 @@ class log_intensity(log_object):
         log_intens_c.intensity = self.intensity
         log_intens_c.data = self.data
         log_intens_c.indivuals = self.indivuals
+        log_intens_c.intens_time = self.intens_time
         log_intens_c.epoch = self.epoch
 
         return log_intens_c
 
     def plot(self, epoch: Union[slice, int] = slice(0, None),
              individual: Union[slice, int] = slice(0, None),
-             data: Union[slice, int] = slice(0, None),
+             data: Union[slice, int] = 0,
              fmt_data: str = "average", linefmt="scatter"):
 
         if fmt_data.lower() == "raw":
-            int_mat = np.asarray(self.intensity)[epoch, 1, individual, data, 0]
+            int_mat = np.asarray(self.intensity)[epoch, 1, individual, data, :]
         else:
             int_mat = np.apply_over_axes(np.average,
-                                         np.asarray(self.intensity)[epoch, 1, individual, data, 0],
+                                         np.asarray(self.intensity)[epoch, 1, individual, data, :],
                                          2)
 
         # for each individual
+        print(np.asarray(self.intensity).shape)
+        print(int_mat.shape)
         for line in range(int_mat.shape[1]):
             # take the amount of epochs
             x = np.array([np.full(int_mat.shape[2], i) for i in range(int_mat.shape[0])]).flatten()
@@ -355,13 +364,13 @@ class mirror_alg(genetic_algoritm):
                 self.log.ranking.update(rank, fx, np.full(39, 0), 0)
                 self.log.time.update(time() - self.tstart)
                 self.log.selection.update(parents, p, fitness)
-                # self.log.log_intensity.update(self.pop, intens.copy())
+                self.log.log_intensity.update(self.pop)
 
-                if len(self.log.add_logs) > 0:
-                    for l in self.log.add_logs:
+                if len(self.log.add_logs) > 1:
+                    for l in self.log.add_logs[0:]:
                         l.update(data=self.pop)
 
-                    self.log.sync_logs()
+                self.log.sync_logs()
 
             elif self.dolog == 1:
                 self.log.ranking.update(rank, fx, np.full(39, 0), 0)
@@ -420,17 +429,21 @@ class mirror_alg(genetic_algoritm):
                         self.log.time.update(time() - self.tstart)
                         self.log.selection.update(parents, p, fitness)
                         self.log.value.update(self.pop, self.genlist[epoch])
+                        self.log.log_intensity.update(self.pop, intens.copy(),
+                                                      time_intens.copy(),
+                                                      individual_table.copy())
+
                         # self.log.log_intensity.update(self.pop, intens.copy())
 
                         # if additional logs added by appending them after initiation of self.log
                         # go through them and update with the population
                         # other data can be found within other logs and data
                         # can be added by using global statements or other.
-                        if len(self.log.add_logs) > 0:
+                        if len(self.log.add_logs) > 1:
                             for l in self.log.add_logs:
                                 l.update(data=self.pop)
 
-                            self.log.sync_logs()
+                        self.log.sync_logs()
 
 
                     elif self.dolog == 1:
@@ -442,13 +455,17 @@ class mirror_alg(genetic_algoritm):
                 epoch += 1
                 self.results = self.genlist
 
+                print(np.asarray(intens).shape)
+
                 intens.append(intens_blueprint)
                 individual_table.append(individual_table_blueprint)
 
             else:
                 print(np.average(intens[epoch][0, 0, 0, :]))
+                print(np.asarray(intens).shape)
                 break
                 set_voltage(individual_table[int(intens[epoch][0, 0, 2, 0])])
+
 
 
 class Process(mp.Process):
@@ -460,7 +477,7 @@ class Process(mp.Process):
 
 ## Algorithm
 
-from AdrianPackv402.Aplot import LivePlot
+from src.AdrianPackv402.Aplot import LivePlot
 from time import time
 
 k = 4
@@ -491,7 +508,7 @@ try:
         ga.b2n = ndbit2int
 
         ga.logdata(2)
-        # ga.log.append(log_intensity(ga.b2n, ga,bitsize, ga.b2nkwargs))
+        ga.log.append(log_intensity(ga.b2n, ga.bitsize, ga.b2nkwargs))
 
         # ga.seed = uniform_bit_pop_float
         ga.set_cross(full_equal_prob)
@@ -510,9 +527,13 @@ try:
                         "p": p
                         },
                verbosity=1,
-               target=8e-5)
+               target=12e-5)
 
-        print(ga.log.ranking.epoch)
+        print(ga.log.log_intensity.intensity)
+        k = 4
+        path = "2for_reportpop30ppi100%s" % k
+        ga.save_log(path + ".pickle" )
+        np.savetxt(path+".txt", np.asarray(time_intens))
 
         # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
         # ga.save_log("dfmtest_data%s.pickle" % k)
@@ -528,6 +549,12 @@ try:
         print("time: ", time() - t0)
 
         main()
+        # with mp.Pool(2) as p:
+        #     worker1 = p.apply_async(main, [])
+        #     worker2 = p.apply_async(checkruntime, [])
+        #
+        #     worker2.wait()
+        #     p.close()
 
     # main()
     # except:
@@ -546,8 +573,6 @@ finally:
         k = 6
         k += 1
 
-        ga.save_log("dfmtest_data%s.pickle" % k)
-
         # print(intens)
 
         set_voltage(np.zeros(shape=n))
@@ -558,6 +583,8 @@ finally:
         print(r"Log saved to src\dfmtest_data%s.pickle" % k)
         print("Done")
 
-        sys.exit()
+        # sys.exit()
+
+
 
 
