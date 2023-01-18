@@ -10,7 +10,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 import mock
 
 MOCK_MODULES = ['numpy', 'matplotlib', 'matplotlib.pyplot',
-                'mpl_toolkits.axes_grid1', 'scipy', 'scipy.optimize']
+                'mpl_toolkits.axes_grid1', 'scipy', 'scipy.optimize',
+                'matplotlib.animation']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
