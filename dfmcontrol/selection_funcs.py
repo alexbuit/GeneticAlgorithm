@@ -23,19 +23,46 @@ def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs):
 
 
 def lin_fitness(y, a, b):
+    """
+    Scale fitness linearly
+
+    :param y: np.ndarray with values f(x1, x2, x3, x...) in order of pop
+    :param a: parameter a
+    :param b: parameter b
+    :return: np.ndarray with linearised values f(x1, x2, x3, x...) in order of pop
+    """
     return a * y + b
 
 
 def exp_fitness(y, k):
+    """
+    Scale fitness exponentially
+    :param y: np.ndarray with values f(x1, x2, x3, x...) in order of pop
+    :param k: parameter k
+    :return: np.ndarray with exponential values f(x1, x2, x3, x...) in order of pop
+    """
     y = y/np.max(y)
     return 1 / (k ** y)
 
 def simple_fitness(y, *args):
+    """
+     Normalise fitness
+    :param y: np.ndarray with fitness values f(x1, x2, x3, x...) in order of pop
+    :param args: Pipeline for additional arguments that are included by default (IE a, b or k)
+    :return: np.ndarray with normalised values f(x1, x2, x3, x...) in order of pop
+    """
     y = np.abs(y)
     return np.max(y) - y
 
 
 def sigmoid_fitness(x, k, x0 = 0):
+    """
+    Sigmoid function
+    :param x: np.ndarray with values f(x1, x2, x3, x...) in order of pop
+    :param k:  steepness parameter k
+    :param x0: start pos parameter x0
+    :return: np.ndarray with sigmoid values f(x1, x2, x3, x...) in order of pop
+    """
     return 1 / (1 + np.exp(-k * (x - x0)))
 
 
@@ -71,6 +98,14 @@ def probability_sort_list(y, p, allow_duplicates=False, **kwargs):
     return pind
 
 def sort_list(y, p, **kwargs):
+    """
+    Select parents out the pool pop
+    :param y: np.ndarray with values f(x1, x2, x3, x...) in order of pop
+    :param p: np.ndarray with probablity values correlating to y values
+    :param kwargs:  allow_duplicates => allow duplicates in the selection
+    :return:  selected parents based on their probability
+    """
+
     pind = []
 
     for i in range(int(y.size / 2)):
@@ -127,13 +162,13 @@ def roulette_selection(*args, **kwargs):
 
 def rank_selection(*args, **kwargs):
     """
+    Select parents out the pool pop based on their rank in the fitness function
 
-    calc_fx params:
-    pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
+    calc_fx params: pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
 
-    :param args:
-    :param kwargs:
-    :return:
+    :param args: args, kwargs passed onto the calc_fx function
+    :param kwargs: k => parameteres passed onto the fitness function
+    :return: selected parents based on their probability
     """
     y = calc_fx(*args, **kwargs)
 
@@ -187,13 +222,12 @@ def rank_selection(*args, **kwargs):
 
 def rank_space_selection(*args, **kwargs):
     """
+        Select parents out the pool pop according to rank space selection
 
-        calc_fx params:
-        pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
-
-        :param args:
-        :param kwargs:
-        :return:
+        calc_fx params: pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
+        :param args: args, kwargs passed onto the calc_fx function
+        :param kwargs: k => parameteres passed onto the fitness function
+        :return: selected parents based on their probability
         """
     y = calc_fx(*args, **kwargs)
 
@@ -227,6 +261,9 @@ def rank_space_selection(*args, **kwargs):
                 np.arange(1, fitness.size + 1, dtype=float) - 1))
     p = p / np.sum(p)
 
+
+def boltzmann_selection(*args, **kwargs):
+    pass
 
 
 

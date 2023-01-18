@@ -29,8 +29,8 @@ except ImportError:
 
 ## global variables
 individuals: int = 30
-points_per_indv: int = 10
-points_stability_test = 20
+points_per_indv: int = 50
+points_stability_test = 100
 
 runtime = 10 # runtime in seconds
 epoch = 0  # ??
@@ -203,6 +203,12 @@ def tfmirror(*args, **kwargs):
 
 
 def select(*args, **kwargs):
+    """
+    Selects the best individuals from the population based on rank selection
+    :param args:  population, fitness, k
+    :param kwargs:  None
+    :return:  selected individuals
+    """
     global intens, optimum, points_per_indv, epoch, points_stability_test
 
     pop = args[0]
@@ -258,6 +264,10 @@ def select(*args, **kwargs):
 
 
 class log_intensity(log_object):
+    """
+    Class for logging the intensity
+
+    """
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         super().__init__(b2num, bitsize, b2nkwargs, *args, **kwargs)
         self.intensity = []
@@ -288,7 +298,16 @@ class log_intensity(log_object):
     def plot(self, epoch: Union[slice, int] = slice(0, None),
              individual: Union[slice, int] = slice(0, None),
              data: Union[slice, int] = 0,
-             fmt_data: str = "average", linefmt="scatter"):
+             fmt_data: str = "average", linefmt="scatter") -> None:
+        """
+        Plots the intensity of the individuals
+        :param epoch: Slice of epochs to plot
+        :param individual: Slice of individuals to plot
+        :param data: Slice of data to plot
+        :param fmt_data: Format of the data to plot 'average' or 'raw'
+        :param linefmt: Format of the line to plot 'scatter' or 'line'
+        :return: None
+        """
 
         if fmt_data.lower() == "raw":
             int_mat = np.asarray(self.intensity)[epoch, 1, individual, data, :]
@@ -327,6 +346,9 @@ class log_intensity(log_object):
         return None
 
 class mirror_alg(genetic_algoritm):
+    """
+    Class for the genetic algorithm implentation of the mirror algorithm
+    """
     def __init__(self, dtype: str = "float", bitsize: int = 32,
                  endianness: str = "big"):
         super().__init__(dtype, bitsize, endianness)
@@ -488,7 +510,6 @@ class Process(mp.Process):
 
 ## Algorithm
 
-from src.AdrianPackv402.Aplot import LivePlot
 from time import time
 
 k = 4
@@ -538,7 +559,7 @@ try:
                         "p": p
                         },
                verbosity=1,
-               target=12e-5)
+               target=20e-6)
 
         print(ga.log.log_intensity.intensity)
         k = 4

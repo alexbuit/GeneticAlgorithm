@@ -25,7 +25,14 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
 
-def mutate(bit, bitsize, **kwargs):
+def mutate(bit, bitsize, **kwargs) -> np.ndarray:
+    """
+    Mutate a bit string from mantissa to bitsize
+    :param bit: bit array to mutate
+    :param bitsize: size of the bit array
+    :param kwargs: mutate_coeff => number of mutations to apply
+    :return: mutated bit array
+    """
     global bdict
 
     bitc = bit.copy()
@@ -47,7 +54,14 @@ def mutate(bit, bitsize, **kwargs):
     return bitc
 
 
-def full_mutate(bit, bitsize, **kwargs):
+def full_mutate(bit, bitsize, **kwargs) -> np.ndarray:
+    """
+    Mutate a bit array from 0 to bitsize
+    :param bit: bit array to mutate
+    :param bitsize: size of the bit array
+    :param kwargs: mutate_coeff => number of mutations to apply
+    :return: mutated bit array
+    """
     global bdict
 
     bitc = bit.copy()
@@ -66,32 +80,50 @@ def full_mutate(bit, bitsize, **kwargs):
 
     return bitc
 
-
-def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
-               cross: Callable, mutate: Callable):
-    """
-    :param fx:
-    :param pop:
-    :param max_iter:
-    :param select:
-    :param cross:
-    :param mutate:
-    :return:
-    """
-    # fx = np.vectorize(fx)
-    for _ in range(max_iter):
-        # Parents function should return pairs of parent indexes in pop
-        parents = select(b2int(pop), fx)
-        # Apply the cross function to all parent couples
-        children = [cross(pop[p[0]], pop[p[1]]) for p in parents]
-        # Mutate the population (without elitism)
-        pop = mutate(children)
-
-    return pop
+#
+# def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
+#                cross: Callable, mutate: Callable):
+#     """
+#     :param fx:
+#     :param pop:
+#     :param max_iter:
+#     :param select:
+#     :param cross:
+#     :param mutate:
+#     :return:
+#     """
+#     # fx = np.vectorize(fx)
+#     for _ in range(max_iter):
+#         # Parents function should return pairs of parent indexes in pop
+#         parents = select(b2int(pop), fx)
+#         # Apply the cross function to all parent couples
+#         children = [cross(pop[p[0]], pop[p[1]]) for p in parents]
+#         # Mutate the population (without elitism)
+#         pop = mutate(children)
+#
+#     return pop
 
 
 class genetic_algoritm:
+    """
+    Genetic Algorithm functions
 
+    :param: dtype => data type of the population
+    :param: bitsize => size of the bit array
+    :param: endianness => endianness of the bit array
+
+    The genetic algorithm is a stochastic search algorithm that is used to find the global minimum (or maximum) of a function.
+    In this case the algortihm is initialised with a population of random bit arrays with size bitsize. The population is then
+    iterated over and the fitness of each bit array is calculated, the fitness is then used to select the parents for the next
+    generation by the selection algorithm defined by genetic_algortihm.select, the algortihm used can be changed by calling the
+    set_select() method or setting it manually by assigning genetic_algorthim.select to a different function.
+    The parents are then crossed over and mutated to create the next generation with the crossing and mutation algorithm defined by
+    genetic_algorithm.cross and .mutate respectively. The process is repeated until the maximum number of iterations is reached.
+    The results are stored in the results attribute and can be accessed by calling genetic_algorithm.get_results() or by indexing
+    the genetic_algorithm object. A log of all fitness, rank, output and time values is also stored in the log attribute and can be accessed
+    by calling genetic_algorithm.get_log().<attr>.<value> or by indexing the genetic_algorithm.log.<attr>.<value> object. This log
+    can be saved to a .pickle file by calling genetic_algorithm.save_log() or by calling genetic_algorithm.save_log() with a file name.
+    """
     def __init__(self, dtype: str = "float", bitsize: int = 32,
                  endianness: str = "big"):
         self.dtype = dtype
@@ -132,25 +164,36 @@ class genetic_algoritm:
 
 
     def __call__(self, *args, **kwargs):
+        """
+        Call the genetic algorithm with the given arguments
+        :param args: arguments for the target function
+        :param kwargs: keyword arguments for the target function
+        :return: None
+        """
         self.run(*args, **kwargs)
 
     def __repr__(self):
         return ""
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> Union[dict, list]:
+        """
+        Get the results of the genetic algorithm
+        :param item: index of the result
+        :return: result
+        """
         return self.results[item]
 
     def run(self, selargs: dict = {},
             cargs: dict = {}, muargs: dict = {},
             epochs: int = 100, verbosity: int = 1):
         """
-        :param cargs:
-        :param muargs:
-        :param seedargs:
-        :param selargs:
-        :param epochs:
-        :param verbosity:
-        :return:
+        Run the genetic algorithm
+        :param cargs: arguments for the cross function
+        :param muargs: arguments for the mutation function
+        :param selargs: arguments for the selection function
+        :param epochs: number of iterations
+        :param verbosity: verbosity level
+        :return: None
         """
 
         if len(self.pop) == 0:
@@ -419,6 +462,11 @@ class genetic_algoritm:
         return None
 
     def save_results(self, path: str):
+        """
+        Save the results of the GA to a .txt file.
+        :param path: str
+        :return: None
+        """
         genarr = np.empty((self.genlist[0].shape[0] - 1, self.epochs), dtype=object)
         k = 0
         for i in self.genlist:
@@ -433,7 +481,12 @@ class genetic_algoritm:
                 f.write(";".join([str(item) for item in genarr[i]]) + "\n")
 
     def load_results(self, path: str):
-        from AdrianPack.Fileread import Fileread
+        """
+        Load the results of a GA from a .txt file.
+        :param path: str
+        :return: None
+        """
+        from dfmcontrol.AdrianPackv402.Fileread import Fileread
 
         data = list(Fileread(path=path, dtype="str", delimiter=";")().values())
 
@@ -523,13 +576,12 @@ class genetic_algoritm:
 
         return None
 
-    def get_log(self):
-        return self.log
-
-    def log2txt(self, path):
-        return None
-
     def save_log(self, path: str = ""):
+        """
+        Save the logdict to a .pickle file.
+        :param path: str
+        :return: None
+        """
         if path == "":
             date_str = self.log.creation.__str__().replace(":", "_")
             path = "GAlog%s" % date_str + ".pickle"
@@ -539,6 +591,13 @@ class genetic_algoritm:
         print("Log saved to: %s" % path)
 
     def load_log(self, path:str, copy: bool = True):
+        """
+        Load a logdict from a .pickle file.
+        :param path: path to .pickle file
+        :param copy: If True, the logdict will be copied to the current GA instance.
+        :return: None
+        """
+
         with open(path, "rb") as f:
             old_log = pickle.load(f)
 
@@ -580,7 +639,13 @@ class genetic_algoritm:
 
     @staticmethod
     @tfx_decorator
-    def none(*args, **kwargs):
+    def none(*args, **kwargs) -> None:
+        """
+        Dummy function for no transformation.
+        :param args: args
+        :param kwargs: kwargs
+        :return: None
+        """
         return None
 
 
