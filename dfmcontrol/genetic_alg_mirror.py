@@ -8,13 +8,24 @@ import sys
 from typing import Union, Callable, List
 from time import sleep, time
 
-from DFM_opt_alg import genetic_algoritm, full_mutate
-from src.cross_funcs import full_equal_prob
-from src.helper import ndbit2int
-from src.selection_funcs import *
-from src.log import log_object, log
+try:
+    from .DFM_opt_alg import genetic_algoritm, full_mutate
+    from .cross_funcs import full_equal_prob
+    from .helper import ndbit2int
+    from .selection_funcs import *
+    from .log import log_object, log
 
-from AdrianPackv402.Helper import compress_ind
+    from .AdrianPackv402.Helper import compress_ind
+
+except ImportError:
+    from dfmcontrol.DFM_opt_alg import genetic_algoritm, full_mutate
+    from dfmcontrol.cross_funcs import full_equal_prob
+    from dfmcontrol.helper import ndbit2int
+    from dfmcontrol.selection_funcs import *
+    from dfmcontrol.log import log_object, log
+
+    from dfmcontrol.AdrianPackv402.Helper import compress_ind
+
 
 ## global variables
 individuals: int = 30

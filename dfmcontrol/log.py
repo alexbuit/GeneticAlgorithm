@@ -3,13 +3,19 @@ from datetime import datetime
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from helper import convertpop2n
 import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 
-from AdrianPackv402.Aplot import Default
+
+
+try:
+    from .helper import convertpop2n
+    from .AdrianPackv402.Aplot import Default
+except ImportError:
+    from dfmcontrol.helper import convertpop2n
+    from dfmcontrol.AdrianPackv402.Aplot import Default
 
 def pythagoras(x):
     return np.sqrt(sum(x))

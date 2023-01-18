@@ -19,11 +19,27 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+Module Index
+============
+Genetic Algorithm:
+------------------
+.. toctree::
+    genetic algorithm <genetic_algorithm.rst>
 
-Module contents
-===============
-.. automodule:: KTH_dfm_control
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Log:
+----
+.. toctree::
+    log <log.rst>
+
+Helper:
+-------
+.. toctree::
+    helper <helper.rst>
+
+
+
+
+
+
+
 

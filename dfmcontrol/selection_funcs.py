@@ -1,7 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from helper import *
 from typing import Iterable
+
+try:
+    from .helper import *
+except ImportError:
+    from dfmcontrol.helper import *
 
 def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs):
     """ Calculate the fitness of a population.

@@ -5,7 +5,7 @@ import struct
 from matplotlib import pyplot as plt
 from matplotlib import cm
 
-from test_functions import allfx, dim2fx, ndimfx
+# from test_functions import allfx, dim2fx, ndimfx
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
@@ -325,18 +325,18 @@ def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
     return None
 
 
-if __name__ == "__main__":
-    from time import time
-    from AdrianPack.Aplot import Default
-    from population_initatilisation import *
-
-    from test_functions import *
-
-    def z(x):
-        return x[0] + x[1]
-
-    for fx in ndimfx + dim2fx:
-        plot3d(fx, -5, 5, resolution= 500, mode= "plot_surface", cmap=cm.coolwarm)
+# if __name__ == "__main__":
+#     from time import time
+#     from AdrianPack.Aplot import Default
+#     from population_initatilisation import *
+#
+#     from test_functions import *
+#
+#     def z(x):
+#         return x[0] + x[1]
+#
+#     for fx in ndimfx + dim2fx:
+#         plot3d(fx, -5, 5, resolution= 500, mode= "plot_surface", cmap=cm.coolwarm)
 
     # start, stop = 0, 100
     # tlist = []

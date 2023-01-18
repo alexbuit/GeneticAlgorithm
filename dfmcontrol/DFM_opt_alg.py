@@ -5,12 +5,20 @@ import pickle
 
 from time import time
 
-from population_initatilisation import *
-from gradient_descent import gd
-from selection_funcs import *
-from cross_funcs import *
-from test_functions import *
-from log import log
+try:
+    from .population_initatilisation import *
+    from .gradient_descent import gd
+    from .selection_funcs import *
+    from .cross_funcs import *
+    from .test_functions import *
+    from .log import log
+except ImportError:
+    from dfmcontrol.population_initatilisation import *
+    from dfmcontrol.gradient_descent import gd
+    from dfmcontrol.selection_funcs import *
+    from dfmcontrol.cross_funcs import *
+    from dfmcontrol.test_functions import *
+    from dfmcontrol.log import log
 
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],

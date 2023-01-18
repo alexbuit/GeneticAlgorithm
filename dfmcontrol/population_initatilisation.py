@@ -3,8 +3,11 @@ import numpy as np
 
 from typing import Union, Iterable
 from scipy.stats import cauchy
-from helper import *
-from helper import int2ndbit
+
+try:
+    from .helper import *
+except ImportError:
+    from dfmcontrol.helper import *
 
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
