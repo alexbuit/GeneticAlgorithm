@@ -1,7 +1,5 @@
 from typing import Callable
 from datetime import datetime
-
-import AdrianPack.Aplot
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import numpy as np
