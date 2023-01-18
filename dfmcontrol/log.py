@@ -1,6 +1,7 @@
 from typing import Callable
 from datetime import datetime
 
+import AdrianPack.Aplot
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import numpy as np
@@ -22,7 +23,62 @@ def pythagoras(x):
 
 
 class log:
+    """
+    Log object containing all data collected by the GA during the run.
 
+    The methods are usually called by the GA itself, but can be called manually
+    before the GA is run to add a log object to the log.
+
+    Methods
+    -------
+    add_log(log_object)
+        Add a log object to the log.
+    sync_logs()
+        Sync all log objects in the log.
+
+    Attributes
+    ----------
+
+    Attributes containing the log files with data collected by the GA during the run.
+    --
+
+    time
+        Log object containing the time data.
+    ranking
+        Log object containing the ranking data.
+    selection
+        Log object containing the selection data.
+    value
+        Log object containing the value data.
+    add_logs
+        List of log objects added to the log.
+
+    Attributes regarding the settings of the GA.
+    --
+
+    pop
+        The population used in the GA.
+    bitsize
+        The size of the binary representation of the population.
+    select
+        The selection method used in the GA.
+    cross
+        The crossover method used in the GA.
+    mutation
+        The mutation method used in the GA.
+    elitism
+        The elitism used in the GA.
+    savetop
+        The savetop used in the GA.
+    b2n
+        The binary to numerical conversion method used in the GA.
+    b2nkwargs
+        The keyword arguments used in the binary to numerical conversion method.
+    logdict
+        Dictionary containing all log objects.
+    creation
+        The datetime of the creation of the log.
+    """
     def __init__(self, pop, select, cross, mutate, b2n, elitism, savetop,
                  bitsize: int, b2nkwargs: dict):
         # Pop
@@ -89,6 +145,7 @@ class log:
         return logcopy
 
     def copy(self):
+        """ Return a copy of the log. """
         return self.__copy__()
 
     def __add__(self, other: "log_object"):
@@ -99,16 +156,45 @@ class log:
         return self.__copy__()
 
     def append(self, other):
+        """ Append a log object to the log. """
         return self.__add__(other)
 
     def sync_logs(self):
+        """ Sync all log objects in the log. """
         for lg in self.add_logs:
             setattr(self, lg.__class__.__name__, lg.copy())
 
         return None
 
 class log_object:
+    """
+    A template for a log object.
 
+    This template can be used to create a log object that can be added to the log using log.append(),
+    log += or log.__add__().
+
+    The methods can be customized to fit the needs of the log object but they need to include the
+    following:
+     - A method called when updating that contains the *args argument.
+     - A method for copying the log object.
+
+    Methods
+    -------
+    update(*args)
+        Method called when updating the log object.
+    copy()
+        Method for copying the log object.
+
+    Attributes
+    ----------
+    data
+        The data collected by the log object.
+    epoch
+        The epoch of the data collected by the log object.
+
+    Attributes can be added but need to be updated locally using a global variable or can be updated
+    in the genetic algorithm when a child instance of genetic_algortihm is created with a custom run() method.
+    """
     def __init__(self, b2num, bitsize, b2nkwargs, *args, **kwargs):
         self.epoch = []
         self.data = []
@@ -150,6 +236,24 @@ class log_object:
 
 
 class log_time(log_object):
+    """
+    A log object for logging the time of the GA.
+
+    Methods
+    -------
+    update(*args)
+        Method called when updating the log object.
+    copy()
+        Method for copying the log object.
+
+    Attributes
+    ----------
+    data
+        The time data collected by the log object.
+    epoch
+        The epoch of the data collected by the log object.
+
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -160,8 +264,17 @@ class log_time(log_object):
         object_copy.epoch = self.epoch
         return object_copy
 
-    def plot(self, save_as="", show=True, *args, **kwargs):
+    def plot(self, save_as="", show=True, *args, **kwargs) -> Default:
+        """
+        Plot the time data.
+        :param save_as: The path to save the plot to.
+        :param show: Show the plot.
+        :param args: Arguments for the plot.
+        :param kwargs: Keyword arguments for the plot.
 
+        :return: The plot in a AdrianPack.Default object.
+        See documentation (AdrianPack on github) for more information.
+        """
         linestyle = "-"
         if "linestyle" in kwargs:
             linestyle = kwargs["linestyle"]
@@ -191,6 +304,28 @@ class log_time(log_object):
 
 
 class log_selection(log_object):
+    """
+    A log object for logging the selection of the GA.
+
+    Methods
+    -------
+    update(*args)
+        Method called when updating the log object.
+    copy()
+        Method for copying the log object.
+
+    Attributes
+    ----------
+    data
+        The selection data collected by the log object.
+    epoch
+        The epoch of the data collected by the log object.
+    probability
+        The probability of the selection data collected by the log object.
+    fitness
+        The fitness of the selection data collected by the log object.
+
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -240,7 +375,35 @@ class log_selection(log_object):
         return pl
 
 class log_ranking(log_object):
+    """
+    A log object for logging the ranking of the GA.
 
+    Methods
+    -------
+    update(*args)
+        Method called when updating the log object.
+    copy()
+        Method for copying the log object.
+
+    Attributes
+    ----------
+    data
+        The ranking data collected by the log object.
+    epoch
+        The epoch of the data collected by the log object.
+    ranknum
+        The numerical variables [x1, x2, ...., xn] in order of rank.
+    distance
+        The distance between the numerical variables and the target.
+    distancefx
+        The distance between the result of numerical variables and the target.
+    effectivity
+        The effectivity of the ranking data collected by the log object.
+        calculated as: by taking the distance between the optimium or minimum and the result of the solutions in ranknum.
+    bestsol
+        The best solution found by the GA per epoch
+
+    """
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ranknum = []
@@ -325,7 +488,30 @@ class log_ranking(log_object):
 
 
 class log_value(log_object):
+    """
+    A log object for logging the value of the GA.
 
+    Methods
+    -------
+    update(*args)
+        Method called when updating the log object.
+    copy()
+        Method for copying the log object.
+
+    Attributes
+    ----------
+    data
+        The value data collected by the log object.
+    epoch
+        The epoch of the data collected by the log object.
+    value
+        The binary value of the solutions proposed by the ga per epoch
+    numval
+        The numerical value of the solutions proposed by the ga per epoch
+    topx
+        The top x solutions proposed by the ga per epoch
+
+    """
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value = []
