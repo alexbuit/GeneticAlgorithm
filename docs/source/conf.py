@@ -9,8 +9,9 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot',
+MOCK_MODULES = ['numpy', 'matplotlib', 'matplotlib.pyplot',
                 'matplotlib.mpl_toolkits']
+
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
