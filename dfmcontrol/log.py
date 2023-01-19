@@ -207,9 +207,6 @@ class log_object:
     def __getitem__(self, item: int):
         return self.data[item]
 
-    # def __repr__(self):
-    #     return str(self.data)
-
     def __copy__(self):
         object_copy = log_object(self.b2n, self.bitsize, *self.args, **self.kwargs)
         object_copy.data = self.data
@@ -222,9 +219,6 @@ class log_object:
     def copy(self):
         return self.__copy__()
 
-    def savetxt(self, path):
-
-        return None
 
     def update(self, data, *args):
         self.data.append(data)
