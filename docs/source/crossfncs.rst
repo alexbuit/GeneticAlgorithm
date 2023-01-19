@@ -19,9 +19,8 @@ Two point crossover
 Uniform crossover
 *****************
 
-################
-Crossing Methods
-################
+Crossing methods
+****************
 
 .. automodule:: dfmcontrol.cross_funcs
    :members:

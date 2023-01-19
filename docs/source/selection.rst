@@ -60,9 +60,9 @@ Fitness evaluation
 ******************
 
 
-#################
+
 Selection methods
-#################
+-----------------
 
 .. automodule:: dfmcontrol.selection_funcs
    :members:

@@ -10,6 +10,14 @@ Welcome to KTH_dfm_control's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   ga
+   log
+   population
+   selection
+   crossing <crossfncs>
+   mutation
+   Mathematical test functions <test_functions>
+   Helper <helper>
 
 
 Indices and tables
@@ -19,48 +27,7 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-Module Index
-============
-Genetic Algorithm:
-------------------
-.. toctree::
-    genetic algorithm <ga.rst>
 
-Population:
------------
-.. toctree::
-    population <population.rst>
-
-Selection:
-----------
-.. toctree::
-    selection <selection.rst>
-
-Crossover:
-----------
-.. toctree::
-    crossover <crossfncs.rst>
-
-Log:
-----
-.. toctree::
-    log <log.rst>
-
-Helper:
--------
-.. toctree::
-    helper <helper.rst>
-
-Mathematical test functions:
-----------------------------
-.. toctree::
-    test functions <test_functions.rst>
-
-.. toctree::
-   math functions <t_functions.rst>
-
-.. toctree::
-   minima lookup <minima.rst>
 
 
 

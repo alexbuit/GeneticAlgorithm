@@ -159,3 +159,11 @@ Saving and loading results
 
 Results can be saved by using the :meth:`save <GeneticAlgorithm.savelog>` method,
 this will save the
+
+Methods
+=======
+
+.. automodule:: dfmcontrol.DFM_opt_alg
+    :members:
+    :undoc-members:
+    :show-inheritance:

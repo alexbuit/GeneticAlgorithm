@@ -41,3 +41,11 @@ the following attributes:
  - dim : the dimension of the function
 
 The test functions can be found :ref:`here <Mathematical test functions>`.
+
+##############
+Files included
+##############
+
+.. toctree::
+    Mathmatical test functions <t_functions>
+    Minima lookup table <minima>
