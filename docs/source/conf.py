@@ -29,8 +29,7 @@ release = '0.1'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon',
-              'sphinx.ext.autosectionlabel','sphinx.ext.intersphinx',
-              'sphinxcontrib.plot']
+              'sphinx.ext.autosectionlabel','sphinx.ext.intersphinx']
 
 templates_path = ['_templates']
 exclude_patterns = []
