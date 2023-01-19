@@ -159,6 +159,17 @@ def roulette_selection(*args, **kwargs):
     p = fitness / sum(fitness)
     return sort_list(fitness, p, **kwargs), fitness, p, y
 
+def tournament_selection(*args, **kwargs):
+    """
+    pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    y = calc_fx(*args, **kwargs)
+
+
 
 def rank_selection(*args, **kwargs):
     """

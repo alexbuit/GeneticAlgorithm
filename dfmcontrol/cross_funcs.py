@@ -7,6 +7,15 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
 
 
 def double_point(parent1, parent2, bitsize):
+    """
+    Double point crossover that doesnt cross the exponent of the floating point number
+
+    :param parent1: A numpy array of dtype np.uint8 for the first parent
+    :param parent2: A numpy array of dtype np.uint8 for the second parent
+    :param bitsize: The number of bits in the floating point number
+
+    :return: A list of two numpy arrays of dtype np.uint8 for the two children
+    """
     global bdict
 
     child1 = np.zeros(parent1.shape, dtype=np.uint8)
@@ -38,7 +47,16 @@ def double_point(parent1, parent2, bitsize):
     return [child1, child2]
 
 
-def signle_point(parent1, parent2, bitsize):
+def single_point(parent1, parent2, bitsize):
+    """
+    Single point crossover that doesnt cross the exponent of the floating point number
+
+    :param parent1: A numpy array of dtype np.uint8 for the first parent
+    :param parent2: A numpy array of dtype np.uint8 for the second parent
+    :param bitsize: The number of bits in the floating point number
+
+    :return: A list of two numpy arrays of dtype np.uint8 for the two children
+    """
     global bdict
 
     child1 = np.zeros(parent1.shape, dtype=np.uint8)
@@ -68,6 +86,15 @@ def signle_point(parent1, parent2, bitsize):
     return [child1, child2]
 
 def equal_prob_cross(parent1, parent2, bitsize):
+    """
+    Equal probability crossover that doesnt cross the exponent of the floating point number
+
+    :param parent1: A numpy array of dtype np.uint8 for the first parent
+    :param parent2: A numpy array of dtype np.uint8 for the second parent
+    :param bitsize: The number of bits in the floating point number
+
+    :return: A list of two numpy arrays of dtype np.uint8 for the two children
+    """
     global bdict
 
     child1 = np.zeros(parent1.shape, dtype=np.uint8)
@@ -96,6 +123,15 @@ def equal_prob_cross(parent1, parent2, bitsize):
     return [child1, child2]
 
 def full_single_point(parent1, parent2, **kwargs):
+    """
+    Single point crossover that crosses the full bit array.
+
+    :param parent1: A numpy array of dtype np.uint8 for the first parent
+    :param parent2: A numpy array of dtype np.uint8 for the second parent
+    :param kwargs: Not used, pipeline for excess kwargs
+
+    :return: A list of two numpy arrays of dtype np.uint8 for the two children
+    """
     global bdict
 
     child1 = np.zeros(parent1.shape, dtype=np.uint8)
@@ -130,6 +166,15 @@ def full_single_point(parent1, parent2, **kwargs):
 
 
 def full_double_point(parent1, parent2, **kwargs):
+    """
+    Double point crossover that crosses the full bit array.
+
+    :param parent1: A numpy array of dtype np.uint8 for the first parent
+    :param parent2: A numpy array of dtype np.uint8 for the second parent
+    :param kwargs: Not used, pipeline for excess kwargs
+
+    :return: A list of two numpy arrays of dtype np.uint8 for the two children
+    """
     global bdict
 
     child1 = np.zeros(parent1.shape, dtype=np.uint8)
@@ -157,6 +202,15 @@ def full_double_point(parent1, parent2, **kwargs):
     return [child1, child2]
 
 def full_equal_prob(parent1, parent2, **kwargs):
+    """
+    Equal probability crossover that crosses the full bit array.
+
+    :param parent1: A numpy array of dtype np.uint8 for the first parent
+    :param parent2: A numpy array of dtype np.uint8 for the second parent
+    :param kwargs: Not used, pipeline for excess kwargs
+
+    :return: A list of two numpy arrays of dtype np.uint8 for the two children
+    """
     global bdict
 
     child1 = np.zeros(parent1.shape, dtype=np.uint8)

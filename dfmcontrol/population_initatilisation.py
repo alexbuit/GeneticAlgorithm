@@ -13,14 +13,26 @@ except ImportError:
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
     """
     Generate a random bit population
+
     :param n: Population size dtype int
     :param m: Bitsize dtype int
+
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
     return np.array([np.random.randint(0, 2, size=m) for _ in range(n)])
 
 
 def normalrand_bit_pop_float(n, bitsize, lower, upper):
+    """
+    Generate a normal distributed bit population
+
+    :param n: Population size dtype int
+    :param bitsize: Bitsize dtype int
+    :param lower: Lower bound dtype float
+    :param upper: Upper bound dtype float
+
+    :return: List of random bits with a bit being a ndarray array of 0 and 1.
+    """
 
     pop_float = np.linspace(lower, upper, num=n)
     blist = []
@@ -45,6 +57,16 @@ def normalrand_bit_pop_float(n, bitsize, lower, upper):
 
 def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: float,
                              scale: float) -> np.ndarray:
+    """
+    Generate a cauchy distributed bit population
+
+    :param shape: Population size dtype tuple
+    :param bitsize: Bitsize dtype int
+    :param loc: loc dtype float
+    :param scale: scale dtype float
+
+    :return: List of bits that are cauchy distributed with a bit being a ndarray array of 0 and 1.
+    """
     if isinstance(shape, int):
         shape = (shape, 1)
     elif len(shape) == 1:
@@ -63,6 +85,16 @@ def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: f
 
 def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: float,
                              high: float) -> np.ndarray:
+    """
+    Generate a uniform distributed bit population
+
+    :param shape: Population size dtype tuple
+    :param bitsize: Bitsize dtype int
+    :param low: low dtype float
+    :param high: high dtype float
+
+    :return: List of random bits with a bit being a ndarray array of 0 and 1.
+    """
 
     if isinstance(shape, int):
         shape = (shape, 1)
@@ -81,6 +113,17 @@ def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: floa
 
 
 def bit8(shape: list, bitsize: int = 8, factor = 1.0, bias = 0.0):
+    """
+    Generate a bit population within boundaries imposed by the factor, bias and
+    bitsize.
+
+    :param shape: Population size dtype tuple
+    :param bitsize: Bitsize dtype int
+    :param factor: Factor dtype float
+    :param bias: Bias dtype float
+
+    :return: List of random bits with a bit being a ndarray array of 0 and 1.
+    """
 
     if isinstance(shape, int):
         shape = (shape, 1)
@@ -99,16 +142,37 @@ def uniform_bit_pop(shape: Iterable, bitsize: int, lower: float, upper: float,
                     factor: float = 1.0, bias: float = 0.0) -> np.ndarray:
     """
     Generate a uniform bit population
+
     :param shape: Population size dtype tuple
     :param bitsize: Bitsize dtype int
     :param lower: Lower bound dtype float
     :param upper: Upper bound dtype float
+
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
     pop_float = np.vstack(np.array_split(np.random.uniform(lower, upper, shape[0] * shape[1]), shape[0]))
 
     if factor < np.abs(lower) or factor < np.abs(upper):
         factor = np.abs(lower) if np.abs(lower) > np.abs(upper) else np.abs(upper)
+
+    return int2ndbit(pop_float, bitsize, factor=factor, bias=bias)
+
+def cauchy_bit_pop(shape: Iterable, bitsize: int, loc: float, scale: float,
+                   factor: float = 1.0, bias: float = 0.0) -> np.ndarray:
+    """
+    Generate a cauchy bit population
+
+    :param shape: Population size dtype tuple
+    :param bitsize: Bitsize dtype int
+    :param loc: loc dtype float
+    :param scale: scale dtype float
+
+    :return: List of random bits with a bit being a ndarray array of 0 and 1.
+    """
+    pop_float = np.vstack(np.array_split(cauchy.rvs(loc=loc, scale=scale, size=shape[0] * shape[1]), shape[0]))
+
+    if factor < np.abs(loc):
+        factor = np.abs(loc)
 
     return int2ndbit(pop_float, bitsize, factor=factor, bias=bias)
 

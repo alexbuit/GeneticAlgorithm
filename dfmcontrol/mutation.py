@@ -4,9 +4,11 @@ import numpy as np
 def mutate(bit, bitsize, **kwargs) -> np.ndarray:
     """
     Mutate a bit string from mantissa to bitsize
+
     :param bit: bit array to mutate
     :param bitsize: size of the bit array
     :param kwargs: mutate_coeff => number of mutations to apply
+
     :return: mutated bit array
     """
     global bdict
@@ -33,9 +35,11 @@ def mutate(bit, bitsize, **kwargs) -> np.ndarray:
 def full_mutate(bit, bitsize, **kwargs) -> np.ndarray:
     """
     Mutate a bit array from 0 to bitsize
+
     :param bit: bit array to mutate
     :param bitsize: size of the bit array
     :param kwargs: mutate_coeff => number of mutations to apply
+
     :return: mutated bit array
     """
     global bdict

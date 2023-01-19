@@ -97,11 +97,13 @@ or other functions in the library. The functions that can be replaced are:
 A function can be set directly by using the following syntax:
 
 .. code-block:: python
+
     ga.population = ga.population_random
 
 or by a method provided by the class:
 
 .. code-block:: python
+
     ga.set_population(ga.population_random)
 
 .. Note::
@@ -126,9 +128,11 @@ and are added seperatly as the following
  - muargs, for the mutation function
 
 As shown in the following example:
+
 .. code-block:: python
 
     ga(selargs={'maximize': True}, cargs={'crossover_rate': 0.5}, muargs={'mutation_rate': 0.1})
+
 
 .. Note::
     The arguments for the fitness function are often added as part of the selargs argument.
@@ -140,19 +144,23 @@ of the algortihm to one of the following values:
  - 2: Output the best fitness value of each generation and the best chromosome
 
 which can be done by using the following syntax:
+
 .. code-block:: python
 
     ga.verbosity = 2
 
 or by adding this as a kwarg to the run method:
+
 .. code-block:: python
 
     ga.run(verbosity=2)
 
 The maximum number of generations can be set by using the following syntax:
+
 .. code-block:: python
 
     ga.run(epochs=100)
+
 
 Saving and loading results
 --------------------------

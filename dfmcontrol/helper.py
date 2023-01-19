@@ -1,3 +1,4 @@
+from typing import Callable
 
 import numpy as np
 import struct
@@ -83,8 +84,8 @@ def b2dfloat(bit: np.ndarray) -> np.ndarray:
 def floatToBinary64(val):
     """
     https://www.technical-recipes.com/2012/converting-between-binary-and-decimal-representations-of-ieee-754-floating-point-numbers-in-c/
-    :param value:
-    :return:
+    :param value: float
+    :return: binary representation of float
     """
     value = struct.unpack("Q", struct.pack('d', val))[0]
     if val < 0:
@@ -100,8 +101,8 @@ def floatToBinary64(val):
 def floatToBinary32(val):
     """
     https://www.technical-recipes.com/2012/converting-between-binary-and-decimal-representations-of-ieee-754-floating-point-numbers-in-c/
-    :param value:
-    :return:
+    :param value: float
+    :return: binary representation of float
     """
     value = struct.unpack("L", struct.pack('f', val))[0]
     if val < 0:
@@ -115,6 +116,14 @@ def floatToBinary32(val):
 
 
 def Ndbit2float(valarr: np.ndarray, bitsize: int, **kwargs) -> np.ndarray:
+    """
+    Conversion of bit m x n (big endian) bit array (numpy) to IEEE 754 double precision float
+
+    :param valarr: m x n ndarray of numpy integers representing a bit
+    :param bitsize: Size of the bit, big endian
+    :param kwargs:
+    :return: m x n/bitsize ndarray of IEEE 754 double precision floats
+    """
     global bdict
     b2f = b2dfloat if bitsize == 64 else b2sfloat
 
@@ -154,6 +163,12 @@ def Ndbit2float(valarr: np.ndarray, bitsize: int, **kwargs) -> np.ndarray:
 
 
 def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
+    """
+    Conversion of bit m x n (big endian) bit array (numpy) to IEEE 754 double precision float
+    :param valarr:  m x n ndarray of numpy integers representing a bit
+    :param bitsize: Size of the bit, big endian
+    :return:  m x n/bitsize ndarray of IEEE 754 double precision floats
+    """
     global bdict
 
     f2b = floatToBinary64 if bitsize == 64 else floatToBinary32
@@ -225,6 +240,15 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
 
 
 def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwargs):
+    """
+    Convert an array of integers to a bit array of size bitsize * len(valarr)
+
+    :param valarr: MxN matrix of integers
+    :param bitsize: Size of the bit, big endian, first bit is sign the others are val
+    :param normalised:  divide by 2**bitsize-1 and apply factor / bias if true
+    :param kwargs: factor: float / bias: float
+    :return: MxN matrix of 0, 1 with dtype np.uint8
+    """
     factor: float = 1.0
     if "factor" in kwargs:
         factor = kwargs["factor"]
@@ -277,6 +301,7 @@ def convertpop2n(bit2num = None, target = None, **kwargs):
             m, n = bit.shape
             a = 2 ** np.arange(n)
             return bit @ a
+
         :param bit2num:
             Binary to numeric conversion routine
         :param kwargs:
@@ -287,21 +312,63 @@ def convertpop2n(bit2num = None, target = None, **kwargs):
 
 
 def sigmoid(x):
+    """
+    Sigmoid function
+
+    :param x: input
+    :return: sigmoid(x)
+    """
     return 1 / (1 + pow(np.e, -x))
 
 def sigmoid_derivative(x):
+    """
+    Derivative of sigmoid function
+
+    :param x: input
+
+    :return: sigmoid_derivative(x)
+    """
     return x * (1 - x)
 
 def sigmoid2(x, a = 1, b = -1, c = 0.5, d=0 ,Q = 0.5, nu = 1):
+    """
+    Sigmoid function
+
+    :param x: input
+    :param a:
+    :param b:
+    :param c:
+    :param d:
+    :param Q:
+    :param nu:
+    :return: sigmoid(x)
+    """
     return a + (b - a) / (1 + Q * np.exp(-c * (x - d)))**(1/nu)
 
-def is_decorated(func):
+def is_decorated(func: Callable) -> bool:
+    """
+    Check if function is decorated
+
+    :param func: function of type function
+
+    :return: True if decorated, False if not
+    """
     try:
         return hasattr(func, '__wrapped__') or func.__name__ not in globals()
     except AttributeError:
         return hasattr(func, "__wrapped__") or func.__class__.__name__ not in globals()
 
 def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
+    """
+    Plot 3d function
+    :param fx: function to plot
+    :param min: min value of x and y
+    :param max: max value of x and y
+    :param resolution: resolution of the plot
+    :param mode: plot_surface or contour
+    :param kwargs: kwargs for plot_surface, contour / show = True
+    :return: None if show = True, else fig, ax
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -321,9 +388,14 @@ def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
 
     ax.title.set_text(f"$f(x_1, x_2) = ${fx.__name__}")
 
-    plt.show()
+    show = kwargs.get("show", True)
 
-    return None
+    if show:
+        plt.show()
+        return None
+
+    else:
+        return fig, ax
 
 
 # if __name__ == "__main__":
