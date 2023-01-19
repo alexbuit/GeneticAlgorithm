@@ -24,7 +24,7 @@ Module Index
 Genetic Algorithm:
 ------------------
 .. toctree::
-    genetic algorithm <genetic_algorithm.rst>
+    genetic algorithm <ga.rst>
 
 Population:
 -----------
@@ -52,9 +52,15 @@ Helper:
     helper <helper.rst>
 
 Mathematical test functions:
----------------
+----------------------------
 .. toctree::
     test functions <test_functions.rst>
+
+.. toctree::
+   math functions <t_functions.rst>
+
+.. toctree::
+   minima lookup <minima.rst>
 
 
 

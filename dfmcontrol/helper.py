@@ -51,6 +51,7 @@ def b2int(bit: np.ndarray) -> np.ndarray:
         m, n = bit.shape  # number of columns is needed, not bits.size
     else:
         n = bit.size
+
     a = 2 ** np.arange(n) # [::-1]  # -1 reverses array of powers of 2 of same length as bits
     return bit @ a  # this matmult is the key line of code
 
@@ -248,7 +249,7 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwarg
         for val in range(valarr.shape[1]):
             # convert int to binary numpy array and add to bit array with sign bit in pos 0
             bit[val * bitsize + 1: (val + 1) * bitsize] = int_to_binary(abs(valarr[arr, val]), bitsize - 1)
-            # assign the signed bit, 0 if >0 1 if < 0
+            # assign the signed bit, 0 if > 0, 1 if < 0
             bit[val * bitsize] = (lambda x: 0 if x > 0 else 1)(valarr[arr, val])
 
         res[arr] = bit
