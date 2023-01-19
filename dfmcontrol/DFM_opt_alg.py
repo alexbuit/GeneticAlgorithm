@@ -398,14 +398,18 @@ class genetic_algoritm:
     def set_select(self, select: Callable):
         """
         Set the parent selection method used in GA, method should take an
-        np.ndarray of dim mx1 as an argument + kwargs and return a list of lists with
-        indexes of (unique) combinations.
+        np.ndarray of dim mx1 as an argument + kwargs. The method should return
+        4 arrays:
+         parent indexes, fitness, probability of selection and function results
+        Of which only the first one is required for the algorithm, the other 3
+        arrays are passed on to the log.select attribute and can be empty
+        arrays.
 
         :param select:
             Method to select parent combination by returning their indexes in the
             population self.pop.
 
-        Example method:
+        Example method: \n
           def select(pop, **kwargs):
             '''Return completely random combinations in pop array''' \n
             return np.random.choice(range(pop.shape[0]), 2, replace=False)
@@ -414,8 +418,8 @@ class genetic_algoritm:
          handle excess arguments.
 
         :param optional fitness:
-         Method to determine the fitness of a population which will be logged
-         in self.log.
+          Method to determine the fitness of a population which will be logged
+          in self.log.
 
         :return: None
         """
