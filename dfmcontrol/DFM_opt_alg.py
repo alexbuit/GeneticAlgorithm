@@ -11,76 +11,22 @@ try:
     from .selection_funcs import *
     from .cross_funcs import *
     from .test_functions import *
+    from .mutation import *
     from .log import log
+
 except ImportError:
     from dfmcontrol.population_initatilisation import *
     from dfmcontrol.gradient_descent import gd
     from dfmcontrol.selection_funcs import *
     from dfmcontrol.cross_funcs import *
+    from dfmcontrol.mutation import *
     from dfmcontrol.test_functions import *
     from dfmcontrol.log import log
-
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
 
-def mutate(bit, bitsize, **kwargs) -> np.ndarray:
-    """
-    Mutate a bit string from mantissa to bitsize
-    :param bit: bit array to mutate
-    :param bitsize: size of the bit array
-    :param kwargs: mutate_coeff => number of mutations to apply
-    :return: mutated bit array
-    """
-    global bdict
-
-    bitc = bit.copy()
-    nbits = int(bitc.size/bitsize)
-
-
-    mutate_coeff = int(bit.size/bitsize)
-    if "mutate_coeff" in kwargs:
-        mutate_coeff = kwargs["mutate_coeff"]
-    # mutations = np.random.randint(nbits * (1 + bdict[bitsize][1]), bit.size, mutate_coeff)
-    mutations = np.random.choice(np.arange(nbits * (1 + bdict[bitsize][1]), bit.size), mutate_coeff, replace=False)
-    # Speed up?
-    for mutation in mutations:
-        if bitc[mutation]:
-            bitc[mutation] = 0
-        else:
-            bitc[mutation] = 1
-
-    return bitc
-
-
-def full_mutate(bit, bitsize, **kwargs) -> np.ndarray:
-    """
-    Mutate a bit array from 0 to bitsize
-    :param bit: bit array to mutate
-    :param bitsize: size of the bit array
-    :param kwargs: mutate_coeff => number of mutations to apply
-    :return: mutated bit array
-    """
-    global bdict
-
-    bitc = bit.copy()
-
-    mutate_coeff = int(bit.size/bitsize)
-    if "mutate_coeff" in kwargs:
-        mutate_coeff = kwargs["mutate_coeff"]
-    # mutations = np.random.randint(nbits * (1 + bdict[bitsize][1]), bit.size, mutate_coeff)
-    mutations = np.random.choice(np.arange(0, bit.size), mutate_coeff, replace=False)
-    # Speed up?
-    for mutation in mutations:
-        if bitc[mutation]:
-            bitc[mutation] = 0
-        else:
-            bitc[mutation] = 1
-
-    return bitc
-
-#
 # def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
 #                cross: Callable, mutate: Callable):
 #     """
@@ -108,9 +54,9 @@ class genetic_algoritm:
     """
     Genetic Algorithm functions
 
-    :param: dtype => data type of the population
-    :param: bitsize => size of the bit array
-    :param: endianness => endianness of the bit array
+    :param dtype: data type of the population
+    :param bitsize: size of the bit array
+    :param endianness: endianness of the bit array
 
     The genetic algorithm is a stochastic search algorithm that is used to find the global minimum (or maximum) of a function.
     In this case the algortihm is initialised with a population of random bit arrays with size bitsize. The population is then
@@ -124,6 +70,7 @@ class genetic_algoritm:
     by calling genetic_algorithm.get_log().<attr>.<value> or by indexing the genetic_algorithm.log.<attr>.<value> object. This log
     can be saved to a .pickle file by calling genetic_algorithm.save_log() or by calling genetic_algorithm.save_log() with a file name.
     """
+
     def __init__(self, dtype: str = "float", bitsize: int = 32,
                  endianness: str = "big"):
         self.dtype = dtype
@@ -159,15 +106,17 @@ class genetic_algoritm:
         self.b2n: Callable = Ndbit2float
         self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
-                               self.b2n, self.elitism, self.save_top,
+                              self.b2n, self.elitism, self.save_top,
                               self.bitsize, self.b2nkwargs)
-
 
     def __call__(self, *args, **kwargs):
         """
         Call the genetic algorithm with the given arguments
+
         :param args: arguments for the target function
+
         :param kwargs: keyword arguments for the target function
+
         :return: None
         """
         self.run(*args, **kwargs)
@@ -178,7 +127,9 @@ class genetic_algoritm:
     def __getitem__(self, item: int) -> Union[dict, list]:
         """
         Get the results of the genetic algorithm
+
         :param item: index of the result
+
         :return: result
         """
         return self.results[item]
@@ -188,11 +139,17 @@ class genetic_algoritm:
             epochs: int = 100, verbosity: int = 1):
         """
         Run the genetic algorithm
+
         :param cargs: arguments for the cross function
+
         :param muargs: arguments for the mutation function
+
         :param selargs: arguments for the selection function
+
         :param epochs: number of iterations
+
         :param verbosity: verbosity level
+
         :return: None
         """
 
@@ -242,8 +199,6 @@ class genetic_algoritm:
                 self.log.ranking.update(rank, self.tfunc.minima["x"])
                 self.log.time.update(time() - self.tstart)
 
-
-
         for epoch in range(self.epochs):
             newgen = []
             if verbosity:
@@ -254,18 +209,17 @@ class genetic_algoritm:
 
             for ppair in parents[self.elitism:]:
                 # child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
-                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                child1, child2 = self.cross(self.pop[ppair[0]],
+                                            self.pop[ppair[1]], **cargs)
 
                 newgen.append(child1)
                 newgen.append(child2)
 
-
             for ppair in parents[:self.elitism]:
-                child1, child2 = self.cross(self.pop[ppair[0]], self.pop[ppair[1]], **cargs)
+                child1, child2 = self.cross(self.pop[ppair[0]],
+                                            self.pop[ppair[1]], **cargs)
                 newgen.append(self.mutation(child1, **muargs))
                 newgen.append(self.mutation(child2, **muargs))
-
-
 
             # Select top10
             t10 = parents[:self.save_top]
@@ -292,7 +246,8 @@ class genetic_algoritm:
                         j += 1
 
                     print(fx, self.tfunc.minima["fx"])
-                    self.log.ranking.update(rank, fx, self.tfunc.minima["x"], self.tfunc.minima["fx"])
+                    self.log.ranking.update(rank, fx, self.tfunc.minima["x"],
+                                            self.tfunc.minima["fx"])
                     self.log.time.update(time() - self.tstart)
                     self.log.selection.update(parents, p, fitness)
                     self.log.value.update(self.pop, self.genlist[epoch])
@@ -309,12 +264,18 @@ class genetic_algoritm:
 
                     # Deprecated
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
-                                       "ranking": rank,
-                                       "ranknum": self.b2n(rank, self.bitsize, self.b2nkwargs),
-                                       "fitness": fitness,
-                                       "value": self.pop,
-                                       "valuetop%s" % self.save_top: self.genlist[epoch],
-                                       "valuenum": np.asarray(self.get_numeric(target=list(self.pop), bitsize=self.bitsize))}
+                                               "ranking": rank,
+                                               "ranknum": self.b2n(rank,
+                                                                   self.bitsize,
+                                                                   self.b2nkwargs),
+                                               "fitness": fitness,
+                                               "value": self.pop,
+                                               "valuetop%s" % self.save_top:
+                                                   self.genlist[epoch],
+                                               "valuenum": np.asarray(
+                                                   self.get_numeric(
+                                                       target=list(self.pop),
+                                                       bitsize=self.bitsize))}
 
 
                 elif self.dolog == 1:
@@ -322,8 +283,8 @@ class genetic_algoritm:
                     self.log.time.update(time() - tsart)
 
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
-                                       "ranking": rank,
-                                       "value": self.pop}
+                                               "ranking": rank,
+                                               "value": self.pop}
             # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
             # self.min = np.min(y)
         self.results = self.genlist
@@ -334,8 +295,8 @@ class genetic_algoritm:
     def init_pop(self, method: Union[str, Callable] = "uniform", **kwargs):
         """
         set self.pop to an array generated by predefined routines or usermade method.
-        :param method:
-            Optional[str, callable]
+
+        :param method: Optional[str, callable]
             if str method will be initialised by routines included in population_initialisation.py
             the str should match the init method, so uniform -> 'uniform' and
             cauchy 'cauchy' etc
@@ -345,8 +306,9 @@ class genetic_algoritm:
             A population function should return a mx1 numpy array of bits, to convert
             floating point values to approved bit values use the float2Ndbit function
             included in helper.py
-        :param kwargs:
-            kwargs for init method
+
+        :param kwargs: kwargs for init method
+
         :return: None
         """
         if method == "uniform":
@@ -359,17 +321,17 @@ class genetic_algoritm:
             self.pop = method(**kwargs)
 
         self.log.pop = self.pop
-        self.shape = (self.pop.shape[0], self.pop.shape[1]/self.bitsize)
+        self.shape = (self.pop.shape[0], self.pop.shape[1] / self.bitsize)
 
         return None
 
     def set_pop(self, pop: np.ndarray):
         """
         Set population (self.pop) to provided ndarray of bits.
-        :param pop:
-        np.ndarray of shape mx1, with bits in numpy arrays of dtype: np.uint8
-        like:
-        [[0, 1, ... ,0, 1], [0, 1, ... ,0, 1], [0, 1, ... ,0, 1]]
+
+        :param pop: np.ndarray of shape mx1, with bits in numpy arrays of
+         dtype: np.uint8 like: [[0, 1, ... ,0, 1], [0, 1, ... ,0, 1], [0, 1, ... ,0, 1]]
+
         :return: None
         """
         self.pop = pop
@@ -380,34 +342,54 @@ class genetic_algoritm:
     def get_pop(self):
         """
         Return a copy of population (self.pop)
+
         :return: self.pop.copy()
         """
         return self.pop.copy()
 
     def target_func(self, target, targs: dict = None):
+        """
+        Set target function to be used in the optimisation.
+
+        :param target: Callable function to be used as target function,
+         should take an array of [x1, x2, ... , xn] (array of float)
+         and return f([x1, x2, ... ,xn]) (float).
+        :param targs: dict of kwargs for target function.
+
+        :return: None
+        """
+
         self.tfunc = target
         self.targs = targs
-
         return None
 
     def get_results(self):
-        return self.results
+        """
+        Return a copy of results (self.results)
+
+        :return: self.results.copy()
+        """
+        return self.results.copy()
 
     def set_cross(self, cross: Callable):
         """
         Set the cross method used in the GA, method should take 2 arguments:
-        parent1 and parent2 (both np.ndarray of dim 1 with dtype np.uint8)
-          + optional kwargs
+        parent1 and parent2 (both np.ndarray of dim 1 with dtype np.uint8) + optional kwargs
         and return a single numpy array with binary value of the resulting child
         from p1 and p2.
+
         :param cross:
             Method to cross binary data p1 and p2 to form child.
+
         Example method:
-        def cross(p1, p2, bitsize, **kwargs):
-            # Take the first half of p1 and cross it with the other half of p2
-            return pnp.concatenate([p1[:int(1/2 * bitsize)], p2[int(1/2 * bitsize):]])
+         def cross(p1, p2, bitsize, **kwargs):
+            ''' Cross two parents to form a child ''' \n
+            # Take the first half of p1 and cross it with the other half of p2 \n
+            return np.concatenate([p1[:int(1/2 * bitsize)], p2[int(1/2 * bitsize):]])
+
         It is recommended to add **kwargs to the provided method to be able to
         handle excess arguments.
+
         :return: None
         """
         self.cross = cross
@@ -418,19 +400,23 @@ class genetic_algoritm:
         Set the parent selection method used in GA, method should take an
         np.ndarray of dim mx1 as an argument + kwargs and return a list of lists with
         indexes of (unique) combinations.
+
         :param select:
             Method to select parent combination by returning their indexes in the
             population self.pop.
-        Example method:
-        def select(pop, **kwargs):
-            # Return completely random combinations in pop array
-            return np.random.choice(range(pop.shape[0]), 2, replace=False)
-        It is recommended to add **kwargs to the provided method to be able to
-        handle excess arguments.
 
-        :param: optional fitness
-            Method to determine the fitness of a population which will be logged
-            in self.log.
+        Example method:
+          def select(pop, **kwargs):
+            '''Return completely random combinations in pop array''' \n
+            return np.random.choice(range(pop.shape[0]), 2, replace=False)
+
+         It is recommended to add **kwargs to the provided method to be able to
+         handle excess arguments.
+
+        :param optional fitness:
+         Method to determine the fitness of a population which will be logged
+         in self.log.
+
         :return: None
         """
         self.select = select
@@ -441,23 +427,29 @@ class genetic_algoritm:
         Set the mutation method which takes a single np.ndarray of dim 1 with
         dtype np.uint8 and kwargs to return the mutated bit. The shape of the input
         array should equal the shape of the output array.
+
         :param mutation:
             Method to mutate a single np.ndarray of bits
+
         Example method:
-        def mutate(bit, **kwargs):
-            # select a random point in the bit
+         def mutate(bit, **kwargs):
+            ''' Mutate a single bit ''' \n
+            # select a random point in the bit \n
             ind = np.random.randint(0, bit.size)
-            # if 1 turn 0 else turn 1.
+            # if 1 turn 0 else turn 1. \n
             if bit[ind]:
                 bit[ind] = 0
             else:
                  bit[ind] = 1
             # return the mutated bit
             return bit
+
         It is recommended to add **kwargs to the provided method to be able to
         handle excess arguments.
-        :return:
+
+        :return None:
         """
+
         self.mutation = mutation
         return None
 
@@ -467,7 +459,8 @@ class genetic_algoritm:
         :param path: str
         :return: None
         """
-        genarr = np.empty((self.genlist[0].shape[0] - 1, self.epochs), dtype=object)
+        genarr = np.empty((self.genlist[0].shape[0] - 1, self.epochs),
+                          dtype=object)
         k = 0
         for i in self.genlist:
             for j in range(i.shape[0] - 1):
@@ -483,7 +476,9 @@ class genetic_algoritm:
     def load_results(self, path: str):
         """
         Load the results of a GA from a .txt file.
+
         :param path: str
+
         :return: None
         """
         from dfmcontrol.AdrianPackv402.Fileread import Fileread
@@ -503,7 +498,8 @@ class genetic_algoritm:
 
         return self.results
 
-    def get_numeric(self, bit2num: Callable = None, target: list = None, **kwargs):
+    def get_numeric(self, bit2num: Callable = None, target: list = None,
+                    **kwargs):
         """
         Convert results list with np.ndarrays of dimension mx1 to numeric data
         using provided method or builtin routine for multi variable
@@ -566,11 +562,13 @@ class genetic_algoritm:
         The log class saves all the data to seperate methods in addition to this
         logdict, see the log class documentation.
 
+        *Logdict is deprecated and will be removed in future versions*
+
         :return: None
         """
         self.log = log(self.pop, self.select, self.cross, self.mutation,
-                               self.b2n,self.elitism, self.save_top,
-                              self.bitsize, self.b2nkwargs)
+                       self.b2n, self.elitism, self.save_top,
+                       self.bitsize, self.b2nkwargs)
 
         self.dolog = verbosity
 
@@ -579,7 +577,9 @@ class genetic_algoritm:
     def save_log(self, path: str = ""):
         """
         Save the logdict to a .pickle file.
+
         :param path: str
+
         :return: None
         """
         if path == "":
@@ -590,11 +590,14 @@ class genetic_algoritm:
 
         print("Log saved to: %s" % path)
 
-    def load_log(self, path:str, copy: bool = True):
+    def load_log(self, path: str, copy: bool = True):
         """
         Load a logdict from a .pickle file.
+
         :param path: path to .pickle file
+
         :param copy: If True, the logdict will be copied to the current GA instance.
+
         :return: None
         """
 
@@ -602,8 +605,9 @@ class genetic_algoritm:
             old_log = pickle.load(f)
 
         if copy:
-            self.log = log(old_log.pop, old_log.select, old_log.cross, old_log.mutation,
-                            old_log.b2n, old_log.elitism, old_log.savetop,
+            self.log = log(old_log.pop, old_log.select, old_log.cross,
+                           old_log.mutation,
+                           old_log.b2n, old_log.elitism, old_log.savetop,
                            old_log.bitsize, old_log.b2nkwargs)
 
             self.log.creation = old_log.creation
@@ -642,8 +646,11 @@ class genetic_algoritm:
     def none(*args, **kwargs) -> None:
         """
         Dummy function for no transformation.
+
         :param args: args
+
         :param kwargs: kwargs
+
         :return: None
         """
         return None
@@ -655,6 +662,7 @@ if __name__ == "__main__":
 
     def inv_ackley(x):
         return booths_function(x)
+
 
     d = 39
 
@@ -674,7 +682,8 @@ if __name__ == "__main__":
     print(ga.log.creation)
 
     ga.optimumfx = np.full(d, -2.903534)
-    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize, lower=low, upper=high, factor=5)
+    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize,
+                lower=low, upper=high, factor=5)
     ga.b2nkwargs = {"factor": 5}
 
     ga.elitism = 2
@@ -691,13 +700,13 @@ if __name__ == "__main__":
 
     ga.target_func(tfunc)
 
-    ga.run(epochs=epochs, muargs={"mutate_coeff": 3}, selargs={"nbit2num": ndbit2int,
-                                                               "k": k, "fitness_func": sigmoid_fitness,
-                                                               "allow_duplicates": True},
+    ga.run(epochs=epochs, muargs={"mutate_coeff": 3},
+           selargs={"nbit2num": ndbit2int,
+                    "k": k, "fitness_func": sigmoid_fitness,
+                    "allow_duplicates": True},
            verbosity=1)
 
     ga.save_log("Booth16b_p%s.pickle" % iteration)
     iteration += 0
-
 
     print("t: ", time() - tsart)

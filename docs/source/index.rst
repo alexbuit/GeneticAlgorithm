@@ -26,6 +26,21 @@ Genetic Algorithm:
 .. toctree::
     genetic algorithm <genetic_algorithm.rst>
 
+Population:
+-----------
+.. toctree::
+    population <population.rst>
+
+Selection:
+----------
+.. toctree::
+    selection <selection.rst>
+
+Crossover:
+----------
+.. toctree::
+    crossover <crossfncs.rst>
+
 Log:
 ----
 .. toctree::
@@ -35,6 +50,11 @@ Helper:
 -------
 .. toctree::
     helper <helper.rst>
+
+Mathematical test functions:
+---------------
+.. toctree::
+    test functions <test_functions.rst>
 
 
 

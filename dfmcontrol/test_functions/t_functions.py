@@ -86,9 +86,11 @@ class _tfx_decorator:
     def compute(self, x, *args, **kwargs) -> Union[float, np.ndarray]:
         """
         Compute the function value at x.
+
         :param x: np.ndarray
         :param args: *args
         :param kwargs: **kwargs
+
         :return: np.ndarray
         """
         return self.__call__(x, *args, **kwargs)
@@ -96,7 +98,9 @@ class _tfx_decorator:
     def set_dimension(self, ndim: int):
         """
         Set the dimension of the function.
+
         :param ndim: int
+
         :return: None
         """
         self.ndim = int(ndim)
@@ -106,7 +110,9 @@ class _tfx_decorator:
     def dim(self, ndim: int):
         """
         Alias for set_dimension.
+
         :param ndim: int
+
         :return: None
         """
         self.set_dimension(ndim)
@@ -116,6 +122,7 @@ class _tfx_decorator:
         """
         Set the minima of the function.
         :param kwargs: minima: {"x": [x1, x2, ... , xn], "fx": []}
+
         :return: None
         """
         self.update_optmin(**kwargs)
@@ -124,7 +131,9 @@ class _tfx_decorator:
     def set_optima(self, **kwargs):
         """
         Set the optima of the function.
+
         :param kwargs: optima: {"x": [x1, x2, ... , xn], "fx": []}
+
         :return: None
         """
         self.update_optmin(**kwargs)
@@ -148,6 +157,7 @@ class _tfx_decorator:
         Calculate the optima and minima of the function by iterating the function of a large grid of points.
         the grid is defined by the high and low attributes.
         This method is unreliable and expensive for higher dimensional functions.
+
         :return: optima: {"x": [x1, x2, ... , xn], "fx": []}, minima: {"x": [x1, x2, ... , xn], "fx": []}
         """
 
@@ -206,10 +216,12 @@ class _tfx_decorator:
     def gradient(self, x, stepsize: float = 0.01, *args, **kwargs):
         """
         Calculate the gradient of the function at x.
+
         :param x: Input point at which to calculate the gradient.
         :param stepsize: The stepsize to use for the gradient calculation.
         :param args:  function arguments
         :param kwargs: dictionary of function arguments
+
         :return: The gradient of the function at x.
         """
         return self.func(x + stepsize, *args, **kwargs)
@@ -218,11 +230,13 @@ class _tfx_decorator:
 def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_analytical: bool = False, **kwargs):
     """
     Decorator for creating a TFx object.
+
     :param func: Callable function to be decorated.
     :param ndim: int, dimension of the function.
     :param cores: int, number of cores to use for the calculation of the optima and minima.
     :param compute_analytical: bool, whether to compute the analytical optima and minima.
     :param kwargs: minima: {"x": [x1, x2, ... , xn], "fx": []}, optima: {"x": [x1, x2, ... , xn], "fx": []}
+
     :return: TFx object
     """
     # If a function is given as an argument, return the decorator
@@ -231,14 +245,16 @@ def tfx_decorator(func: Callable = None, ndim: int= 1, cores: int =1, compute_an
 
     # Otherwise, create a decorator and return it.
     else:
-        return lambda f: _tfx_decorator(f, ndim, cores, compute_analytical, **kwargs)
+        dec = lambda f: _tfx_decorator(f, ndim, cores, compute_analytical, **kwargs)
 
 # 1D functions
 @tfx_decorator
 def tfx(x):
     """
     Test function.
+
     :param x: Input point.
+
     :return: The value of the function at x.
     """
     return 3 * x**2 + 2 * x + 1
@@ -248,8 +264,10 @@ def tfx(x):
 def wheelers_ridge(x: Union[np.ndarray, list], a: float = 1.5) -> float:
     """
     Compute the Wheelersridge function for given x1 and x2
+
     :param x: list with x1 (otype: float) and x2 (otype: float)
     :param a: additional parameter typically a=1.5
+
     :return: Value f(x1, x2, a), real float
     """
     x1, x2 = x
@@ -259,7 +277,9 @@ def wheelers_ridge(x: Union[np.ndarray, list], a: float = 1.5) -> float:
 def booths_function(x: Union[np.ndarray, list]) -> float:
     """
     Compute the Booths function for given x1 and x2
+
     :param x: list with x1 (otype: float) and x2 (otype: float)
+
     :return: Value f(x1, x2), real float
     """
     return (x[0] + 2*x[1] - 7)**2 + (2 * x[0] + x[1] - 5)**2
@@ -269,8 +289,10 @@ def booths_function(x: Union[np.ndarray, list]) -> float:
 def michealewicz(x: list, m: float = 10.0) -> float:
     """
     Compute the Micealewicz function for x1, x2, x...
+
     :param x: List of x inputs, where N-dimensions = len(x)
     :param m: Steepness parameter, typically m=10
+
     :return: Value f(x1, x2, ....), real float
     """
     return -sum(
@@ -281,11 +303,13 @@ def michealewicz(x: list, m: float = 10.0) -> float:
 def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2):
     """
     Compute Ackley' function for x1, x2, x...
+
     :param x: list of x inputs where N-dimension = len(x)
-    :param a: 
-    :param b:
-    :param c:
-    :return:
+    :param a: float, typically a=20
+    :param b: float, typically b=0.2
+    :param c: float, typically c=2
+
+    :return: Value f(x1, x2, ....), real float
     """
     c *= np.pi  # Needed for autodoc, maybe find a workaround?
 
@@ -297,8 +321,10 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2):
 def Styblinski_Tang(x: list):
     """
     Compute Ackley' function for x1, x2, x...
+
     :param x: list of x inputs where N-dimension = len(x)
-    :return:
+
+    :return: Value f(x1, x2, ....), real float
     """
     x = np.array(x, dtype=float)
     return sum(x**4) - 16 * sum(x**2) + 5 * sum(x)/2
