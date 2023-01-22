@@ -6,7 +6,7 @@ import pickle
 from time import time
 
 try:
-    from .population_initatilisation import *
+    from .pop import *
     from .gradient_descent import gd
     from .selection_funcs import *
     from .cross_funcs import *
@@ -15,7 +15,7 @@ try:
     from .log import log
 
 except ImportError:
-    from dfmcontrol.population_initatilisation import *
+    from dfmcontrol.pop import *
     from dfmcontrol.gradient_descent import gd
     from dfmcontrol.selection_funcs import *
     from dfmcontrol.cross_funcs import *
@@ -103,7 +103,7 @@ class genetic_algoritm:
         self.results: list = []
 
         self.dolog: int = 2
-        self.b2n: Callable = Ndbit2float
+        self.b2n: Callable = Ndbit2floatIEEE754
         self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
                               self.b2n, self.elitism, self.save_top,
@@ -136,7 +136,8 @@ class genetic_algoritm:
 
     def run(self, selargs: dict = {},
             cargs: dict = {}, muargs: dict = {},
-            epochs: int = 100, verbosity: int = 1):
+            epochs: int = 100, verbosity: int = 1,
+            runcond: bool = None):
         """
         Run the genetic algorithm
 
@@ -159,9 +160,12 @@ class genetic_algoritm:
         if not is_decorated(self.tfunc):
             self.tfunc = tfx_decorator(self.tfunc)
 
-        self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
 
         self.epochs = epochs
+        if runcond is None:
+            runcond = lambda e: self.epochs <= e
+
+        self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
 
         selargs["fx"] = self.tfunc
         selargs["bitsize"] = self.bitsize
@@ -199,8 +203,10 @@ class genetic_algoritm:
                 self.log.ranking.update(rank, self.tfunc.minima["x"])
                 self.log.time.update(time() - self.tstart)
 
-        for epoch in range(self.epochs):
+        epoch = 0
+        while runcond(epoch):
             newgen = []
+            epoch += 1
             if verbosity:
                 print("%s/%s" % (epoch + 1, self.epochs))
 
@@ -248,7 +254,7 @@ class genetic_algoritm:
                     print(fx, self.tfunc.minima["fx"])
                     self.log.ranking.update(rank, fx, self.tfunc.minima["x"],
                                             self.tfunc.minima["fx"])
-                    self.log.time.update(time() - self.tstart)
+                    self.log.time.update(time() - self.tstart, self.tfunc.calculations)
                     self.log.selection.update(parents, p, fitness)
                     self.log.value.update(self.pop, self.genlist[epoch])
 
@@ -261,22 +267,6 @@ class genetic_algoritm:
                             l.update(data=self.pop)
 
                         self.log.sync_logs()
-
-                    # Deprecated
-                    self.log.logdict[epoch] = {"time": time() - self.tstart,
-                                               "ranking": rank,
-                                               "ranknum": self.b2n(rank,
-                                                                   self.bitsize,
-                                                                   self.b2nkwargs),
-                                               "fitness": fitness,
-                                               "value": self.pop,
-                                               "valuetop%s" % self.save_top:
-                                                   self.genlist[epoch],
-                                               "valuenum": np.asarray(
-                                                   self.get_numeric(
-                                                       target=list(self.pop),
-                                                       bitsize=self.bitsize))}
-
 
                 elif self.dolog == 1:
                     self.log.ranking.update(rank, self.tfunc.minima["x"])
@@ -316,7 +306,7 @@ class genetic_algoritm:
         elif method == "cauchy":
             self.pop = cauchyrand_bit_pop_float(**kwargs)
         elif method == "nbit":
-            self.pop = bit8(**kwargs)
+            self.pop = bitpop(**kwargs)
         else:
             self.pop = method(**kwargs)
 

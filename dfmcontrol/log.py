@@ -248,13 +248,36 @@ class log_time(log_object):
     """
 
     def __init__(self, *args, **kwargs):
+        self.calculation = []
         super().__init__(*args, **kwargs)
 
     def __copy__(self):
         object_copy = log_time(self.b2n, self.bitsize, *self.args, **self.kwargs)
         object_copy.data = self.data
         object_copy.epoch = self.epoch
+        object_copy.calculation = self.calculation
         return object_copy
+
+    def update(self, data, *args):
+        """
+        Update the log object.
+
+        :param data: The time data to be added to the log object.
+        :param args: Calculation number.
+        :return: None
+        """
+        self.data.append(data)
+
+        # Get the epoch number from the length of the data list.
+        self.epoch.append(len(self.data))
+
+        # Get the calculation number from the args and subtract from previous amount to get the number for this epoch.
+        if len(self.epoch) >= 1:
+            self.calculation.append(args[0] - self.calculation[-1])
+        else:
+            self.calculation.append(args[0])
+
+        return None
 
     def plot(self, save_as="", show=True, *args, **kwargs):
         """

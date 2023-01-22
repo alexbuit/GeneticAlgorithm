@@ -28,7 +28,15 @@ def bitdict():
     return {8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64}
 
 
-def int_to_binary(integer, size):
+def int_to_binary(integer: int, size: int) -> np.ndarray:
+    """
+    https://stackoverflow.com/questions/699866/python-int-to-binary
+
+    :param integer: integer to be converted
+    :param size: size of binary representation
+
+    :return: binary representation of integer
+    """
     binary_arr = np.zeros(shape=size, dtype=np.uint8)
     i = 0
     while(integer > 0):
@@ -81,8 +89,10 @@ def b2dfloat(bit: np.ndarray) -> np.ndarray:
         np.float64).transpose()[0]
 
 
-def floatToBinary64(val):
+def floatToBinary64(val: np.float64):
     """
+    Conversion of float to binary representation
+
     https://www.technical-recipes.com/2012/converting-between-binary-and-decimal-representations-of-ieee-754-floating-point-numbers-in-c/
     :param value: float
     :return: binary representation of float
@@ -98,7 +108,7 @@ def floatToBinary64(val):
         return np.array([int(i) for i in "".join("0" for _ in range(64))])
 
 
-def floatToBinary32(val):
+def floatToBinary32(val: np.float32):
     """
     https://www.technical-recipes.com/2012/converting-between-binary-and-decimal-representations-of-ieee-754-floating-point-numbers-in-c/
     :param value: float
@@ -115,7 +125,7 @@ def floatToBinary32(val):
         return np.array([int(i) for i in "".join("0" for _ in range(32))])
 
 
-def Ndbit2float(valarr: np.ndarray, bitsize: int, **kwargs) -> np.ndarray:
+def Ndbit2floatIEEE754(valarr: np.ndarray, bitsize: int, **kwargs) -> np.ndarray:
     """
     Conversion of bit m x n (big endian) bit array (numpy) to IEEE 754 double precision float
 
@@ -162,7 +172,7 @@ def Ndbit2float(valarr: np.ndarray, bitsize: int, **kwargs) -> np.ndarray:
     return resmat
 
 
-def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
+def float2NdbitIEEE754(valarr: np.ndarray, bitsize: int) -> np.ndarray:
     """
     Conversion of bit m x n (big endian) bit array (numpy) to IEEE 754 double precision float
     :param valarr:  m x n ndarray of numpy integers representing a bit
@@ -185,23 +195,26 @@ def float2Ndbit(valarr: np.ndarray, bitsize: int) -> np.ndarray:
 def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
               **kwargs):
     """
+    Conversion of bit m x n (big endian) bit array (numpy) to integer or float
+    depending on the normalised flag. If normalised is true, the integer is
+    normalised to the range 0 to 1 and a factor / bias may be applied if
+    specified in kwargs.
+
+    The factor / bias is applied to the integer after normalisation so that
+    the conversion is done as follows
+
+    float = (b2n(valarr)/2^(bitsize) * factor) + bias
 
     :param valarr: MxN matrix of 0, 1 with dtype np.uint8
                    with M arrays and N the length of val * bitsize
     :param bitsize: Size of the bit, big endian, first bit is sign the others are val
     :param normalised: divide by 2**bitsize-1 and apply factor / bias if true
     :param kwargs: factor: float / bias: float
-    :return:
+
+    :return: MxN matrix of integers or floats (np.float64)
     """
-
-
-    factor: float = 1.0
-    if "factor" in kwargs:
-        factor = kwargs["factor"]
-
-    bias: float = 0.0
-    if "bias" in kwargs:
-        bias = kwargs["bias"]
+    factor = kwargs.get("factor", 1)
+    bias = kwargs.get("bias", 0)
 
     if valarr.ndim == 1:
         valarr = valarr[np.newaxis, :]
@@ -239,14 +252,24 @@ def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
     return resmat
 
 
-def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwargs):
+def int2ndbit(valarr: np.ndarray, bitsize: int, **kwargs):
     """
-    Convert an array of integers to a bit array of size bitsize * len(valarr)
+    Convert an array of integers (or floats) to a bit array of size bitsize * len(valarr)
+    if the valarr is a float, the float will be normalised to the range 0 to 1
+    and a factor / bias may be applied if specified in kwargs. So that
+
+    float = valarr / factor - bias
+
+    The float will then be assigned an integer value between 0 and 2**bitsize-1
+
+    int = int(float * 2**bitsize-1)  # Rounding error may occur
+
+    The integer will then be converted to a bit array of size bitsize.
 
     :param valarr: MxN matrix of integers
     :param bitsize: Size of the bit, big endian, first bit is sign the others are val
-    :param normalised:  divide by 2**bitsize-1 and apply factor / bias if true
     :param kwargs: factor: float / bias: float
+
     :return: MxN matrix of 0, 1 with dtype np.uint8
     """
     factor: float = 1.0
@@ -264,8 +287,6 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwarg
         shape.append(1)
 
     shape[-1] = int(np.ceil(shape[-1]*bitsize))
-    print(shape)
-
 
     res = np.zeros(shape, dtype = np.uint8)
     for arr in range(shape[0]):
@@ -281,7 +302,7 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, normalised: bool = True, **kwarg
     return res
 
 
-def convertpop2n(bit2num = None, target = None, **kwargs):
+def convertpop2n(bit2num=None, target=None, **kwargs):
         """
         FROM genetic_algortim.get_numeric() TO BE USED IN OTHER FILES.
 
@@ -361,12 +382,15 @@ def is_decorated(func: Callable) -> bool:
 def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
     """
     Plot 3d function
+
     :param fx: function to plot
     :param min: min value of x and y
     :param max: max value of x and y
     :param resolution: resolution of the plot
     :param mode: plot_surface or contour
+
     :param kwargs: kwargs for plot_surface, contour / show = True
+
     :return: None if show = True, else fig, ax
     """
     fig = plt.figure()
@@ -378,17 +402,29 @@ def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
 
     X, Y = np.meshgrid(linsp, linsp)
     Z = fx([X, Y])
+    
+    # Instansiate kwargs
+    show = kwargs.get("show", True)
 
-    plot = getattr(ax, mode)(X, Y, Z, **kwargs)
+    try:
+        title = kwargs.get("title", f"$f(x_1, x_2) = ${fx.__name__}")
+    except AttributeError:
+        title = kwargs.get("title", f"$f(x_1, x_2) = ${fx.__class__.__name__}")
+
+    # Get the plot kwargs
+    plargs = kwargs.copy()
+    plargs.pop("show", None)
+    plargs.pop("title", None)
+
+    # plot
+    plot = getattr(ax, mode)(X, Y, Z, **plargs)
     fig.colorbar(plot, shrink=0.5, aspect=5)
 
     ax.set_xlabel("$x_1$")
     ax.set_ylabel("$x_2$")
     ax.set_zlabel("$f(x_1, x_2)$")
 
-    ax.title.set_text(f"$f(x_1, x_2) = ${fx.__name__}")
-
-    show = kwargs.get("show", True)
+    ax.title.set_text(title)
 
     if show:
         plt.show()

@@ -47,6 +47,8 @@ class _tfx_decorator:
 
         self.samplesize = kwargs.get("sample_size", int(1e5) * cores)
 
+        self.calculations = 0
+
         if compute_analytical:
             # The search area for the optima and minima.
             self.high, self.low = kwargs.get("high", 500), kwargs.get("low", -500)
@@ -70,6 +72,8 @@ class _tfx_decorator:
             self.ndim = x.shape[1]
         else:
             self.ndim = x.shape[0]
+
+        self.calculations += 1
 
         return self.func(x, *args, **kwargs)
 

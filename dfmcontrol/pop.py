@@ -12,7 +12,7 @@ except ImportError:
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
     """
-    Generate a random bit population
+    Generate a random bit population, n individuals with m variables.
 
     :param n: Population size dtype int
     :param m: Bitsize dtype int
@@ -22,11 +22,14 @@ def rand_bit_pop(n: int, m: int) -> np.ndarray:
     return np.array([np.random.randint(0, 2, size=m) for _ in range(n)])
 
 
-def normalrand_bit_pop_float(n, bitsize, lower, upper):
-    """
-    Generate a normal distributed bit population
+# float2NdbitIEEE754 and NdbittofloatIEEE754 routines
 
-    :param n: Population size dtype int
+def normalrand_bit_pop_float(n, bitsize, lower, upper):  # TODO: implement multi variable
+    """
+    Generate a normal distributed bit population with floats converted with
+    float2NdbitIEEE754 and NdbittofloatIEEE754.
+
+    :param n: Population size dtype int individuals
     :param bitsize: Bitsize dtype int
     :param lower: Lower bound dtype float
     :param upper: Upper bound dtype float
@@ -58,9 +61,10 @@ def normalrand_bit_pop_float(n, bitsize, lower, upper):
 def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: float,
                              scale: float) -> np.ndarray:
     """
-    Generate a cauchy distributed bit population
+    Generate a cauchy distributed bit population with floats converted with
+    float2NdbitIEEE754 and NdbittofloatIEEE754.
 
-    :param shape: Population size dtype tuple
+    :param shape: Population size dtype tuple [individuals, variables]
     :param bitsize: Bitsize dtype int
     :param loc: loc dtype float
     :param scale: scale dtype float
@@ -76,9 +80,10 @@ def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: f
 
     pop_float = cauchy.rvs(loc=loc, scale=scale, size=size)
     pop_float = np.array(np.array_split(pop_float, int(size/shape[0])), dtype=float)
+
     blist = []
     for val in range(pop_float.shape[1]):
-        blist.append(float2Ndbit(pop_float[:, val], bitsize))
+        blist.append(float2NdbitIEEE754(pop_float[:, val], bitsize))
 
     return np.array(blist)
 
@@ -86,9 +91,10 @@ def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: f
 def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: float,
                              high: float) -> np.ndarray:
     """
-    Generate a uniform distributed bit population
+    Generate a uniform distributed bit population with floats converted with
+    float2NdbitIEEE754 and NdbittofloatIEEE754.
 
-    :param shape: Population size dtype tuple
+    :param shape: Population size dtype tuple [individuals, variables]
     :param bitsize: Bitsize dtype int
     :param low: low dtype float
     :param high: high dtype float
@@ -107,17 +113,19 @@ def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: floa
     pop_float = np.array(np.array_split(pop_float, int(size/shape[0])), dtype=float)
     blist = []
     for val in range(pop_float.shape[1]):
-        blist.append(float2Ndbit(pop_float[:, val], bitsize))
+        blist.append(float2NdbitIEEE754(pop_float[:, val], bitsize))
 
     return np.array(blist)
 
 
-def bit8(shape: list, bitsize: int = 8, factor = 1.0, bias = 0.0):
+# int2ndbit and ndbit2int routines
+
+def bitpop(shape: list, bitsize: int = 8, factor = 1.0, bias = 0.0):
     """
     Generate a bit population within boundaries imposed by the factor, bias and
-    bitsize.
+    bitsize. Using floats converted with int2ndbit and ndbit2int.
 
-    :param shape: Population size dtype tuple
+    :param shape: Population size dtype tuple [individuals, variables]
     :param bitsize: Bitsize dtype int
     :param factor: Factor dtype float
     :param bias: Bias dtype float
@@ -138,18 +146,21 @@ def bit8(shape: list, bitsize: int = 8, factor = 1.0, bias = 0.0):
 
     return np.array(blist, dtype=np.uint8)
 
-def uniform_bit_pop(shape: Iterable, bitsize: int, lower: float, upper: float,
+def uniform_bit_pop(shape: Iterable, bitsize: int, boundaries: list,
                     factor: float = 1.0, bias: float = 0.0) -> np.ndarray:
     """
-    Generate a uniform bit population
+    Generate a uniform bit population with floats converted with
+    int2ndbit and ndbit2int.
 
-    :param shape: Population size dtype tuple
+    :param shape: Population size dtype tuple [individuals, variables]
     :param bitsize: Bitsize dtype int
-    :param lower: Lower bound dtype float
-    :param upper: Upper bound dtype float
+    :param boundaries: Boundaries [0] lower, [1] upper dtype list of float or int
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
+
+    lower, upper = boundaries
+
     pop_float = np.vstack(np.array_split(np.random.uniform(lower, upper, shape[0] * shape[1]), shape[0]))
 
     if factor < np.abs(lower) or factor < np.abs(upper):
@@ -160,9 +171,10 @@ def uniform_bit_pop(shape: Iterable, bitsize: int, lower: float, upper: float,
 def cauchy_bit_pop(shape: Iterable, bitsize: int, loc: float, scale: float,
                    factor: float = 1.0, bias: float = 0.0) -> np.ndarray:
     """
-    Generate a cauchy bit population
+    Generate a cauchy bit population with floats converted with
+    int2ndbit and ndbit2int.
 
-    :param shape: Population size dtype tuple
+    :param shape: Population size dtype tuple [individuals, variables]
     :param bitsize: Bitsize dtype int
     :param loc: loc dtype float
     :param scale: scale dtype float

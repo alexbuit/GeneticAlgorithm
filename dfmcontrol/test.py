@@ -12,8 +12,8 @@ class TestDFM(unittest.TestCase):
     def test_convert_bin64(self):
 
         randarr = np.linspace(0, 100, 10000, dtype=np.double)
-        binarr64 = float2Ndbit(randarr, 64)
-        floatarr64 = Ndbit2float(binarr64, 64)
+        binarr64 = float2NdbitIEEE754(randarr, 64)
+        floatarr64 = Ndbit2floatIEEE754(binarr64, 64)
 
         for i in range(randarr.size):
             self.assertEqual(randarr[i], floatarr64[i])
@@ -21,8 +21,8 @@ class TestDFM(unittest.TestCase):
     def test_convert_bin32(self):
 
         randarr = np.linspace(0, 100, 10000, dtype=float)
-        binarr32 = float2Ndbit(randarr, 32)
-        floatarr32 = Ndbit2float(binarr32, 32)
+        binarr32 = float2NdbitIEEE754(randarr, 32)
+        floatarr32 = Ndbit2floatIEEE754(binarr32, 32)
 
         for i in range(randarr.size):
             self.assertAlmostEqual(randarr[i], floatarr32[i], places=5)
@@ -52,4 +52,4 @@ if __name__ == '__main__':
     # runner = unittest.TextTestRunner()
     # runner.run(suite())
 
-    print(time_t(float2Ndbit, [(np.array([0.213, 0.213, 0.4234]), 64)]))
+    print(time_t(float2NdbitIEEE754, [(np.array([0.213, 0.213, 0.4234]), 64)]))

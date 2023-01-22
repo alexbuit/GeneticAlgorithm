@@ -7,7 +7,7 @@ try:
 except ImportError:
     from dfmcontrol.helper import *
 
-def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs):
+def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2floatIEEE754, **kwargs):
     """ Calculate the fitness of a population.
     :param pop: Population of individuals
     :param fx: Function to calculate the fitness of an individual
@@ -279,10 +279,10 @@ def boltzmann_selection(*args, **kwargs):
 
 
 if __name__ == "__main__":
-    from population_initatilisation import *
+    from pop import *
     from test_functions import *
 
-    pop = bit8([16, 4], 16)
+    pop = bitpop([16, 4], 16)
     pop_float = ndbit2int(pop, 16, factor=5)
 
     tst_fx = michealewicz
