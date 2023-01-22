@@ -272,11 +272,12 @@ class log_time(log_object):
         self.epoch.append(len(self.data))
 
         # Get the calculation number from the args and subtract from previous amount to get the number for this epoch.
-        if len(self.epoch) >= 1:
-            self.calculation.append(args[0] - self.calculation[-1])
-        else:
-            self.calculation.append(args[0])
+        # if len(self.epoch) > 1:
+        #     self.calculation.append(args[0] - self.calculation[-1])
+        # else:
+        #
 
+        self.calculation.append(args[0])
         return None
 
     def plot(self, save_as="", show=True, *args, **kwargs):
@@ -703,9 +704,11 @@ class log_value(log_object):
 
         figure, [axis1, axis2] = plt.subplots(1, 2)
 
+        print(fitness)
         line2data = np.array(fitness)
         if fitness==None:
-            line2data = self.numvalue
+            line2data = np.asarray(self.numvalue)
+
 
         line, = axis1.plot(self.numvalue[0][:, 0], self.numvalue[0][:, 1],
                          linestyle="",

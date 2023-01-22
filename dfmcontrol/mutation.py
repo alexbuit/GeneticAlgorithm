@@ -1,5 +1,6 @@
 
 import numpy as np
+from dfmcontrol.helper import bdict
 
 def mutate(bit, bitsize, **kwargs) -> np.ndarray:
     """

@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from typing import Union, Iterable
+from typing import Union, Iterable, List
 from scipy.stats import cauchy
 
 try:
@@ -88,16 +88,15 @@ def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: f
     return np.array(blist)
 
 
-def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: float,
-                             high: float) -> np.ndarray:
+def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int,
+                          boundaries: List[int]) -> np.ndarray:
     """
     Generate a uniform distributed bit population with floats converted with
     float2NdbitIEEE754 and NdbittofloatIEEE754.
 
     :param shape: Population size dtype tuple [individuals, variables]
     :param bitsize: Bitsize dtype int
-    :param low: low dtype float
-    :param high: high dtype float
+    :param boundaries: Boundaries dtype list [lower, upper]
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
@@ -108,6 +107,7 @@ def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int, low: floa
         shape = (shape[0], 1)
 
     size = shape[0] * shape[1]
+    low, high = boundaries
 
     pop_float = np.random.uniform(low, high, size)
     pop_float = np.array(np.array_split(pop_float, int(size/shape[0])), dtype=float)

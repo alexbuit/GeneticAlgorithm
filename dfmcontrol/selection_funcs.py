@@ -201,7 +201,7 @@ def rank_selection(*args, **kwargs):
     if "fitness_func" in kwargs:
         fitness_func = kwargs["fitness_func"]
 
-    fitness = y
+    fitness = fitness_func(y, np.asarray(k))
 
     fit_rng = np.argsort(fitness)
 

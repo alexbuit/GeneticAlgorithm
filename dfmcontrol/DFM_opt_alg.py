@@ -162,8 +162,10 @@ class genetic_algoritm:
 
 
         self.epochs = epochs
+        self.epoch = 0
+
         if runcond is None:
-            runcond = lambda e: self.epochs <= e
+            runcond = "self.epoch < self.epochs"
 
         self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
 
@@ -190,7 +192,7 @@ class genetic_algoritm:
             if self.dolog == 2:
 
                 self.log.ranking.update(rank, fx, self.tfunc.minima["x"], 0)
-                self.log.time.update(time() - self.tstart)
+                self.log.time.update(time() - self.tstart, 0)
                 self.log.selection.update(parents, p, fitness)
 
                 if len(self.log.add_logs) > 0:
@@ -202,13 +204,15 @@ class genetic_algoritm:
             elif self.dolog == 1:
                 self.log.ranking.update(rank, self.tfunc.minima["x"])
                 self.log.time.update(time() - self.tstart)
-
-        epoch = 0
-        while runcond(epoch):
+                
+        print(self.condinterpreter(runcond))
+        while self.condinterpreter(runcond):
             newgen = []
-            epoch += 1
+
             if verbosity:
-                print("%s/%s" % (epoch + 1, self.epochs))
+                print("%s/%s" % (self.epoch + 1, self.epochs))
+                print("Distance to sol: %s" % np.min(np.abs(self.log.ranking.distancefx[-1])))
+                print("Group distance: %s" % np.average(np.abs(self.log.ranking.distancefx[-1])))
 
             cargs["bitsize"] = self.bitsize
             muargs["bitsize"] = self.bitsize
@@ -231,10 +235,10 @@ class genetic_algoritm:
             t10 = parents[:self.save_top]
             self.genlist.append([])
             for ppair in t10:
-                self.genlist[epoch].append(self.pop[ppair[0]])
-                self.genlist[epoch].append(self.pop[ppair[1]])
+                self.genlist[self.epoch].append(self.pop[ppair[0]])
+                self.genlist[self.epoch].append(self.pop[ppair[1]])
 
-            self.genlist[epoch] = np.array(self.genlist[epoch])
+            self.genlist[self.epoch] = np.array(self.genlist[self.epoch])
 
             # genlist.append(rpop)
             self.pop = np.array(newgen)
@@ -251,12 +255,13 @@ class genetic_algoritm:
                         rank[j] = self.pop[i]
                         j += 1
 
-                    print(fx, self.tfunc.minima["fx"])
+                    # print(fx, self.tfunc.minima["fx"])
+                    
                     self.log.ranking.update(rank, fx, self.tfunc.minima["x"],
                                             self.tfunc.minima["fx"])
                     self.log.time.update(time() - self.tstart, self.tfunc.calculations)
                     self.log.selection.update(parents, p, fitness)
-                    self.log.value.update(self.pop, self.genlist[epoch])
+                    self.log.value.update(self.pop, self.genlist[self.epoch])
 
                     # if additional logs added by appending them after initiation of self.log
                     # go through them and update with the population
@@ -275,12 +280,25 @@ class genetic_algoritm:
                     self.log.logdict[epoch] = {"time": time() - self.tstart,
                                                "ranking": rank,
                                                "value": self.pop}
-            # y = np.apply_along_axis(self.tfunc, 1, Ndbit2float(self.pop, self.bitsize))
-            # self.min = np.min(y)
+
+            self.epoch += 1
+
         self.results = self.genlist
 
     def run_threaded(self, threads, **kwargs):
-        pass
+        """
+        Run the genetic algorithm in multiple threads
+
+        :param threads: number of threads
+
+        :param kwargs: arguments for the run function
+
+        :return: None
+        """
+        self.threads = threads
+        self.threadpool = ThreadPool(threads)
+        self.threadpool.map(self.run, [kwargs] * threads)
+
 
     def init_pop(self, method: Union[str, Callable] = "uniform", **kwargs):
         """
@@ -291,22 +309,42 @@ class genetic_algoritm:
             the str should match the init method, so uniform -> 'uniform' and
             cauchy 'cauchy' etc
             full list of usable args:
-            ['uniform', 'cauchy', 'nbit']
+            ['uniform', 'cauchy', 'normal']
             if callable the population will be the return value of given function.
             A population function should return a mx1 numpy array of bits, to convert
             floating point values to approved bit values use the float2Ndbit function
             included in helper.py
 
-        :param kwargs: kwargs for init method
-
+        :param kwargs: kwargs for init method, generally the first argument is the shape
+            of the population, the second is the bitsize for the population (auto filled)
+            followed by routine specific kwargs (see the wiki or pop.py).
+            
+        :param kwargs[shape]: Tuple of ints (m, n) where m is the number of individuals
+            and n is the number of bits per individual.
+        :param kwargs[bitsize]: optional int, number of bits per individual.
+        :param kwargs[boundaries]: tuple of floats, boundaries for the population
+            list of ints or floats [lower, upper]. Only used for uniform and normal
+            distributions.
+    
         :return: None
         """
-        if method == "uniform":
-            self.pop = uniform_bit_pop(**kwargs)
-        elif method == "cauchy":
-            self.pop = cauchyrand_bit_pop_float(**kwargs)
-        elif method == "nbit":
-            self.pop = bitpop(**kwargs)
+        if "bitsize" not in kwargs:
+            kwargs["bitsize"] = self.bitsize
+        
+        if self.b2n is ndbit2int and method in ["uniform", "cauchy", "normal"]:
+            if method == "uniform":
+                self.pop = uniform_bit_pop(**kwargs)
+            elif method == "cauchy":
+                self.pop = cauchy_bit_pop(**kwargs)
+            elif method == "normal":
+                self.pop = bitpop(**kwargs)
+        elif self.b2n is Ndbit2floatIEEE754 and method in ["uniform", "cauchy", "normal"]:
+            if method == "uniform":
+                self.pop = uniform_bit_pop_float(**kwargs)
+            elif method == "cauchy":
+                self.pop = cauchyrand_bit_pop_float(**kwargs)
+            elif method == "normal":
+                self.pop = normalrand_bit_pop_float(**kwargs) 
         else:
             self.pop = method(**kwargs)
 
@@ -635,6 +673,32 @@ class genetic_algoritm:
 
         return self.log
 
+    def condinterpreter(self, cond: str):
+        """
+        Interpret a condition string and return a list of conditions.
+
+
+        :param cond:
+        :return:
+        """
+
+        cndsplit = cond.split(" ")
+        conditions = []
+
+        for i in range(len(cndsplit)):
+            if cndsplit[i] in ["<", ">", "==", "!=", "<=", ">="]:
+                conditions.append([cndsplit[i - 1], cndsplit[i], cndsplit[i + 1]])
+
+        # For all conditions construct  lambda function to test the condition
+        for i in range(len(conditions)):
+            conditions[i] = eval(conditions[i][0] + conditions[i][1] + conditions[i][2])
+
+        for i in conditions:
+            if not i:
+                return False
+
+        return True
+
     @staticmethod
     @tfx_decorator
     def none(*args, **kwargs) -> None:
@@ -658,14 +722,14 @@ if __name__ == "__main__":
         return booths_function(x)
 
 
-    d = 39
+    d = 2
 
-    size = [20, d]
+    size = [5, d]
     low, high = -5, 5
     bitsize = 8
-    tfunc = Styblinski_Tang
+    tfunc = ackley
     # epochs = int(np.floor(np.log2(size[0])))
-    epochs = 100
+    epochs = 10
 
     iteration = 10
 
@@ -673,17 +737,19 @@ if __name__ == "__main__":
 
     k = np.e
     ga = genetic_algoritm(bitsize=bitsize)
+
     print(ga.log.creation)
 
-    ga.optimumfx = np.full(d, -2.903534)
-    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize,
-                lower=low, upper=high, factor=5)
-    ga.b2nkwargs = {"factor": 5}
-
-    ga.elitism = 2
+    # ga.optimumfx = np.full(d, -2.903534)
 
     ga.b2n = ndbit2int
     ga.logdata(2)
+
+    ga.init_pop("uniform", shape=[size[0], size[1]], bitsize=bitsize,
+                boundaries=[low, high], factor=10)
+    ga.b2nkwargs = {"factor": 10}
+
+    ga.elitism = 2
 
     # ga.seed = uniform_bit_pop_float
     ga.set_cross(full_equal_prob)
@@ -698,9 +764,17 @@ if __name__ == "__main__":
            selargs={"nbit2num": ndbit2int,
                     "k": k, "fitness_func": sigmoid_fitness,
                     "allow_duplicates": True},
-           verbosity=1)
+           verbosity=1, runcond="min(np.abs(self.log.ranking.distancefx[-1])) < 0.1")
 
     ga.save_log("Booth16b_p%s.pickle" % iteration)
     iteration += 0
 
+    lg = ga.log
+
+    print("Distancefx: ", min(np.abs(lg.ranking.distancefx[-1])))
+    print("Best solution: %s" % lg.ranking.bestsol)
+    print("Computations %s" % lg.time.calculation)
     print("t: ", time() - tsart)
+
+    lg.value.animate2d(ackley, low, high, fitness=lg.selection.fitness)
+
