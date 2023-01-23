@@ -24,9 +24,8 @@ gea.b2nkwargs = lg.b2nkwargs
 
 
 # lg.selection.plot(x_label="Iteration", y_label="avg Fitness", title="Fitness of individuals", fmt_data="raw", top=1)
-
-print(lg.selection.data)
-
+print(lg.add_logs)
+lg.log_intensity.plot()
 # print(lg.add_logs)
 #
 # print(lg.log_intensity)

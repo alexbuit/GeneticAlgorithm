@@ -5,9 +5,10 @@ import numpy as np
 Gradient descent algortihm for use with the genetic algorithm
 """
 
-def gd(f, x0, args=(), alpha=0.01, max_iter=50, tol=1e-6, verbose=False):
+def gradient_descend(f, x0, args=(), alpha=0.01, max_iter=50, tol=1e-6, verbose=False):
     """
     Gradient descent algorithm for use with the genetic algorithm
+
     :param f: function to be minimized
     :param x0: starting point
     :param args: arguments for f
@@ -15,6 +16,7 @@ def gd(f, x0, args=(), alpha=0.01, max_iter=50, tol=1e-6, verbose=False):
     :param max_iter: maximum number of iterations
     :param tol: tolerance for convergence
     :param verbose: print information
+
     :return: x, f(x)
     """
     x = x0
@@ -27,3 +29,9 @@ def gd(f, x0, args=(), alpha=0.01, max_iter=50, tol=1e-6, verbose=False):
         x = x_new
     return x, f(x, *args)
 
+if __name__ == "__main__":
+    def f(x):
+        return x**2 + x
+
+    x, fx = gradient_descend(f, 4, alpha=0.001, max_iter=1000)
+    print("x: {}, f(x): {}".format(x, fx))

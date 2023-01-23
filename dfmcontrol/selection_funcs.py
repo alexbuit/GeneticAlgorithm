@@ -4,8 +4,10 @@ from typing import Iterable
 
 try:
     from .helper import *
+    # from .gradient_descent import gradient_descent
 except ImportError:
     from dfmcontrol.helper import *
+    # from dfmcontrol.gradient_descent import gradient_descent
 
 def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2floatIEEE754, **kwargs):
     """ Calculate the fitness of a population.
@@ -240,22 +242,20 @@ def rank_space_selection(*args, **kwargs):
         :param kwargs: k => parameteres passed onto the fitness function
         :return: selected parents based on their probability
         """
+    pop = args[0]
     y = calc_fx(*args, **kwargs)
 
     # probability paramter for rank selection
-    prob_param = 1.9
-    if "p" in kwargs:
-        prob_param = kwargs["p"]
+    prob_param = kwargs.get("p", 1.9)
 
     # diversity parameter for significance of the distance between individuals
-    div_param = 1
-    if "d" in kwargs:
-        div_param = kwargs["d"]
+    div_param = kwargs.get("d", 1)
 
     # parameters for fitness func
-    k = [1.5]
-    if "k" in kwargs:
-        k = kwargs["k"]
+    k = kwargs.get("k", [1.5])
+
+    # gradient descent parameter, if 0 then no gradient descent
+    gd_param = kwargs.get("gd", 0.1)
 
     if not isinstance(k, Iterable):
         k = [k]
@@ -266,6 +266,16 @@ def rank_space_selection(*args, **kwargs):
         fitness_func = kwargs["fitness_func"]
 
     fitness = fitness_func(y, *k)
+    fit_rng = np.argsort(fitness)
+
+    best = fit_rng[0]
+    diversity = np.sqrt(np.asarray([pop[best]**2 - pop[i]**2 for i in pop])) * div_param
+
+    if gd_param > 0:
+        # gradient descent
+        pass
+
+    fitness = fitness + diversity
     fit_rng = np.argsort(fitness)
 
     p = (prob_param * (1 - prob_param) ** (

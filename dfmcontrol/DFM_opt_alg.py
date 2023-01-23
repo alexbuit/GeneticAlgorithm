@@ -7,7 +7,7 @@ from time import time
 
 try:
     from .pop import *
-    from .gradient_descent import gd
+    # from .gradient_descent import gd
     from .selection_funcs import *
     from .cross_funcs import *
     from .test_functions import *
@@ -16,7 +16,7 @@ try:
 
 except ImportError:
     from dfmcontrol.pop import *
-    from dfmcontrol.gradient_descent import gd
+    # from dfmcontrol.gradient_descent import gd
     from dfmcontrol.selection_funcs import *
     from dfmcontrol.cross_funcs import *
     from dfmcontrol.mutation import *
