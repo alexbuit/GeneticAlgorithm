@@ -204,10 +204,15 @@ class genetic_algoritm:
             elif self.dolog == 1:
                 self.log.ranking.update(rank, self.tfunc.minima["x"])
                 self.log.time.update(time() - self.tstart)
-                
-        print(self.condinterpreter(runcond))
+
         while self.condinterpreter(runcond):
             newgen = []
+
+            # print(self.tfunc.minima["fx"])
+            # print(self.tfunc(self.b2n(self.pop, **self.b2nkwargs)))
+            # print(np.abs(self.log.ranking.distancefx[-1]))
+            # print("------------------")
+
 
             if verbosity:
                 print("%s/%s" % (self.epoch + 1, self.epochs))
@@ -320,7 +325,7 @@ class genetic_algoritm:
             followed by routine specific kwargs (see the wiki or pop.py).
             
         :param kwargs[shape]: Tuple of ints (m, n) where m is the number of individuals
-            and n is the number of bits per individual.
+            and n is the number of genes per individual.
         :param kwargs[bitsize]: optional int, number of bits per individual.
         :param kwargs[boundaries]: tuple of floats, boundaries for the population
             list of ints or floats [lower, upper]. Only used for uniform and normal
@@ -646,6 +651,7 @@ class genetic_algoritm:
 
             self.log.time.data = old_log.time.data
             self.log.time.epoch = old_log.time.epoch
+            self.log.time.calculation = old_log.time.calculation
 
             self.log.ranking.data = old_log.ranking.data
             self.log.ranking.epoch = old_log.ranking.epoch

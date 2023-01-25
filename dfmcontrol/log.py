@@ -522,7 +522,7 @@ class log_value(log_object):
         The epoch of the data collected by the log object.
     value
         The binary value of the solutions proposed by the ga per epoch
-    numval
+    numvalue
         The numerical value of the solutions proposed by the ga per epoch
     topx
         The top x solutions proposed by the ga per epoch
@@ -665,7 +665,7 @@ class log_value(log_object):
                          linestyle="",
                          marker="o", label="Algortithm")
 
-        linsp = np.linspace(low, high)
+        linsp = np.linspace(low, high, 10000)
         plt.plot(linsp, tfx(linsp), label="tfx", linestyle="--")
 
         plt.xlim(low, high)

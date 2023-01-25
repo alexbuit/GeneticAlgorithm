@@ -145,7 +145,7 @@ class _tfx_decorator:
 
     def update_optmin(self, **kwargs):
         if self.func.__name__ in ["wheelers_ridge", "booths_function",
-                             "michealewicz", "ackley", "Styblinski_Tang"]:
+                             "michealewicz", "ackley", "Styblinski_Tang", "tfx"]:
             self.minima = {
                 "x": getattr(tf, "min" + self.func.__name__ + "loc")(self.ndim),
                 "fx": getattr(tf, "min" + self.func.__name__)(self.ndim)}
@@ -261,7 +261,7 @@ def tfx(x):
 
     :return: The value of the function at x.
     """
-    return 3 * x**2 + 2 * x + 1
+    return (3 * x**2 + 2 * x + 1) * np.abs(np.sin(x))
 
 ## 2D functions
 @tfx_decorator

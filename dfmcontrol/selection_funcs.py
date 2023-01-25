@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Iterable
 
+import random
+
 try:
     from .helper import *
     # from .gradient_descent import gradient_descent
@@ -11,11 +13,13 @@ except ImportError:
 
 def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2floatIEEE754, **kwargs):
     """ Calculate the fitness of a population.
+    
     :param pop: Population of individuals
     :param fx: Function to calculate the fitness of an individual
     :param bitsize: Bitsize of an individual
     :param nbit2num: Function to convert a ndarray of bits to a number
     :param kwargs: Additional arguments for nbit2num
+    
     :return: Fitness of the population
     """
     if "bitsize" in kwargs["b2nkwargs"]:
@@ -55,6 +59,9 @@ def simple_fitness(y, *args):
     """
     y = np.abs(y)
     return np.max(y) - y
+
+def no_fitness(y, *args):
+    return y
 
 
 def sigmoid_fitness(x, k, x0 = 0):
@@ -161,7 +168,61 @@ def roulette_selection(*args, **kwargs):
     p = fitness / sum(fitness)
     return sort_list(fitness, p, **kwargs), fitness, p, y
 
-def tournament_selection(*args, **kwargs):
+
+def rank_tournament_selection(*args, **kwargs):
+    """
+    pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
+    
+    :param args: 
+    :param kwargs: 
+    :return: 
+    """
+    
+    y = calc_fx(*args, **kwargs).flatten()
+
+    # parameters for fitness func
+    k = [1.5]
+    if "k" in kwargs:
+        k = kwargs["k"]
+
+    if not isinstance(k, Iterable):
+        k = [k]
+
+    # fitness func
+    fitness_func = exp_fitness
+    if "fitness_func" in kwargs:
+        fitness_func = kwargs["fitness_func"]
+
+    fitness = fitness_func(y, *k)
+    fit_rng = np.argsort(fitness)
+
+    prob_param = 0.01
+    if "p" in kwargs:
+        prob_param = kwargs["p"]
+
+    p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
+    p = p/np.sum(p)
+
+    selection_array = np.zeros(fit_rng.shape)
+    for i in range(fitness.size):
+        selection_array[fit_rng[i]] = p[i]
+
+    parent_population = y.copy()
+    offspring_population = []
+    for p in range(len(y)):
+        parents = []
+        for i in range(8): # 8 parents per offspring
+            temp_population = []
+            for j in range(4):
+                temp_population.append(np.random.choice(list(range(parent_population.size)), 1, p=selection_array.flatten(), replace=False))
+                
+            # sort solutions by fitness
+            temp_population = sorted(temp_population, key=lambda x: fitness_func(x, np.asarray(k)), reverse=True)
+            parents.append([temp_population[0][0], temp_population[1][0]])
+
+    return parents, fitness_func(y, np.asarray(k)), fitness_func(y, np.asarray(k)) / sum(fitness_func(y, np.asarray(k))), y
+
+def roullette_selection(*args, **kwargs):
     """
     pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
 
@@ -186,7 +247,7 @@ def rank_selection(*args, **kwargs):
     y = calc_fx(*args, **kwargs)
 
     # probability paramter for rank selection
-    prob_param = 1.9
+    prob_param = 0.01
     if "p" in kwargs:
         prob_param = kwargs["p"]
 
@@ -302,8 +363,7 @@ if __name__ == "__main__":
     print(ackley([0, 0]))
 
 
-    parents = rank_space_selection(pop=pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int,
-                   factor=5, p=0.1, k=0.01)
+    parents = tournament_selection(pop=pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int, b2nkwargs={"factor": 5})
     print(parents)
 
 

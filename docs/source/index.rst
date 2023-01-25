@@ -6,6 +6,20 @@
 Welcome to KTH_dfm_control's documentation!
 ===========================================
 
+Examples can be found in :ref:`<examples>`, and a quick start guide can be
+found in :ref:`<quickstart>`.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   examples
+   quickstart
+   api
+
+Contents:
+=========
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

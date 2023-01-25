@@ -11,7 +11,17 @@ def mintfx(x: float):
 
     :return: Minimum value of the function at x
     """
-    return None
+    return 0
+
+def mintfxloc(x: float):
+    """
+    Global minimum for tfx function.
+
+    :param x: Value of the function
+
+    :return: Global minimum location
+    """
+    return 0
 
 # 2dimension
 # cite simone fraser university
@@ -97,7 +107,10 @@ def minmichealewiczloc(n: int):
     d[8] = d[7] + [1.756087]
     d[9] = d[8] + [1.655717]
     d[10] = d[9] + [1.570796]
-    return np.array(d[n])
+    if n <= 10:
+        return np.array(d[n])
+    else:
+        return np.full(n, np.pi/2, float)
 
 
 # cite simon fraser university
