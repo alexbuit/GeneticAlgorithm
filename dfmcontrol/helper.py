@@ -379,6 +379,12 @@ def is_decorated(func: Callable) -> bool:
     except AttributeError:
         return hasattr(func, "__wrapped__") or func.__class__.__name__ not in globals()
 
+
+def flip_a_coin() -> bool:
+    """ Flip a coin function with 50/50 chance for True/False"""
+    return True if np.random.randint(0, 2) else False
+
+
 def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
     """
     Plot 3d function
@@ -432,7 +438,6 @@ def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
 
     else:
         return fig, ax
-
 
 # if __name__ == "__main__":
 #     from time import time

@@ -181,25 +181,23 @@ def rank_tournament_selection(*args, **kwargs):
     y = calc_fx(*args, **kwargs).flatten()
 
     # parameters for fitness func
-    k = [1.5]
-    if "k" in kwargs:
-        k = kwargs["k"]
+    k = kwargs.get("k", [1.5])
 
     if not isinstance(k, Iterable):
         k = [k]
 
     # fitness func
-    fitness_func = exp_fitness
-    if "fitness_func" in kwargs:
-        fitness_func = kwargs["fitness_func"]
+    fitness_func = kwargs.get("fitness_func", exp_fitness)
 
     fitness = fitness_func(y, *k)
     fit_rng = np.argsort(fitness)
 
-    prob_param = 0.01
-    if "p" in kwargs:
-        prob_param = kwargs["p"]
+    prob_param = kwargs.get("p", 0.01)
 
+    tournament_size = kwargs.get("tournament_size", 4)
+
+    # For pure tournament the probabilities should all be equal.
+    # Add a kwarg for this?
     p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
     p = p/np.sum(p)
 
@@ -211,9 +209,9 @@ def rank_tournament_selection(*args, **kwargs):
     offspring_population = []
     for p in range(len(y)):
         parents = []
-        for i in range(8): # 8 parents per offspring
+        for i in range(parent_population.size): # 8 parents per offspring
             temp_population = []
-            for j in range(4):
+            for j in range(tournament_size):
                 temp_population.append(np.random.choice(list(range(parent_population.size)), 1, p=selection_array.flatten(), replace=False))
                 
             # sort solutions by fitness
@@ -221,17 +219,6 @@ def rank_tournament_selection(*args, **kwargs):
             parents.append([temp_population[0][0], temp_population[1][0]])
 
     return parents, fitness_func(y, np.asarray(k)), fitness_func(y, np.asarray(k)) / sum(fitness_func(y, np.asarray(k))), y
-
-def roullette_selection(*args, **kwargs):
-    """
-    pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
-
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    y = calc_fx(*args, **kwargs)
-
 
 
 def rank_selection(*args, **kwargs):
@@ -345,8 +332,76 @@ def rank_space_selection(*args, **kwargs):
 
 
 def boltzmann_selection(*args, **kwargs):
-    pass
+    """
 
+    """
+
+    pop = args[0]
+    y = calc_fx(*args, **kwargs)
+
+    # fitness func
+    fitness_func = exp_fitness
+    if "fitness_func" in kwargs:
+        fitness_func = kwargs["fitness_func"]
+
+    # parameters for fitness func
+    k = kwargs.get("k", [1.5])
+
+    # Temperature parameter
+    T = kwargs.get("T", 10)
+
+    fitness = fitness_func(y, *k)
+    fitness = max(fitness) - fitness  # minimise (remove for optimise)
+    fit_rng = np.argsort(fitness)
+
+    pind = []
+
+    for i in range(pop.shape[0]):
+        ind = np.random.choice(fit_rng, 1)[0]
+
+        pind.append([])
+
+        threshold = np.random.choice(np.sort(np.delete(np.abs(fitness - fitness[ind]), ind))[2:])
+
+        selection_2 = np.random.choice(np.where(np.delete(np.abs(fitness - fitness[ind]), ind) < threshold)[0], 1)[0]
+
+        # Strict third selection
+        selection_3 = np.random.choice(np.where(np.delete(np.abs(fitness - fitness[ind]), ind) < threshold)[0], 1)[0]
+
+        indexes = [ind, selection_2, selection_3]
+
+        values = np.array([fitness[ind], fitness[selection_2], fitness[selection_3]]).flatten()
+
+
+        p1 = np.exp(-values[1] / T) / (
+                    np.exp(-values[1] / T) + np.exp(-values[2] / T))
+        anti_accepted = np.random.choice([1, 2], p=np.asarray([p1, 1-p1]).flatten())
+
+        p2 = np.exp(-values[0] / T) / (np.exp(-values[0] / T) + np.exp(
+            -values[anti_accepted] / T))
+        accepted = np.random.choice([0, 1], p=np.asarray([p2, 1-p2]).flatten())
+
+        pind[i].append(indexes[accepted])
+
+        # Totally random third selection, with new value for 2
+        selection_2 = np.random.choice(np.where(np.delete(np.abs(fitness - fitness[ind]), [ind, selection_2]) < threshold)[0], 1)[0]
+        selection_3 = np.random.choice(np.delete(fit_rng, [ind, selection_2, selection_3]), 1)[0]
+
+
+        indexes = [ind, selection_2, selection_3]
+        values = np.array([fitness[ind], fitness[selection_2], fitness[selection_3]]).flatten()
+
+        p1 = np.exp(-values[1] / T) / (
+                    np.exp(-values[1] / T) + np.exp(-values[2] / T))
+        anti_accepted = np.random.choice([1, 2], p=np.asarray([p1, 1-p1]).flatten())
+
+        p2 = np.exp(-values[0] / T) / (np.exp(-values[0] / T) + np.exp(
+            -values[anti_accepted] / T))
+        accepted = np.random.choice([0, 1], p=np.asarray([p2, 1-p2]).flatten())
+
+        pind[i].append(indexes[accepted])
+
+    return pind, fitness, fitness, y
 
 
 if __name__ == "__main__":
@@ -354,7 +409,7 @@ if __name__ == "__main__":
     from test_functions import *
 
     pop = bitpop([16, 4], 16)
-    pop_float = ndbit2int(pop, 16, factor=5)
+    pop_float = ndbit2int(pop, 16, factor=10)
 
     tst_fx = michealewicz
 
@@ -363,7 +418,7 @@ if __name__ == "__main__":
     print(ackley([0, 0]))
 
 
-    parents = tournament_selection(pop=pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int, b2nkwargs={"factor": 5})
+    parents = boltzmann_selection(pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int, b2nkwargs={"factor": 5})
     print(parents)
 
 
