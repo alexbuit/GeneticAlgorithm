@@ -14,6 +14,7 @@ try:
     from .helper import ndbit2int
     from .selection_funcs import *
     from .log import log_object, log
+    from .test_functions import tfx_decorator
 
     from .AdrianPackv402.Helper import compress_ind
 
@@ -23,14 +24,16 @@ except ImportError:
     from dfmcontrol.helper import ndbit2int
     from dfmcontrol.selection_funcs import *
     from dfmcontrol.log import log_object, log
+    from dfmcontrol.test_functions import tfx_decorator
+
 
     from dfmcontrol.AdrianPackv402.Helper import compress_ind
 
 
 ## global variables
 individuals: int = 30
-points_per_indv: int = 50
-points_stability_test = 100
+points_per_indv: int = 20
+points_stability_test = 25
 
 runtime = 10 # runtime in seconds
 epoch = 0  # ??
@@ -164,7 +167,6 @@ def tfmirror(*args, **kwargs):
     avg_read = np.zeros(num_pop.shape[0])
 
     i = 0
-
     for indiv in num_pop:
         voltages = indiv
 
@@ -198,6 +200,8 @@ def tfmirror(*args, **kwargs):
         i += 1
         # Test out on DFM and append intensity
         # Divide intensity by global var optimum
+
+    set_voltage(np.zeros(shape=n))
 
     return avg_read
 
@@ -317,8 +321,7 @@ class log_intensity(log_object):
                                          2)
 
         # for each individual
-        print(np.asarray(self.intensity).shape)
-        print(int_mat.shape)
+
         for line in range(int_mat.shape[1]):
             # take the amount of epochs
             x = np.array([np.full(int_mat.shape[2], i) for i in range(int_mat.shape[0])]).flatten()
@@ -352,6 +355,7 @@ class mirror_alg(genetic_algoritm):
     def __init__(self, dtype: str = "float", bitsize: int = 32,
                  endianness: str = "big"):
         super().__init__(dtype, bitsize, endianness)
+        self.tfunc = tfx_decorator(tfmirror, 39)
 
         # self.log.__add__(log_intensity(self.b2n, self.bitsize, self.b2nkwargs))
 
@@ -379,6 +383,8 @@ class mirror_alg(genetic_algoritm):
         selargs["b2n"] = self.b2n
         selargs["b2nkwargs"] = self.b2nkwargs
         selargs["verbosity"] = verbosity
+        selargs["avoid_calc_fx"] = True
+        selargs["points_per_indv"] = points_per_indv
 
         parents, fitness, p, fx = self.select(self.pop, **selargs)
 
@@ -395,7 +401,7 @@ class mirror_alg(genetic_algoritm):
 
             if self.dolog == 2:
                 self.log.ranking.update(rank, fx, np.full(39, 0), 0)
-                self.log.time.update(time() - self.tstart)
+                self.log.time.update(time() - self.tstart, self.tfunc.calculations)
                 self.log.selection.update(parents, p, fitness)
                 self.log.log_intensity.update(self.pop)
 
@@ -414,6 +420,10 @@ class mirror_alg(genetic_algoritm):
                 newgen = []
                 if verbosity:
                     print("%s/%s" % (epoch + 1, self.epochs))
+
+                selargs["points_per_indv"] = points_per_indv
+                selargs["pop"] = self.pop
+                selargs["stability"] = False
 
                 cargs["bitsize"] = self.bitsize
                 muargs["bitsize"] = self.bitsize
@@ -459,7 +469,7 @@ class mirror_alg(genetic_algoritm):
                             j += 1
 
                         self.log.ranking.update(rank, fx, np.full(39, 0), self.target)
-                        self.log.time.update(time() - self.tstart)
+                        self.log.time.update(time() - self.tstart, self.tfunc.calculations)
                         self.log.selection.update(parents, p, fitness)
                         self.log.value.update(self.pop, self.genlist[epoch])
                         self.log.log_intensity.update(self.pop, intens.copy(),
@@ -483,6 +493,12 @@ class mirror_alg(genetic_algoritm):
                         self.log.ranking.update(rank, fx, self.tfunc.minima["x"], self.tfunc.minima["fx"])
                         self.log.time.update(time() - self.tstart)
 
+                selargs["points_per_indv"] = points_stability_test
+                selargs["stability"] = True
+                selargs["pop"] = self.pop[np.where(np.max(fitness) == fitness)[0][0]]
+
+                tfmirror(**selargs)
+
                 print(np.average(intens[epoch][0, 0, 0, :]))
 
                 epoch += 1
@@ -494,8 +510,6 @@ class mirror_alg(genetic_algoritm):
                 individual_table.append(individual_table_blueprint)
 
             else:
-                print(np.average(intens[epoch][0, 0, 0, :]))
-                print(np.asarray(intens).shape)
                 break
                 set_voltage(individual_table[int(intens[epoch][0, 0, 2, 0])])
 
@@ -519,64 +533,66 @@ size = [individuals, n]
 
 ga = mirror_alg(bitsize=bitsize)
 
+
+def t():
+    return time() - t0
+
+
+def main():
+    global time_intens
+
+    ga.optimumfx = optimum
+    print(size)
+
+    ga.b2n = ndbit2int
+
+
+    ga.init_pop("cauchy", shape=[size[0], size[1]], bitsize=bitsize, loc=0, scale=1)
+    print(ga.pop.shape)
+    print(ga.log.creation)
+    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
+
+    ga.elitism = 4
+
+
+    ga.logdata(2)
+    ga.log.append(log_intensity(ga.b2n, ga.bitsize, ga.b2nkwargs))
+
+    # ga.seed = uniform_bit_pop_float
+    ga.set_cross(full_equal_prob)
+    ga.set_mutate(full_mutate)
+    ga.set_select(rank_tournament_selection)
+
+    # P value for population of 20?
+    p = 0.01
+    ga.log.ranking.epoch.append(0)
+
+    print("start run")
+    ga.run(muargs={"mutate_coeff": 3},
+           selargs={"nbit2num": ndbit2int,
+                    "b2n": ga.b2n,
+                    "b2nkwargs": ga.b2nkwargs,
+                    "p": p
+                    },
+           verbosity=1,
+           target=40e-6)
+
+    print(ga.log.log_intensity.intensity)
+    k = 4
+    path = "test%s" % k
+    ga.save_log(path + ".pickle")
+    np.savetxt(path + ".txt", np.asarray(time_intens))
+
+    # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
+    # ga.save_log("dfmtest_data%s.pickle" % k)
+
+
+def checkruntime():
+    sleep(runtime)
+    return True
+
 # for i in np.linspace(0.01, 0.1, 10):
 try:
-    def t():
-        return time() - t0
-
-    def main():
-        global time_intens
-
-        ga.optimumfx = optimum
-        print(size)
-        ga.init_pop("nbit", shape=[size[0], size[1]], bitsize=bitsize)
-
-        print(ga.log.creation)
-        print(ga.pop.shape)
-        ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
-
-        ga.elitism = 4
-
-        ga.b2n = ndbit2int
-
-        ga.logdata(2)
-        ga.log.append(log_intensity(ga.b2n, ga.bitsize, ga.b2nkwargs))
-
-        # ga.seed = uniform_bit_pop_float
-        ga.set_cross(full_equal_prob)
-        ga.set_mutate(full_mutate)
-        ga.set_select(select)
-
-        # P value for population of 20?
-        p = 0.01
-        ga.log.ranking.epoch.append(0)
-
-        print("start run")
-        ga.run(muargs={"mutate_coeff": 3},
-               selargs={"nbit2num": ndbit2int,
-                        "b2n": ga.b2n,
-                        "b2nkwargs" : ga.b2nkwargs,
-                        "p": p
-                        },
-               verbosity=1,
-               target=20e-6)
-
-        print(ga.log.log_intensity.intensity)
-        k = 4
-        path = "2for_reportpop30ppi100%s" % k
-        ga.save_log(path + ".pickle" )
-        np.savetxt(path+".txt", np.asarray(time_intens))
-
-        # ga.log.log_intensity.plot(fmt_data = "raw", individual = slice(0, 1))
-        # ga.save_log("dfmtest_data%s.pickle" % k)
-
-
-
-    def checkruntime():
-        sleep(runtime)
-        return True
-
-
     if __name__ == "__main__":
         print("time: ", time() - t0)
 
@@ -615,8 +631,7 @@ finally:
         print(r"Log saved to src\dfmtest_data%s.pickle" % k)
         print("Done")
 
-        # sys.exit()
-
+        sys.exit()
 
 
 

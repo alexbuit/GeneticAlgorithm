@@ -39,11 +39,14 @@ def int_to_binary(integer: int, size: int) -> np.ndarray:
     """
     binary_arr = np.zeros(shape=size, dtype=np.uint8)
     i = 0
-    while(integer > 0):
-        digit = integer % 2
-        binary_arr[i] = digit
-        integer = integer // 2
-        i += 1
+    try:
+        while(integer > 0):
+            digit = integer % 2
+            binary_arr[i] = digit
+            integer = integer // 2
+            i += 1
+    except IndexError:
+        binary_arr = np.full(shape=size, fill_value=1, dtype=np.uint8)
     # binary_arr = np.flip(binary_arr)
     return binary_arr
 

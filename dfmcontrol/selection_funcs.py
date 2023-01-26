@@ -150,7 +150,13 @@ def roulette_selection(*args, **kwargs):
         calculated from input population
     :return:
     """
-    y = calc_fx(*args, **kwargs)
+
+    if not kwargs.get("avoid_calc_fx", False):
+        y = calc_fx(*args, **kwargs)
+    else:
+        y = args[1](args[0], **kwargs)
+    y = y.flatten()
+
 
     k = [1.5]
     if "k" in kwargs:
@@ -177,9 +183,14 @@ def rank_tournament_selection(*args, **kwargs):
     :param kwargs: 
     :return: 
     """
-    
-    y = calc_fx(*args, **kwargs).flatten()
 
+    if not kwargs.get("avoid_calc_fx", False):
+        y = calc_fx(*args, **kwargs)
+    else:
+
+        y = kwargs["fx"](args[0], **kwargs)
+
+    y = y.flatten()
     # parameters for fitness func
     k = kwargs.get("k", [1.5])
 
@@ -207,16 +218,15 @@ def rank_tournament_selection(*args, **kwargs):
 
     parent_population = y.copy()
     offspring_population = []
-    for p in range(len(y)):
-        parents = []
-        for i in range(parent_population.size): # 8 parents per offspring
-            temp_population = []
-            for j in range(tournament_size):
-                temp_population.append(np.random.choice(list(range(parent_population.size)), 1, p=selection_array.flatten(), replace=False))
-                
-            # sort solutions by fitness
-            temp_population = sorted(temp_population, key=lambda x: fitness_func(x, np.asarray(k)), reverse=True)
-            parents.append([temp_population[0][0], temp_population[1][0]])
+    parents = []
+    for i in range(int(np.ceil(parent_population.size/2))): # 8 parents per offspring
+        temp_population = []
+        for j in range(tournament_size):
+            temp_population.append(np.random.choice(list(range(parent_population.size)), 1, p=selection_array.flatten(), replace=False))
+
+        # sort solutions by fitness
+        temp_population = sorted(temp_population, key=lambda x: fitness_func(x, np.asarray(k)), reverse=True)
+        parents.append([temp_population[0][0], temp_population[1][0]])
 
     return parents, fitness_func(y, np.asarray(k)), fitness_func(y, np.asarray(k)) / sum(fitness_func(y, np.asarray(k))), y
 
@@ -231,7 +241,11 @@ def rank_selection(*args, **kwargs):
     :param kwargs: k => parameteres passed onto the fitness function
     :return: selected parents based on their probability
     """
-    y = calc_fx(*args, **kwargs)
+    if not kwargs.get("avoid_calc_fx", False):
+        y = calc_fx(*args, **kwargs)
+    else:
+        y = args[1](args[0], **kwargs)
+    y = y.flatten()
 
     # probability paramter for rank selection
     prob_param = 0.01
@@ -291,7 +305,11 @@ def rank_space_selection(*args, **kwargs):
         :return: selected parents based on their probability
         """
     pop = args[0]
-    y = calc_fx(*args, **kwargs)
+    if not kwargs.get("avoid_calc_fx", False):
+        y = calc_fx(*args, **kwargs)
+    else:
+        y = args[1](args[0], **kwargs)
+    y = y.flatten()
 
     # probability paramter for rank selection
     prob_param = kwargs.get("p", 1.9)
@@ -337,7 +355,12 @@ def boltzmann_selection(*args, **kwargs):
     """
 
     pop = args[0]
-    y = calc_fx(*args, **kwargs)
+
+    if not kwargs.get("avoid_calc_fx", False):
+        y = calc_fx(*args, **kwargs)
+    else:
+        y = args[1](args[0], **kwargs)
+    y = y.flatten()
 
     # fitness func
     fitness_func = exp_fitness
