@@ -18,7 +18,10 @@ The package can be installed with pip and git:
 
 To show the basic functionality of the library, we will optimize a simple
 function defined :ref:`here <tfx>` as :func:`tfx`. The function is defined as:
-:math:`f(x) = 3 x^2 + 2x + 1`. With its minimum at :math:`x = -\dfrac{1}{3}`.
+:math:`f(x) = (3 x^2 + 2x + 1) \cdot \sin{(x)}`. With its minimum at
+:math:`x = 0`.
+
+
 
 2.1 Import the necessary modules
 --------------------------------

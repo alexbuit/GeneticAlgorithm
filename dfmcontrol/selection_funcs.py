@@ -375,7 +375,7 @@ def boltzmann_selection(*args, **kwargs):
 
     fitness = fitness_func(y, *k)
     fitness = max(fitness) - fitness  # minimise (remove for optimise)
-    fit_rng = np.argsort(fitness)
+    fit_rng = np.argsort(fitness).flatten()
 
     pind = []
 
@@ -384,7 +384,10 @@ def boltzmann_selection(*args, **kwargs):
 
         pind.append([])
 
-        threshold = np.random.choice(np.sort(np.delete(np.abs(fitness - fitness[ind]), ind))[2:])
+        thr_arr = np.sort(np.delete(np.abs(fitness - fitness[ind]), ind))
+        non_zero_idx = np.where(thr_arr > 0)[0][2]
+
+        threshold = np.random.choice(thr_arr[non_zero_idx:])
 
         selection_2 = np.random.choice(np.where(np.delete(np.abs(fitness - fitness[ind]), ind) < threshold)[0], 1)[0]
 
@@ -431,8 +434,8 @@ if __name__ == "__main__":
     from pop import *
     from test_functions import *
 
-    pop = bitpop([16, 4], 16)
-    pop_float = ndbit2int(pop, 16, factor=10)
+    pop = bitpop([8, 39], 16)
+    pop_float = ndbit2int(pop, 16, factor=50)
 
     tst_fx = michealewicz
 
@@ -441,7 +444,8 @@ if __name__ == "__main__":
     print(ackley([0, 0]))
 
 
-    parents = boltzmann_selection(pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int, b2nkwargs={"factor": 5})
-    print(parents)
+    for i in range(0, 10000):
+        parents = boltzmann_selection(pop, fx=tst_fx, bitsize=16, nbit2num=ndbit2int, b2nkwargs={"factor": 5})
+        print(i)
 
 
