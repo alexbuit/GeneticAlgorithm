@@ -1,6 +1,5 @@
 #########
-Selection        return x ** 2 + 1
-
+Selection
 #########
 
 The selection of parents for the next generation is a vital part of the genetic algorithm

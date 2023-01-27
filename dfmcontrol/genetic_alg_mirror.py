@@ -299,17 +299,91 @@ class log_intensity(log_object):
 
         return log_intens_c
 
+    def save2txt(self, data: Union[str, list], filename: str, sep: str = ";"):
+        """
+        Saves data from the intens matrix or from an log_intensity attr to a txt file
+
+        :param data:  str or list of str, data to be saved
+        :note: binary data does not function properly
+
+        :param filename:  str, filename
+        :param sep:  str, seperator
+
+        :return:  None
+        """
+
+        # get the data
+        try:
+            # If the data is in the intens matrix create a submatrix with the
+            # data
+            idxs = ["intensity", "time", "binary"]
+            if data in idxs or isinstance(data, list):
+                if isinstance(data, str):
+                    if data in ["time", "intensity"]:
+                        submat = np.asarray(self.intensity)[:, 1, :, idxs.index(data)]
+                        submat = np.apply_over_axes(np.average, submat, 2).reshape([submat.shape[0], submat.shape[1]]).T
+                    elif data == "binary":
+                        cmat = np.asarray(self.intensity)[:, 1, :,
+                               idxs.index(data), 0].astype(int)
+                        indmat = np.asarray(self.indivuals)[:, 1, :]
+                        cmat = indmat[:, 0, cmat]
+                        submat = cmat.T
+
+                # If more than one data type is selected, concatenate them
+                elif isinstance(idxs, list):
+                    # Intensity and time should go before binary in the data param
+                    # otherwise the binary data will be averaged, so raise error
+                    if idxs[0] == "binary":
+                        raise ValueError("Binary data should be last in data param")
+
+                    # Create a submatrix for each data type and concatenate them
+                    # Start with intensity and time
+                    submat = np.asarray(self.intensity)[:, 1, :, idxs.index(data[0])]
+                    submat = np.apply_over_axes(np.average, submat, 2).reshape([submat.shape[0], submat.shape[1]]).T
+
+                    for i in range(1, len(data)):
+                        # If the requested data is time or intensity, average over the points per individual to get a
+                        # single value.
+                        if data[i] in ["time", "intensity"]:
+                            cmat = np.asarray(self.intensity)[:, 1, :, idxs.index(data[i])]
+                            cmat = np.apply_over_axes(np.average, cmat, 2).reshape([cmat.shape[0], cmat.shape[1]]).T
+                            submat = np.concatenate([submat, cmat], axis=1)
+                        # If the requested data is binary, use the indexes in intensity to get the binary values from individual_table
+                        else:
+                            cmat = np.asarray(self.indivuals)[:, 1, :, idxs.index(data[i])]
+                            cmat = individual_table[cmat]
+                            print(cmat)
+
+
+                data = submat
+            else:
+                data = np.array(getattr(self, data)).T
+
+        except AttributeError:
+            raise AttributeError(
+                "The data '%s' does not exist in the log object '%s'." % (
+                data, self.__class__.__name__))
+
+        # Save to text file with separator sep
+        with open(filename, "w") as f:
+            f.write(sep.join(str(i) for i in range(len(self.intensity))) + "\n")
+            for i in range(len(data)):
+                f.write(
+                    sep.join(str(data[i, j]) for j in range(data.shape[1])) + "\n")
+
     def plot(self, epoch: Union[slice, int] = slice(0, None),
              individual: Union[slice, int] = slice(0, None),
              data: Union[slice, int] = 0,
              fmt_data: str = "average", linefmt="scatter") -> None:
         """
         Plots the intensity of the individuals
+
         :param epoch: Slice of epochs to plot
         :param individual: Slice of individuals to plot
         :param data: Slice of data to plot
         :param fmt_data: Format of the data to plot 'average' or 'raw'
         :param linefmt: Format of the line to plot 'scatter' or 'line'
+
         :return: None
         """
 
@@ -320,27 +394,24 @@ class log_intensity(log_object):
                                          np.asarray(self.intensity)[epoch, 1, individual, data, :],
                                          2)
 
-        # for each individual
-
         for line in range(int_mat.shape[1]):
             # take the amount of epochs
             x = np.array([np.full(int_mat.shape[2], i) for i in range(int_mat.shape[0])]).flatten()
+
             # plot their intensity at each epoch
             # x = [0, 1, ... epoch n]
             # y = [intens of indv 'line' @ epoch 0, @ epoch 1, @ epoch 2, ... @ epoch n]
             y = int_mat[:, line].flatten()
 
-
             if linefmt == "scatter":
-                plt.scatter(x, y, label = "individual %s" % line)
+                plt.scatter(x, y, label="individual %s" % line)
             else:
-                plt.plot(x, y, label = "individual %s" % line)
+                plt.plot(x, y, label="individual %s" % line)
 
         plt.xlabel("epoch")
         plt.ylabel("Intensity")
 
         plt.legend()
-
         plt.show()
         return None
 
@@ -363,13 +434,16 @@ class mirror_alg(genetic_algoritm):
             cargs: dict = {}, muargs: dict = {},
             target: float = 1, verbosity: int = 1):
         """
-        :param cargs:
-        :param muargs:
-        :param seedargs:
-        :param selargs:
-        :param epochs:
-        :param verbosity:
-        :return:
+        Runs the genetic algorithm.
+
+        :param cargs: Arguments for the crossover function
+        :param muargs: Arguments for the mutation function
+        :param seedargs: Arguments for the seed function
+        :param selargs: Arguments for the selection function
+        :param epochs: Number of epochs to run
+        :param verbosity: Verbosity of the algorithm
+
+        :return: None
         """
         global epoch, optimum, points_per_indv, points_stability_test
 
@@ -385,6 +459,7 @@ class mirror_alg(genetic_algoritm):
         selargs["verbosity"] = verbosity
         selargs["avoid_calc_fx"] = True
         selargs["points_per_indv"] = points_per_indv
+        selargs["points_stability_test"] = points_stability_test
 
         parents, fitness, p, fx = self.select(self.pop, **selargs)
 
@@ -561,7 +636,7 @@ def main():
     # ga.seed = uniform_bit_pop_float
     ga.set_cross(full_equal_prob)
     ga.set_mutate(full_mutate)
-    ga.set_select(boltzmann_selection)
+    ga.set_select(rank_tournament_selection)
 
     # P value for population of 20?
     p = 0.01
@@ -575,9 +650,11 @@ def main():
                     "p": p
                     },
            verbosity=1,
-           target=2)
+           target=1.6)
 
-    print(ga.log.log_intensity.intensity)
+    # print(ga.log.log_intensity.intensity)
+    ga.log.log_intensity.save2txt(["time", "intensity"], "intensity.txt")
+
     k = 4
     path = "test%s" % k
     ga.save_log(path + ".pickle")

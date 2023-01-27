@@ -79,6 +79,7 @@ class genetic_algoritm:
 
         self.genlist: list = []
         self.pop: np.ndarray = np.array([])
+        self.initial_pop: np.ndarray = np.array([])
 
         self.tfunc: Callable = self.none
         self.targs: dict = {}
@@ -153,7 +154,7 @@ class genetic_algoritm:
 
         :return: None
         """
-
+        print(self.pop, self.initial_pop)
         if len(self.pop) == 0:
             self.init_pop()
 
@@ -218,6 +219,7 @@ class genetic_algoritm:
                 print("%s/%s" % (self.epoch + 1, self.epochs))
                 print("Distance to sol: %s" % np.min(np.abs(self.log.ranking.distancefx[-1])))
                 print("Group distance: %s" % np.average(np.abs(self.log.ranking.distancefx[-1])))
+                print("Best fitness: %s" % np.min(self.log.selection.fitness[-1]))
 
             cargs["bitsize"] = self.bitsize
             muargs["bitsize"] = self.bitsize
@@ -356,20 +358,28 @@ class genetic_algoritm:
         self.log.pop = self.pop
         self.shape = (self.pop.shape[0], self.pop.shape[1] / self.bitsize)
 
+        self.initial_pop = self.pop
+
         return None
 
-    def set_pop(self, pop: np.ndarray):
+    def set_pop(self, pop: np.ndarray, reset: bool = True):
         """
         Set population (self.pop) to provided ndarray of bits.
 
         :param pop: np.ndarray of shape mx1, with bits in numpy arrays of
          dtype: np.uint8 like: [[0, 1, ... ,0, 1], [0, 1, ... ,0, 1], [0, 1, ... ,0, 1]]
 
+        :param reset: bool, if True the initial population will be set to the provided pop.
+
         :return: None
         """
         self.pop = pop
         self.log.pop = self.pop
         self.shape = (self.pop.shape[0], self.pop.shape[1] / self.bitsize)
+
+        if reset:
+            self.initial_pop = self.pop
+
         return None
 
     def get_pop(self):
@@ -660,6 +670,8 @@ class genetic_algoritm:
             self.log.ranking.distancex = old_log.ranking.distancex
             self.log.ranking.distancefx = old_log.ranking.distancefx
             self.log.ranking.bestsol = old_log.ranking.bestsol
+            self.log.ranking.result = old_log.ranking.result
+            self.log.ranking.bestresult = old_log.ranking.bestresult
 
             self.log.selection = old_log.selection.copy()
 
@@ -704,6 +716,20 @@ class genetic_algoritm:
                 return False
 
         return True
+
+    def reset(self, reset_pop = True):
+        """
+        Reset the GA instance to the initial state.
+
+        :param reset_pop: If False, the population will be reset to the initial population.
+        :return: None
+        """
+        self.genlist: list = []
+        self.pop = self.initial_pop
+
+        if reset_pop:
+            self.pop: np.ndarray = np.array([])
+
 
     @staticmethod
     @tfx_decorator

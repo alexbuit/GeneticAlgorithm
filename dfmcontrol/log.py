@@ -219,6 +219,36 @@ class log_object:
     def copy(self):
         return self.__copy__()
 
+    def save2txt(self, data: str, filename: str, sep: str = ";"):
+        """
+        Save the log object to a text file.
+
+        :type data: str
+        :param data: The data to save in the form of the log_object attr.
+
+        :type filename: str
+        :param filename: The filename of the text file.
+
+        :type sep: str
+        :param sep: The separator used in the text file.
+
+        :return: None
+        """
+
+        # get the data
+        try:
+            data = np.array(getattr(self, data)).T
+        except AttributeError:
+            raise AttributeError("The data '%s' does not exist in the log object '%s'." % (data, self.__class__.__name__))
+
+        # Save to text file with separator sep
+        with open(filename, "w") as f:
+            f.write(sep.join(str(i) for i in range(len(self.epoch))) + "\n")
+            for i in range(len(data)):
+                f.write(sep.join(str(data[i, j]) for j in range(data.shape[1])) + "\n")
+
+        return None
+
 
     def update(self, data, *args):
         self.data.append(data)
@@ -423,6 +453,8 @@ class log_ranking(log_object):
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ranknum = []
+        self.result = []
+        self.bestresult = []
         self.effectivity = []
         self.distancex = []
         self.distancefx = []
@@ -436,6 +468,9 @@ class log_ranking(log_object):
         object_copy.effectivity = self.effectivity
         object_copy.distancex = self.distancex
         object_copy.bestsol = self.bestsol
+        object_copy.distancefx = self.distancefx
+        object_copy.bestresult = self.bestresult
+        object_copy.result = self.result
         return object_copy
 
     def update(self, data, *args):
@@ -455,6 +490,8 @@ class log_ranking(log_object):
 
         self.ranknum.append(self.b2n(data, **self.b2nkwargs))
 
+        self.result.append(self.fx)
+
         # Calculate the euclidian distance between the optimum and all pop values
         self.distancex.append(np.apply_along_axis(pythagoras, 1, (np.absolute(self.ranknum[-1] - args[1]))**2))
         self.distancefx.append(self.fx - args[2])
@@ -465,6 +502,7 @@ class log_ranking(log_object):
         # Find the best solution of this iteration and append it to the list
         ind = np.where(self.effectivity[-1] == max(self.effectivity[-1]))[0]
         self.bestsol.append(self.ranknum[-1][ind])
+        self.bestresult.append(self.fx[ind])
 
     def __getitem__(self, item: int):
         return self.ranknum[item]
