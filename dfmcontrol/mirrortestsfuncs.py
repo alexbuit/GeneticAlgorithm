@@ -3,7 +3,6 @@ import sys
 import numpy as np
 
 from time import sleep, time
-from AdrianPack.Helper import compress_ind
 from okotech_lib.okodm_sdk.python import okodm_class as oko
 
 def mirror(a):

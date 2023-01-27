@@ -26,7 +26,6 @@ except ImportError:
     from dfmcontrol.log import log_object, log
     from dfmcontrol.test_functions import tfx_decorator
 
-
     from dfmcontrol.AdrianPackv402.Helper import compress_ind
 
 
@@ -41,7 +40,7 @@ epoch = 0  # ??
 # Hardcoded value for 39ch mirror
 individual_size = 39
 
-test_setup = False
+test_setup = True
 
 # Logs intensity of stability test and algorithm
 # array of dim 4, saved as dim 5 after run [epochs, 2: [stability, test], individuals, 3: [intensity, time, bin combination], sample size]
@@ -167,6 +166,7 @@ def tfmirror(*args, **kwargs):
     avg_read = np.zeros(num_pop.shape[0])
 
     i = 0
+    print(num_pop.shape)
     for indiv in num_pop:
         voltages = indiv
 
@@ -446,7 +446,7 @@ class mirror_alg(genetic_algoritm):
                 t10 = parents[:self.save_top]
 
                 self.genlist.append([])
-
+                # print(self.genlist[epoch+1])
                 for ppair in t10:
                     self.genlist[epoch].append(self.pop[ppair[0]])
                     self.genlist[epoch].append(self.pop[ppair[1]])
@@ -561,7 +561,7 @@ def main():
     # ga.seed = uniform_bit_pop_float
     ga.set_cross(full_equal_prob)
     ga.set_mutate(full_mutate)
-    ga.set_select(rank_tournament_selection)
+    ga.set_select(boltzmann_selection)
 
     # P value for population of 20?
     p = 0.01
@@ -575,7 +575,7 @@ def main():
                     "p": p
                     },
            verbosity=1,
-           target=40e-6)
+           target=2)
 
     print(ga.log.log_intensity.intensity)
     k = 4
@@ -631,7 +631,7 @@ finally:
         print(r"Log saved to src\dfmtest_data%s.pickle" % k)
         print("Done")
 
-        sys.exit()
 
+main()
 
 

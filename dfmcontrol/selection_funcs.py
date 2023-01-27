@@ -187,7 +187,6 @@ def rank_tournament_selection(*args, **kwargs):
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
     else:
-
         y = kwargs["fx"](args[0], **kwargs)
 
     y = y.flatten()
@@ -217,9 +216,9 @@ def rank_tournament_selection(*args, **kwargs):
         selection_array[fit_rng[i]] = p[i]
 
     parent_population = y.copy()
-    offspring_population = []
+
     parents = []
-    for i in range(int(np.ceil(parent_population.size/2))): # 8 parents per offspring
+    for i in range(int(np.ceil(parent_population.size/2))):
         temp_population = []
         for j in range(tournament_size):
             temp_population.append(np.random.choice(list(range(parent_population.size)), 1, p=selection_array.flatten(), replace=False))
@@ -244,7 +243,7 @@ def rank_selection(*args, **kwargs):
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
     else:
-        y = args[1](args[0], **kwargs)
+        y = kwargs["fx"](args[0], **kwargs)
     y = y.flatten()
 
     # probability paramter for rank selection
@@ -308,7 +307,7 @@ def rank_space_selection(*args, **kwargs):
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
     else:
-        y = args[1](args[0], **kwargs)
+        y = kwargs["fx"](args[0], **kwargs)
     y = y.flatten()
 
     # probability paramter for rank selection
@@ -353,13 +352,13 @@ def boltzmann_selection(*args, **kwargs):
     """
 
     """
-
     pop = args[0]
 
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
     else:
-        y = args[1](args[0], **kwargs)
+        y = kwargs["fx"](args[0], **kwargs)
+
     y = y.flatten()
 
     # fitness func
@@ -379,7 +378,7 @@ def boltzmann_selection(*args, **kwargs):
 
     pind = []
 
-    for i in range(pop.shape[0]):
+    for i in range(int(np.ceil(pop.shape[0]/2))):
         ind = np.random.choice(fit_rng, 1)[0]
 
         pind.append([])
