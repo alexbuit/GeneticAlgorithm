@@ -16,8 +16,8 @@ import numpy as np
 # For the mirror
 
 ## global variables
-individuals: int = 50
-points_per_indv: int = 20
+individuals: int = 20
+points_per_indv: int = 25
 points_stability_test = 25
 
 runtime = 10 # runtime in seconds
@@ -119,7 +119,7 @@ def tfmirror(*args, **kwargs):
     b2n: Callable = kwargs["b2n"]
     b2nkwargs: dict = kwargs["b2nkwargs"]
 
-    ppi: int = kwargs.get("points_per_indv", 20)
+    ppi: int = kwargs.get("points_per_indv", 25)
     stability: bool = kwargs.get("stability", False)
 
     num_pop = b2n(pop, bitsize, **b2nkwargs)
@@ -140,7 +140,7 @@ def tfmirror(*args, **kwargs):
     i = 0
     for indiv in num_pop:
         voltages = indiv
-
+        print(np.sum(voltages))
         set_voltage(voltages)
 
         # Read the power meter
@@ -175,12 +175,14 @@ def tfmirror(*args, **kwargs):
 
     set_voltage(np.zeros(shape=n))
 
+    print(avg_read)
+
     return avg_read
 
 # Create a genetic algorithm object
 ga = genetic_algoritm(bitsize=8)
 tfunc = tfx_decorator(tfmirror)
-tfunc.set_minima(minima={"x": None, "fx": 50e-6})
+tfunc.set_minima(minima={"x": None, "fx": 40e-6})
 
 # use the default bit2num function
 ga.b2n = dfmh.ndbit2int
@@ -190,7 +192,7 @@ ga.b2nkwargs = {"factor": 1}
 
 # Initiate a population of 16 individuals with 2 genes each
 ga.init_pop("normal", shape=[individuals, n], bitsize=ga.bitsize, factor=ga.b2nkwargs["factor"])
-
+print(ga.b2n(ga.pop, ga.bitsize, **ga.b2nkwargs))
 # Initiate the log
 ga.logdata(2)
 
@@ -198,16 +200,16 @@ ga.logdata(2)
 ga.target_func(tfunc)
 
 # Set the selection, mutation and crossover functions
-ga.set_select(dfmc.selection_funcs.boltzmann_selection) # Rank selection
+ga.set_select(dfmc.selection_funcs.rank_selection) # Rank selection
 ga.set_mutate(dfmc.mutation.full_mutate) # Mutate the full bit (do not use for IEEE 754 floats)
 ga.set_cross(dfmc.cross_funcs.full_equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
 
-ga.elitism = 4  # Keep the 4 best individuals
+ga.elitism = 8  # Keep the 4 best individuals
 # Run the genetic algorithm
 
 # The runcond argument is a string that is evaluated as a condition for the algorithm to stop
 # The string can use any of the attributes of the genetic algorithm object
-runcond = r"np.min(np.abs(self.log.ranking.distancefx[-1])) > 1e-6"  # Stop when the minimum distance from the best solution to the mathematical is less than 0.1
+runcond = r"self.epoch < 50"  # Stop when the minimum distance from the best solution to the mathematical is less than 0.1
 
 # The verbosity argument is an integer that controls the amount of output
 # 0: No output
@@ -223,21 +225,35 @@ selargs = {"nbit2num": ga.b2n, "fitness_func": dfmc.selection_funcs.no_fitness,
            "points_per_individual": points_per_indv}
 
 # print(ga.b2n(ga.pop, ga.bitsize,**ga.b2nkwargs))
-epochs = np.zeros([100, 3])
+epochs = np.zeros([10, 3])
 
 tstart = time.time()
+set_voltage(np.zeros(n))
 
-for i in range(10):
-    ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity, runcond=runcond)
-    print("iter %s, epochs %s" % (i, ga.epoch))
+try:
+    for i in range(10):
+        ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity, runcond=runcond)
+        print("iter %s, epochs %s" % (i, ga.epoch))
 
-    print("Time elapsed: %s" % (time.time() - tstart))
+        print("Time elapsed: %s" % (time.time() - tstart))
 
-    epochs[i, 0] = ga.epoch
-    epochs[i, 1] = time.time() - tstart
-    epochs[i, 2] = np.min(np.abs(ga.log.ranking.distancefx[-1]))
-    ga.reset(reset_pop=False)
-    tstart = time.time()
+        ga.save_log("Test_%s_%s.pickle" % (ga.select.__name__, i))
+        np.savetxt("Test_%s_%s.txt" % (ga.select.__name__, i), time_intens)
+
+        epochs[i, 0] = ga.epoch
+        epochs[i, 1] = time.time() - tstart
+        epochs[i, 2] = np.min(np.abs(ga.log.ranking.distancefx[-1]))
+        ga.reset(reset_pop=False)
+        set_voltage(np.zeros(n))
+
+        time_intens: List[np.ndarray] = [np.zeros(2)]
+        tstart = time.time()
+
+except Exception as exception:
+    print(exception)
+
+finally:
+    set_voltage(np.zeros(n))
 
 np.savetxt("labtest1.csv", epochs, delimiter=";")
 
@@ -248,3 +264,5 @@ plt.ylabel("Frequency")
 plt.show()
 
 print("Time elapsed: %s" % (time.time() - tstart))
+
+sys.exit()

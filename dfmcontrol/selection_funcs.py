@@ -154,7 +154,7 @@ def roulette_selection(*args, **kwargs):
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
     else:
-        y = args[1](args[0], **kwargs)
+        y = kwargs["fx"](args[0], **kwargs)
     y = y.flatten()
 
 
@@ -172,6 +172,7 @@ def roulette_selection(*args, **kwargs):
     fitness = fitness_func(y, *k)
 
     p = fitness / sum(fitness)
+    print(y)
     return sort_list(fitness, p, **kwargs), fitness, p, y
 
 
@@ -320,8 +321,6 @@ def rank_space_selection(*args, **kwargs):
     # parameters for fitness func
     k = kwargs.get("k", [1.5])
 
-    # gradient descent parameter, if 0 then no gradient descent
-    gd_param = kwargs.get("gd", 0.1)
 
     if not isinstance(k, Iterable):
         k = [k]
@@ -335,18 +334,38 @@ def rank_space_selection(*args, **kwargs):
     fit_rng = np.flip(np.argsort(fitness))
 
     best = fit_rng[0]
-    diversity = np.sqrt(np.asarray([pop[best]**2 - pop[i]**2 for i in pop])) * div_param
-
-    if gd_param > 0:
-        # gradient descent
-        pass
-
+    diversity = np.sqrt(np.asarray([y[best]**2 - y[i]**2 for i in fit_rng])) * div_param
     fitness = fitness + diversity
     fit_rng = np.argsort(fitness)
 
     p = (prob_param * (1 - prob_param) ** (
                 np.arange(1, fitness.size + 1, dtype=float) - 1))
     p = p / np.sum(p)
+
+    selection_array = np.zeros(fit_rng.shape)
+    for i in range(fitness.size):
+        selection_array[fit_rng[i]] = p[i]
+
+    pind = []
+    rng = np.arange(0, y.size)
+
+    for i in range(int(y.size / 2)):
+        if selection_array.size > 1:
+            try:
+                par = np.random.choice(rng, 2, p=selection_array,
+                                       replace=False)
+            except ValueError:
+                if kwargs["verbosity"] == 1:
+                    print("Value error in selection, equal probability")
+
+                selection_array = np.full(selection_array.size,
+                                          1 / selection_array.size)
+                par = np.random.choice(rng, 2, p=selection_array,
+                                       replace=False)
+
+            pind.append(list(sorted(par).__reversed__()))
+
+    return pind, fitness, p, y
 
 
 def boltzmann_selection(*args, **kwargs):
