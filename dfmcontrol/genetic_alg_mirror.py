@@ -150,7 +150,7 @@ def tfmirror(*args, **kwargs):
     ppi: int = kwargs.get("points_per_indv", 100)
     stability: bool = kwargs.get("stability", False)
 
-    num_pop = b2n(pop, **b2nkwargs)
+    num_pop = b2n(pop, bitsize, **b2nkwargs)
 
     # Values are normalised, how much time does this take?
     for indiv in num_pop:
@@ -625,7 +625,7 @@ def main():
     ga.init_pop("cauchy", shape=[size[0], size[1]], bitsize=bitsize, loc=0, scale=1)
     print(ga.pop.shape)
     print(ga.log.creation)
-    ga.b2nkwargs = {"factor": 1, "normalised": True, "bitsize": 8, "bias": 0.0}
+    ga.b2nkwargs = {"factor": 1, "normalised": True, "bias": 0.0}
 
     ga.elitism = 4
 
@@ -647,7 +647,8 @@ def main():
            selargs={"nbit2num": ndbit2int,
                     "b2n": ga.b2n,
                     "b2nkwargs": ga.b2nkwargs,
-                    "p": p
+                    "p": p,
+                    "fitness_func": no_fitness
                     },
            verbosity=1,
            target=1.6)

@@ -104,7 +104,7 @@ class genetic_algoritm:
         self.results: list = []
 
         self.dolog: int = 2
-        self.b2n: Callable = Ndbit2floatIEEE754
+        self.b2n: Callable = ndbit2int
         self.b2nkwargs: dict = {}
         self.log: "log" = log(self.pop, self.select, self.cross, self.mutation,
                               self.b2n, self.elitism, self.save_top,
@@ -154,7 +154,7 @@ class genetic_algoritm:
 
         :return: None
         """
-        print(self.pop, self.initial_pop)
+        # print(self.pop, self.initial_pop)
         if len(self.pop) == 0:
             self.init_pop()
 
@@ -177,6 +177,7 @@ class genetic_algoritm:
         selargs["verbosity"] = verbosity
 
         self.tfunc.set_dimension(self.shape[1])
+
         parents, fitness, p, fx = self.select(self.pop, **selargs)
 
         # if self.seed.__name__ == "none":
@@ -192,7 +193,7 @@ class genetic_algoritm:
 
             if self.dolog == 2:
 
-                self.log.ranking.update(rank, fx, self.tfunc.minima["x"], 0)
+                self.log.ranking.update(rank, fx, self.tfunc.minima["x"], self.tfunc.minima["fx"])
                 self.log.time.update(time() - self.tstart, 0)
                 self.log.selection.update(parents, p, fitness)
 
@@ -205,6 +206,7 @@ class genetic_algoritm:
             elif self.dolog == 1:
                 self.log.ranking.update(rank, self.tfunc.minima["x"])
                 self.log.time.update(time() - self.tstart)
+
 
         while self.condinterpreter(runcond):
             newgen = []
@@ -219,15 +221,15 @@ class genetic_algoritm:
                 print("%s/%s" % (self.epoch + 1, self.epochs))
                 print("Distance to sol: %s" % np.min(np.abs(self.log.ranking.distancefx[-1])))
                 print("Group distance: %s" % np.average(np.abs(self.log.ranking.distancefx[-1])))
-                print("Best fitness: %s" % np.min(self.log.selection.fitness[-1]))
+                print("Best fitness: %s" % np.max(self.log.selection.fitness[-1]))
 
             cargs["bitsize"] = self.bitsize
             muargs["bitsize"] = self.bitsize
 
             for ppair in parents[self.elitism:]:
-                # child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
-                child1, child2 = self.cross(self.pop[ppair[0]],
-                                            self.pop[ppair[1]], **cargs)
+                child1, child2 = self.pop[ppair[0]], self.pop[ppair[1]]
+                # child1, child2 = self.cross(self.pop[ppair[0]],
+                #                             self.pop[ppair[1]], **cargs)
 
                 newgen.append(child1)
                 newgen.append(child2)
@@ -284,7 +286,7 @@ class genetic_algoritm:
                     self.log.ranking.update(rank, self.tfunc.minima["x"])
                     self.log.time.update(time() - tsart)
 
-                    self.log.logdict[epoch] = {"time": time() - self.tstart,
+                    self.log.logdict[self.epoch] = {"time": time() - self.tstart,
                                                "ranking": rank,
                                                "value": self.pop}
 
@@ -756,9 +758,9 @@ if __name__ == "__main__":
 
     d = 2
 
-    size = [5, d]
-    low, high = -5, 5
-    bitsize = 8
+    size = [25, d]
+    low, high = -10, 10
+    bitsize = 16
     tfunc = ackley
     # epochs = int(np.floor(np.log2(size[0])))
     epochs = 10
@@ -794,9 +796,9 @@ if __name__ == "__main__":
 
     ga.run(epochs=epochs, muargs={"mutate_coeff": 3},
            selargs={"nbit2num": ndbit2int,
-                    "k": k, "fitness_func": sigmoid_fitness,
+                    "k": k, "fitness_func": no_fitness,
                     "allow_duplicates": True},
-           verbosity=1, runcond="min(np.abs(self.log.ranking.distancefx[-1])) < 0.1")
+           verbosity=0, runcond="min(np.abs(self.log.ranking.distancefx[-1])) > 0.1")
 
     ga.save_log("Booth16b_p%s.pickle" % iteration)
     iteration += 0

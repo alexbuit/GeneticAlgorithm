@@ -485,19 +485,15 @@ class log_ranking(log_object):
         self.epoch.append(len(self.data))
         self.fx = args[0]
 
-        if "bitsize" not in self.b2nkwargs:
-            self.b2nkwargs["bitsize"] = self.bitsize
-
-        self.ranknum.append(self.b2n(data, **self.b2nkwargs))
+        self.ranknum.append(self.b2n(data, self.bitsize, **self.b2nkwargs))
 
         self.result.append(self.fx)
 
         # Calculate the euclidian distance between the optimum and all pop values
-        self.distancex.append(np.apply_along_axis(pythagoras, 1, (np.absolute(self.ranknum[-1] - args[1]))**2))
         self.distancefx.append(self.fx - args[2])
 
         # Determine the effectivity relative to the largest distcance after the first epoch.
-        self.effectivity.append(1 - self.distancex[-1] / max(self.distancex[0]))
+        self.effectivity.append(1 - self.distancefx[-1] / max(self.distancefx[-1]))
 
         # Find the best solution of this iteration and append it to the list
         ind = np.where(self.effectivity[-1] == max(self.effectivity[-1]))[0]
@@ -523,15 +519,12 @@ class log_ranking(log_object):
             pass
 
         avgpepoch = [np.average(i[0:]) for i in datasource]
-        print(avgpepoch)
 
         if not "linestyle" in kwargs:
             kwargs["linestyle"] = "-"
 
         if not "marker" in kwargs:
             kwargs["marker"] = "o"
-
-        print(len(self.epoch), len(avgpepoch))
 
         pl = Default(self.epoch, avgpepoch, **kwargs)
         if show:
@@ -591,11 +584,10 @@ class log_value(log_object):
         self.value.append(data)
         self.epoch.append(len(self.data))
 
-        if "bitsize" not in self.b2nkwargs:
-            self.b2nkwargs["bitsize"] = self.bitsize
 
         self.numvalue.append(np.asarray(convertpop2n(bit2num=self.b2n,
                                                      target=list(data),
+                                                     bitsize=self.bitsize,
                                                      **self.b2nkwargs))[:, 0])
         self.topx.append(args[0])
         return None
@@ -740,7 +732,7 @@ class log_value(log_object):
         :return:
         """
 
-        figure, [axis1, axis2] = plt.subplots(1, 2)
+        figure, axis1 = plt.subplots(1, 1)
 
         print(fitness)
         line2data = np.array(fitness)
@@ -752,7 +744,7 @@ class log_value(log_object):
                          linestyle="",
                          marker="o", label="Algortithm")
 
-        line2 = axis2.bar(range(len(np.sort(line2data[0, :]))), np.sort(line2data[0, :]))
+        # line2 = axis2.bar(range(len(np.sort(line2data[0, :]))), np.sort(line2data[0, :]))
 
         x1, x2 = np.linspace(low, high, 1000), np.linspace(low, high, 1000)
         X1, X2 = np.meshgrid(x1, x2)
@@ -774,14 +766,14 @@ class log_value(log_object):
             print(frame)
             line.set_data(self.numvalue[frame][:, 0], self.numvalue[frame][:, 1])
 
-            sorted_fitness = np.sort(line2data[frame, :])
+            # sorted_fitness = np.sort(line2data[frame, :])
 
-            for i, b in enumerate(line2):
-                b.set_height(sorted_fitness[i])
+            # for i, b in enumerate(line2):
+            #     b.set_height(sorted_fitness[i])
 
 
             axis1.set_title("2D plot")
-            axis2.set_title("fitness of individuals")
+            # axis2.set_title("fitness of individuals")
             plt.title("Iteration: %s" % frame)
             return None
 

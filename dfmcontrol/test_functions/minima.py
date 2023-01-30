@@ -86,7 +86,7 @@ def minmichealewicz(n: int):
     if n > 10 or n < 2:
         return n*-0.99864 + 0.30271
     else:
-        n = n -2
+        n = n-1
         return np.array([-1.8013034, -2.7603947, -3.6988571, -4.6876582, -5.6876582, -6.6808853, -7.6637574, -8.6601517, -9.6601517])[n]
 
 def minmichealewiczloc(n: int):

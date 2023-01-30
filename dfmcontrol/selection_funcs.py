@@ -119,7 +119,7 @@ def sort_list(y, p, **kwargs):
 
     for i in range(int(y.size / 2)):
         par = np.flip(np.argsort(p))[0:2]
-        par = list(sorted(par).__reversed__())
+        par = list(sorted(par))
         pind.append(par)
         try:
             y = np.delete(y, np.where(par == pind[-1][0])[0][0])
@@ -200,7 +200,7 @@ def rank_tournament_selection(*args, **kwargs):
     fitness_func = kwargs.get("fitness_func", exp_fitness)
 
     fitness = fitness_func(y, *k)
-    fit_rng = np.argsort(fitness)
+    fit_rng = np.flip(np.argsort(fitness))
 
     prob_param = kwargs.get("p", 0.01)
 
@@ -266,7 +266,7 @@ def rank_selection(*args, **kwargs):
 
     fitness = fitness_func(y, np.asarray(k))
 
-    fit_rng = np.argsort(fitness)
+    fit_rng = np.flip(np.argsort(fitness))
 
     p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
     p = p/np.sum(p)
@@ -308,6 +308,7 @@ def rank_space_selection(*args, **kwargs):
         y = calc_fx(*args, **kwargs)
     else:
         y = kwargs["fx"](args[0], **kwargs)
+
     y = y.flatten()
 
     # probability paramter for rank selection
@@ -331,7 +332,7 @@ def rank_space_selection(*args, **kwargs):
         fitness_func = kwargs["fitness_func"]
 
     fitness = fitness_func(y, *k)
-    fit_rng = np.argsort(fitness)
+    fit_rng = np.flip(np.argsort(fitness))
 
     best = fit_rng[0]
     diversity = np.sqrt(np.asarray([pop[best]**2 - pop[i]**2 for i in pop])) * div_param
@@ -372,9 +373,8 @@ def boltzmann_selection(*args, **kwargs):
     # Temperature parameter
     T = kwargs.get("T", 10)
 
-    fitness = fitness_func(y, *k)
-    fitness = max(fitness) - fitness  # minimise (remove for optimise)
-    fit_rng = np.argsort(fitness).flatten()
+    fitness = fitness_func(y, *k)  # minimise (remove for optimise)
+    fit_rng = np.flip(np.argsort(fitness).flatten())
 
     pind = []
 
@@ -383,11 +383,9 @@ def boltzmann_selection(*args, **kwargs):
 
         pind.append([])
 
-        thr_arr = np.sort(np.delete(np.abs(fitness - fitness[ind]), ind))
-        non_zero_idx = np.where(thr_arr > 0)[0][2]
-
-        threshold = np.random.choice(thr_arr[non_zero_idx:])
-
+        thr_arr = np.unique(np.sort(np.delete(np.abs(fitness - fitness[ind]), ind)))
+        non_zero_idx = np.where(thr_arr > 0)[0][3]
+        threshold = np.random.choice(thr_arr[non_zero_idx:], 1)[0]
         selection_2 = np.random.choice(np.where(np.delete(np.abs(fitness - fitness[ind]), ind) < threshold)[0], 1)[0]
 
         # Strict third selection

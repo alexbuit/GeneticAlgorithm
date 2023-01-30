@@ -150,6 +150,8 @@ class _tfx_decorator:
                 "x": getattr(tf, "min" + self.func.__name__ + "loc")(self.ndim),
                 "fx": getattr(tf, "min" + self.func.__name__)(self.ndim)}
             self.optima = {"x": None, "fx": None}
+        elif self.minima["x"] is not None or self.minima["fx"] is not None or self.optima["x"] is not None or self.optima["fx"] is not None: # Ugly pls fix
+            pass
         else:
             self.optima = kwargs.get("optima", {"x": None,
                                                 "fx": None})  # {"x": [x1, x2, ... , xn], "fx": []}
@@ -317,7 +319,7 @@ def ackley(x: list, a: float = 20, b: float = 0.2, c: float = 2):
     """
     c *= np.pi  # Needed for autodoc, maybe find a workaround?
 
-    ndim = (lambda i: len(i) if isinstance(i, list) else i.ndim)(x)
+    ndim = (lambda i: len(i) if isinstance(i, list) else i.size)(x)
     x = np.array(x, dtype=float)
     return -a * np.exp(-b * np.sqrt(1/ndim * sum(x**2))) - np.exp(1/ndim * sum(np.cos(c * x))) + a + np.exp(1)
 
@@ -331,7 +333,7 @@ def Styblinski_Tang(x: list):
     :return: Value f(x1, x2, ....), real float
     """
     x = np.array(x, dtype=float)
-    return sum(x**4) - 16 * sum(x**2) + 5 * sum(x)/2
+    return (sum(x**4) - 16 * sum(x**2) + 5 * sum(x))/2
 
 
 

@@ -305,7 +305,7 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, **kwargs):
     return res
 
 
-def convertpop2n(bit2num=None, target=None, **kwargs):
+def convertpop2n(bit2num=None, target=None, bitsize=None, **kwargs):
         """
         FROM genetic_algortim.get_numeric() TO BE USED IN OTHER FILES.
 
@@ -332,7 +332,7 @@ def convertpop2n(bit2num=None, target=None, **kwargs):
             kwargs for bit2num
         :return: numeric values for results of the loaded GA data
         """
-        return [bit2num(i, **kwargs) for i in target]
+        return [bit2num(i, bitsize, **kwargs) for i in target]
 
 
 def sigmoid(x):
