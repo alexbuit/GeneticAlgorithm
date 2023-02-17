@@ -91,7 +91,8 @@ class genetic_algoritm:
         self.cross: Callable = full_equal_prob
         self.mutation: Callable = mutate
 
-        # self.seed: Callable = self.none
+        self.mode: str = "optimise" # or mnimise
+        self.modebool: bool = True if self.mode == "optimise" else False
 
         self.tstart = time()
 
@@ -175,6 +176,7 @@ class genetic_algoritm:
         selargs["b2n"] = self.b2n
         selargs["b2nkwargs"] = self.b2nkwargs
         selargs["verbosity"] = verbosity
+        selargs["mode"] = self.modebool
 
         self.tfunc.set_dimension(self.shape[1])
 
@@ -366,7 +368,8 @@ class genetic_algoritm:
 
         return None
 
-    def set_pop(self, pop: np.ndarray, reset: bool = True):
+    @property
+    def set_pop(self, reset: bool = True):
         """
         Set population (self.pop) to provided ndarray of bits.
 
@@ -386,6 +389,7 @@ class genetic_algoritm:
 
         return None
 
+    @property
     def get_pop(self):
         """
         Return a copy of population (self.pop)
@@ -394,7 +398,8 @@ class genetic_algoritm:
         """
         return self.pop.copy()
 
-    def target_func(self, target, targs: dict = None):
+    @property
+    def target_func(self, targs: dict = None):
         """
         Set target function to be used in the optimisation.
 
@@ -731,10 +736,12 @@ class genetic_algoritm:
         self.genlist: list = []
         self.pop = self.initial_pop
 
-        self.log = self.logdata(2)
+        self.logdata(2)
 
         if reset_pop:
             self.pop: np.ndarray = np.array([])
+
+        self.log.pop = self.pop
 
 
     @staticmethod

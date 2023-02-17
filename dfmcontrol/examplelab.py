@@ -225,14 +225,45 @@ selargs = {"nbit2num": ga.b2n, "fitness_func": dfmc.selection_funcs.no_fitness,
            "points_per_individual": points_per_indv}
 
 # print(ga.b2n(ga.pop, ga.bitsize,**ga.b2nkwargs))
-epochs = np.zeros([10, 3])
 
 tstart = time.time()
 set_voltage(np.zeros(n))
 
-try:
-    for i in range(10):
-        ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity, runcond=runcond)
+
+epochs = np.zeros([10, 3])
+
+for i in range(5):
+    # try:
+    ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity, runcond=runcond)
+    print("iter %s, epochs %s" % (i, ga.epoch))
+
+    print("Time elapsed: %s" % (time.time() - tstart))
+
+    ga.save_log("Test_%s_%s.pickle" % (ga.select.__name__, i))
+    np.savetxt("Test_%s_%s.txt" % (ga.select.__name__, i), time_intens)
+
+    epochs[i, 0] = ga.epoch
+    epochs[i, 1] = time.time() - tstart
+    epochs[i, 2] = np.min(np.abs(ga.log.ranking.distancefx[-1]))
+    ga.reset(reset_pop=False)
+    set_voltage(np.zeros(n))
+
+    time_intens: List[np.ndarray] = [np.zeros(2)]
+    tstart = time.time()
+    # except Exception as e:
+    #     print(e)
+    #     set_voltage(np.zeros(n))
+
+np.savetxt("labtest1%s.csv" % ga.select.__name__, epochs, delimiter=";")
+
+
+ga.set_select(dfmc.selection_funcs.roulette_selection)
+epochs = np.zeros([10, 3])
+
+for i in range(5):
+    try:
+        ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity,
+               runcond=runcond)
         print("iter %s, epochs %s" % (i, ga.epoch))
 
         print("Time elapsed: %s" % (time.time() - tstart))
@@ -248,20 +279,99 @@ try:
 
         time_intens: List[np.ndarray] = [np.zeros(2)]
         tstart = time.time()
+    except Exception as e:
+        print(e)
+        set_voltage(np.zeros(n))
 
-except Exception as exception:
-    print(exception)
+np.savetxt("labtest1%s.csv" % ga.select.__name__, epochs, delimiter=";")
 
-finally:
-    set_voltage(np.zeros(n))
 
-np.savetxt("labtest1.csv", epochs, delimiter=";")
+ga.set_select(dfmc.selection_funcs.boltzmann_selection)
+epochs = np.zeros([10, 3])
 
-plt.hist(epochs[:, 0], 30)
-plt.xlabel("Epochs")
-plt.ylabel("Frequency")
+for i in range(5):
+    try:
+        ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity,
+               runcond=runcond)
+        print("iter %s, epochs %s" % (i, ga.epoch))
 
-plt.show()
+        print("Time elapsed: %s" % (time.time() - tstart))
+
+        ga.save_log("Test_%s_%s.pickle" % (ga.select.__name__, i))
+        np.savetxt("Test_%s_%s.txt" % (ga.select.__name__, i), time_intens)
+
+        epochs[i, 0] = ga.epoch
+        epochs[i, 1] = time.time() - tstart
+        epochs[i, 2] = np.min(np.abs(ga.log.ranking.distancefx[-1]))
+        ga.reset(reset_pop=False)
+        set_voltage(np.zeros(n))
+
+        time_intens: List[np.ndarray] = [np.zeros(2)]
+        tstart = time.time()
+    except Exception as e:
+        print(e)
+        set_voltage(np.zeros(n))
+
+np.savetxt("labtest1%s.csv" % ga.select.__name__, epochs, delimiter=";")
+
+ga.set_select(dfmc.selection_funcs.rank_tournament_selection)
+epochs = np.zeros([10, 3])
+
+
+for i in range(5):
+    try:
+        ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity,
+               runcond=runcond)
+        print("iter %s, epochs %s" % (i, ga.epoch))
+
+        print("Time elapsed: %s" % (time.time() - tstart))
+
+        ga.save_log("Test_%s_%s.pickle" % (ga.select.__name__, i))
+        np.savetxt("Test_%s_%s.txt" % (ga.select.__name__, i), time_intens)
+
+        epochs[i, 0] = ga.epoch
+        epochs[i, 1] = time.time() - tstart
+        epochs[i, 2] = np.min(np.abs(ga.log.ranking.distancefx[-1]))
+        ga.reset(reset_pop=False)
+
+
+
+        time_intens: List[np.ndarray] = [np.zeros(2)]
+        tstart = time.time()
+    except Exception as e:
+        print(e)
+        set_voltage(np.zeros(n))
+
+
+np.savetxt("labtest1%s.csv" % ga.select.__name__, epochs, delimiter=";")
+
+ga.set_select(dfmc.selection_funcs.rank_space_selection)
+epochs = np.zeros([10, 3])
+
+for i in range(5):
+    try:
+        ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity,
+               runcond=runcond)
+        print("iter %s, epochs %s" % (i, ga.epoch))
+
+        print("Time elapsed: %s" % (time.time() - tstart))
+
+        ga.save_log("Test_%s_%s.pickle" % (ga.select.__name__, i))
+        np.savetxt("Test_%s_%s.txt" % (ga.select.__name__, i), time_intens)
+
+        epochs[i, 0] = ga.epoch
+        epochs[i, 1] = time.time() - tstart
+        epochs[i, 2] = np.min(np.abs(ga.log.ranking.distancefx[-1]))
+        ga.reset(reset_pop=False)
+        set_voltage(np.zeros(n))
+
+        time_intens: List[np.ndarray] = [np.zeros(2)]
+        tstart = time.time()
+    except Exception as e:
+        print(e)
+        set_voltage(np.zeros(n))
+
+np.savetxt("labtest1%s.csv" % ga.select.__name__, epochs, delimiter=";")
 
 print("Time elapsed: %s" % (time.time() - tstart))
 
