@@ -1,6 +1,9 @@
 # Genetic algorithm for a DM
 The files included contain a set of functions/classes to build a genetic algorithm that can be used on an N-channel deformable mirror.
 
+UPDATED DOCS:
+https://kth-dfm-control.readthedocs.io/en/latest/
+
 # Contents
 1. [How to install?](#how-to-install)
 2. [Dependecies](#dependecies)
