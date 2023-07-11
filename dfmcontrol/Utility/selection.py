@@ -8,7 +8,7 @@ try:
     from dfmcontrol.Helper import *
     # from .gradient_descent import gradient_descent
 except ImportError:
-    from dfmcontrol.helper import *
+    from .dfmcontrol.Helper import *
     # from dfmcontrol.gradient_descent import gradient_descent
 
 def calc_fx(pop, fx, bitsize, nbit2num = Ndbit2floatIEEE754, **kwargs):
@@ -176,7 +176,6 @@ def roulette_selection(*args, **kwargs):
         p = 1 - (fitness / sum(fitness))
 
 
-    print(y)
     return sort_list(fitness, p, **kwargs), fitness, p, y
 
 
@@ -256,6 +255,7 @@ def rank_selection(*args, **kwargs):
         y = calc_fx(*args, **kwargs)
     else:
         y = kwargs["fx"](args[0], **kwargs)
+
     y = y.flatten()
 
     # probability paramter for rank selection

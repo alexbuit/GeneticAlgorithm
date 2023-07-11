@@ -7,7 +7,7 @@ from scipy.stats import cauchy
 try:
     from dfmcontrol.Helper import *
 except ImportError:
-    from dfmcontrol.helper import *
+    from dfmcontrol.Helper import *
 
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:

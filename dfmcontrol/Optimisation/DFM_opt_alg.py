@@ -307,8 +307,8 @@ class genetic_algoritm:
         :return: None
         """
         self.threads = threads
-        self.threadpool = ThreadPool(threads)
-        self.threadpool.map(self.run, [kwargs] * threads)
+        # self.threadpool = ThreadPool(threads)
+        # self.threadpool.map(self.run, [kwargs] * threads)
 
 
     def init_pop(self, method: Union[str, Callable] = "uniform", **kwargs):
@@ -397,7 +397,7 @@ class genetic_algoritm:
         return self.pop.copy()
 
     @property
-    def target_func(self, targs: dict = None):
+    def target_func(self, target, targs: dict = None):
         """
         Set target function to be used in the optimisation.
 

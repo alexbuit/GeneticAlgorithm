@@ -1,12 +1,14 @@
-import unittest
 
 from typing import Callable, Iterable
 from time import time
 import numpy as np
+import pytest
+import unittest
 
-from Helper import *
+from dfmcontrol.Helper import *
+from dfmcontrol.Utility import crossover, pop, selection
 
-
+@pytest.mark.usefixtures("db_class")
 class TestDFM(unittest.TestCase):
 
     def test_convert_bin64(self):
@@ -27,29 +29,13 @@ class TestDFM(unittest.TestCase):
         for i in range(randarr.size):
             self.assertAlmostEqual(randarr[i], floatarr32[i], places=5)
 
-class test_alg(unittest.TestCase):
+    def test_crossover_single_point(self):
 
-    def testmichealoqicz(self):
-        pass
+        def fitness(x):
+            return x
 
+        test_pop = pop.uniform_bit_pop([1000, 16], 16, [0, 100])
+        parents = selection.roulette_selection(test_pop, fitness, 2, ndbit2int, bitsize=16)
+        crossed = crossover.single_point(parents, 0.5, bitsize=16)
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(TestDFM("test_convert_bin64"))
-    suite.addTest(TestDFM("test_convert_bin32"))
-    return suite
-
-
-def time_t(fx: Callable, params: Iterable):
-    tlist = [time(),]
-    for p in params:
-        fx(p)
-        tlist.append(time() - tlist[-1])
-
-    return tlist
-
-if __name__ == '__main__':
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite())
-
-    print(time_t(float2NdbitIEEE754, [(np.array([0.213, 0.213, 0.4234]), 64)]))
+        self.assertEqual(crossed.shape, (2, 16))
