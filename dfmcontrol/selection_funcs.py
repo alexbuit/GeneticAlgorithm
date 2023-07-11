@@ -171,8 +171,7 @@ def roulette_selection(*args, **kwargs):
 
     fitness = fitness_func(y, *k)
 
-    p = fitness / sum(fitness)
-    print(y)
+    p = (np.max(fitness) - fitness) / sum(fitness)
     return sort_list(fitness, p, **kwargs), fitness, p, y
 
 
@@ -201,9 +200,9 @@ def rank_tournament_selection(*args, **kwargs):
     fitness_func = kwargs.get("fitness_func", exp_fitness)
 
     fitness = fitness_func(y, *k)
-    fit_rng = np.flip(np.argsort(fitness))
+    fit_rng = np.argsort(fitness)
 
-    prob_param = kwargs.get("p", 0.01)
+    prob_param = kwargs.get("p", 0.1)
 
     tournament_size = kwargs.get("tournament_size", 4)
 
@@ -248,7 +247,7 @@ def rank_selection(*args, **kwargs):
     y = y.flatten()
 
     # probability paramter for rank selection
-    prob_param = 0.01
+    prob_param = 0.1
     if "p" in kwargs:
         prob_param = kwargs["p"]
 
@@ -267,7 +266,7 @@ def rank_selection(*args, **kwargs):
 
     fitness = fitness_func(y, np.asarray(k))
 
-    fit_rng = np.flip(np.argsort(fitness))
+    fit_rng = np.argsort(fitness)
 
     p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
     p = p/np.sum(p)
@@ -313,7 +312,7 @@ def rank_space_selection(*args, **kwargs):
     y = y.flatten()
 
     # probability paramter for rank selection
-    prob_param = kwargs.get("p", 1.9)
+    prob_param = kwargs.get("p", 0.1)
 
     # diversity parameter for significance of the distance between individuals
     div_param = kwargs.get("d", 1)
@@ -331,7 +330,8 @@ def rank_space_selection(*args, **kwargs):
         fitness_func = kwargs["fitness_func"]
 
     fitness = fitness_func(y, *k)
-    fit_rng = np.flip(np.argsort(fitness))
+    print(fitness)
+    fit_rng = np.argsort(fitness)
 
     best = fit_rng[0]
     diversity = np.sqrt(np.asarray([y[best]**2 - y[i]**2 for i in fit_rng])) * div_param
@@ -364,7 +364,6 @@ def rank_space_selection(*args, **kwargs):
                                        replace=False)
 
             pind.append(list(sorted(par).__reversed__()))
-
     return pind, fitness, p, y
 
 

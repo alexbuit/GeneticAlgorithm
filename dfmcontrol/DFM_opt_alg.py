@@ -97,7 +97,7 @@ class genetic_algoritm:
 
         self.epochs = None
         self.shape: tuple = (0, 0)
-        self.elitism: int = 10
+        self.elitism: int = 5
         self.save_top: int = 10
 
         self.targetfx: Union[Iterable, float] = self.tfunc.minima["x"]
@@ -210,8 +210,6 @@ class genetic_algoritm:
 
         while self.condinterpreter(runcond):
             newgen = []
-            print(np.min(np.abs(self.log.ranking.distancefx[-1])) > 1e-7)
-            print(np.min(np.abs(self.log.ranking.distancefx[-1])))
 
             # print(self.tfunc.minima["fx"])
             # print(self.tfunc(self.b2n(self.pop, **self.b2nkwargs)))
@@ -731,7 +729,7 @@ class genetic_algoritm:
         self.genlist: list = []
         self.pop = self.initial_pop
 
-        self.log = self.logdata(2)
+        self.logdata(2)
 
         if reset_pop:
             self.pop: np.ndarray = np.array([])

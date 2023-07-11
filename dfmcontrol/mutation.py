@@ -21,6 +21,7 @@ def mutate(bit, bitsize, **kwargs) -> np.ndarray:
     mutate_coeff = int(bit.size/bitsize)
     if "mutate_coeff" in kwargs:
         mutate_coeff = kwargs["mutate_coeff"]
+
     # mutations = np.random.randint(nbits * (1 + bdict[bitsize][1]), bit.size, mutate_coeff)
     mutations = np.random.choice(np.arange(nbits * (1 + bdict[bitsize][1]), bit.size), mutate_coeff, replace=False)
     # Speed up?

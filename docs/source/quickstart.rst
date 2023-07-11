@@ -60,4 +60,9 @@ conversion function, setting the lower and upper bound of the numerical value.
 2.3 Initialise the population.
 -------------------------------
 The population is initialised using the :func:`init_pop` method of the
-genetic algorithm.
+genetic algorithm. Which as the following arguments:
+
+- Method: The method used to initialise the population. This can be either
+  :attr:`uniform_bit_pop <dfmcontrol.pop.uniform_bit_pop>` or
+  :attr:`cauchy_bit_pop <dfmcontrol.pop.cauchy_bit_pop>` or
+  :attr:`bitpop <dfmcontrol.pop.bitpop>` from .
