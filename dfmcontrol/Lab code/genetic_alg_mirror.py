@@ -11,12 +11,12 @@ from time import sleep, time
 try:
     from .DFM_opt_alg import genetic_algoritm, full_mutate
     from .cross_funcs import full_equal_prob
-    from .helper import ndbit2int
+    from dfmcontrol.Helper import ndbit2int
     from .selection_funcs import *
-    from .log import log_object, log
-    from .test_functions import tfx_decorator
+    from dfmcontrol.Log import log_object, log
+    from dfmcontrol.Mathematical_functions import tfx_decorator
 
-    from .AdrianPackv402.Helper import compress_ind
+    from dfmcontrol.AdrianPackv402.Helper import compress_ind
 
 except ImportError:
     from dfmcontrol.DFM_opt_alg import genetic_algoritm, full_mutate
@@ -24,7 +24,7 @@ except ImportError:
     from dfmcontrol.helper import ndbit2int
     from dfmcontrol.selection_funcs import *
     from dfmcontrol.log import log_object, log
-    from dfmcontrol.test_functions import tfx_decorator
+    from dfmcontrol.Mathematical_functions import tfx_decorator
 
     from dfmcontrol.AdrianPackv402.Helper import compress_ind
 

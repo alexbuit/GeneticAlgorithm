@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 /src/test_functions/diffmichealewizc.py
 /dfmcontrol/token
-/dfmcontrol/examplefile.py
-/dfmcontrol/examplelab.py
+/dfmcontrol/Lab code/examplefile.py
+/dfmcontrol/Lab code/examplelab.py

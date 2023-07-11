@@ -5,7 +5,7 @@ from typing import Iterable
 import random
 
 try:
-    from .helper import *
+    from dfmcontrol.Helper import *
     # from .gradient_descent import gradient_descent
 except ImportError:
     from dfmcontrol.helper import *

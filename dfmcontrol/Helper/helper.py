@@ -6,7 +6,7 @@ import struct
 from matplotlib import pyplot as plt
 from matplotlib import cm
 
-# from test_functions import allfx, dim2fx, ndimfx
+# from Mathematical_functions import allfx, dim2fx, ndimfx
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
@@ -447,7 +447,7 @@ def plot3d(fx, min, max, resolution = 100, mode= "plot_surface", **kwargs):
 #     from AdrianPack.Aplot import Default
 #     from population_initatilisation import *
 #
-#     from test_functions import *
+#     from Mathematical_functions import *
 #
 #     def z(x):
 #         return x[0] + x[1]

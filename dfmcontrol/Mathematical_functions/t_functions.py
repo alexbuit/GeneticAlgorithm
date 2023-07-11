@@ -8,7 +8,7 @@ import threading as th
 
 # np.random.seed(12424)
 
-from dfmcontrol.test_functions import minima as tf
+from dfmcontrol.Mathematical_functions import minima as tf
 
 class _tfx_decorator:
     """

@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 from time import time
 import numpy as np
 
-from helper import *
+from Helper import *
 
 
 class TestDFM(unittest.TestCase):

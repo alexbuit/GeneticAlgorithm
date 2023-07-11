@@ -1,12 +1,11 @@
 
-import dfmcontrol.test_functions
-import dfmcontrol.pop
-import dfmcontrol.selection_funcs
-import dfmcontrol.cross_funcs
-import dfmcontrol.mutation
-import dfmcontrol.helper
-import dfmcontrol.DFM_opt_alg
-import dfmcontrol.log
+import dfmcontrol.Mathematical_functions
+import dfmcontrol.Utility.pop
+import dfmcontrol.Utility.selection
+import dfmcontrol.Utility.crossover
+import dfmcontrol.Utility.mutation
+import dfmcontrol.Helper
+import dfmcontrol.Optimisation
+import dfmcontrol.Log
 
-__all__ = ["test_functions", "pop", "selection_funcs", "cross_funcs", "mutation",
-           "helper", "DFM_opt_alg", "log"]
+__all__ = ["Mathematical_functions", "Utility", "Helper", "Optimisation", "Log"]

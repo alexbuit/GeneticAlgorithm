@@ -1,11 +1,4 @@
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation, PillowWriter
 from time import time
-
-import numpy as np
-from helper import Ndbit2floatIEEE754
-
-from genetic_alg_mirror import log_intensity, select
 
 from DFM_opt_alg import *
 

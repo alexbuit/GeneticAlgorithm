@@ -10,10 +10,10 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 
 
 try:
-    from .helper import convertpop2n
-    from .AdrianPackv402.Aplot import Default
+    from dfmcontrol.Helper import convertpop2n
+    from dfmcontrol.AdrianPackv402.Aplot import Default
 except ImportError:
-    from dfmcontrol.helper import convertpop2n
+    from dfmcontrol.Helper import convertpop2n
     from dfmcontrol.AdrianPackv402.Aplot import Default
 
 def pythagoras(x):

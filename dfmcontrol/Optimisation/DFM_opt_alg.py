@@ -6,22 +6,22 @@ import pickle
 from time import time
 
 try:
-    from .pop import *
-    # from .gradient_descent import gd
-    from .selection_funcs import *
-    from .cross_funcs import *
-    from .test_functions import *
-    from .mutation import *
-    from .log import log
-
-except ImportError:
     from dfmcontrol.pop import *
-    # from dfmcontrol.gradient_descent import gd
+    # from .gradient_descent import gd
     from dfmcontrol.selection_funcs import *
     from dfmcontrol.cross_funcs import *
+    from dfmcontrol.Mathematical_functions import *
     from dfmcontrol.mutation import *
-    from dfmcontrol.test_functions import *
     from dfmcontrol.log import log
+
+except ImportError:
+    from dfmcontrol.Utility.pop import *
+    # from dfmcontrol.gradient_descent import gd
+    from dfmcontrol.Utility.selection import *
+    from dfmcontrol.Utility.crossover import *
+    from dfmcontrol.Utility.mutation import *
+    from dfmcontrol.Mathematical_functions import *
+    from dfmcontrol.Log.log import log
 
 bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}

@@ -5,7 +5,7 @@ from typing import Union, Iterable, List
 from scipy.stats import cauchy
 
 try:
-    from .helper import *
+    from dfmcontrol.Helper import *
 except ImportError:
     from dfmcontrol.helper import *
 
