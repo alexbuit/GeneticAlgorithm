@@ -1,3 +1,7 @@
+
+:includedir: _includes
+:sourcedir: docs/Readme
+
 # Genetic algorithm for a DM
 The files included contain a set of functions/classes to build a genetic algorithm that can be used on an N-channel deformable mirror.
 
@@ -10,7 +14,7 @@ The files included contain a set of functions/classes to build a genetic algorit
 6. [Todo within mutation.py](#todo-within-mutationpy)
 
 ## Todo within DFM_opt_alg.py
-<script src="DFM_opt_alg.md"></script>
+include::{includedir}/DFM_opt_alg.py[]
 
 ## Todo withing log.py
 
