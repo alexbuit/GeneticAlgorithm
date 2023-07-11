@@ -158,20 +158,25 @@ def roulette_selection(*args, **kwargs):
     y = y.flatten()
 
 
-    k = [1.5]
-    if "k" in kwargs:
-        k = kwargs["k"]
+    k = kwargs.get("k", 1)
+
+    mode = kwargs.get("mode", True)
 
     if not isinstance(k, Iterable):
         k = [k]
 
-    fitness_func = exp_fitness
-    if "fitness_func" in kwargs:
-        fitness_func = kwargs["fitness_func"]
+    fitness_func = kwargs.get("fitness_func", exp_fitness)
 
     fitness = fitness_func(y, *k)
 
-    p = (np.max(fitness) - fitness) / sum(fitness)
+    # If the modebool is set to true a higher cost function value is better
+    if mode:
+        p = fitness / sum(fitness)
+    else:
+        p = 1 - (fitness / sum(fitness))
+
+
+    print(y)
     return sort_list(fitness, p, **kwargs), fitness, p, y
 
 
@@ -200,7 +205,14 @@ def rank_tournament_selection(*args, **kwargs):
     fitness_func = kwargs.get("fitness_func", exp_fitness)
 
     fitness = fitness_func(y, *k)
-    fit_rng = np.argsort(fitness)
+
+    # The mode for opt/min
+    mode = kwargs.get("mode", True)
+
+    if mode:
+        fit_rng = np.flip(np.argsort(fitness))
+    else:
+        fit_rng = np.argsort(fitness)
 
     prob_param = kwargs.get("p", 0.1)
 
@@ -312,7 +324,7 @@ def rank_space_selection(*args, **kwargs):
     y = y.flatten()
 
     # probability paramter for rank selection
-    prob_param = kwargs.get("p", 0.1)
+    prob_param = kwargs.get("p", 1.9)
 
     # diversity parameter for significance of the distance between individuals
     div_param = kwargs.get("d", 1)
@@ -364,6 +376,7 @@ def rank_space_selection(*args, **kwargs):
                                        replace=False)
 
             pind.append(list(sorted(par).__reversed__()))
+
     return pind, fitness, p, y
 
 
