@@ -1,9 +1,6 @@
 
 import dfmcontrol.Mathematical_functions
-import dfmcontrol.Utility.pop
-import dfmcontrol.Utility.selection
-import dfmcontrol.Utility.crossover
-import dfmcontrol.Utility.mutation
+import dfmcontrol.Utility
 import dfmcontrol.Helper
 import dfmcontrol.Optimisation
 import dfmcontrol.Log

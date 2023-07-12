@@ -396,7 +396,6 @@ class genetic_algoritm:
         """
         return self.pop.copy()
 
-    @property
     def target_func(self, target, targs: dict = None):
         """
         Set target function to be used in the optimisation.

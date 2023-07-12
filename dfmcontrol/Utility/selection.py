@@ -460,7 +460,7 @@ def boltzmann_selection(*args, **kwargs):
 
 if __name__ == "__main__":
     from pop import *
-    from test_functions import *
+    from dfmcontrol.Mathematical_functions.t_functions import *
 
     pop = bitpop([8, 39], 16)
     pop_float = ndbit2int(pop, 16, factor=50)
