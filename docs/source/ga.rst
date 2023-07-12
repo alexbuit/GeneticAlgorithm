@@ -171,7 +171,7 @@ this will save the
 Methods
 =======
 
-.. automodule:: dfmcontrol.DFM_opt_alg
+.. automodule:: dfmcontrol.Optimisation.DFM_opt_alg
     :members:
     :undoc-members:
     :show-inheritance:

@@ -125,7 +125,7 @@ Styblinski Tang
 Decorator function
 ##################
 
-.. automodule:: dfmcontrol.test_functions.t_functions
+.. automodule:: dfmcontrol.Mathematical_functions.t_functions
    :members:
    :undoc-members:
    :show-inheritance:

@@ -25,7 +25,7 @@ Complete list of functions
 
 All functions defined in this module are listed below.
 
-.. automodule:: dfmcontrol.test_functions.minima
+.. automodule:: dfmcontrol.Mathematical_functions.minima
    :members:
    :undoc-members:
    :show-inheritance:

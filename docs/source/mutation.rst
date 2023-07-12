@@ -5,7 +5,7 @@ Mutation
 Methods
 =======
 
-.. automodule:: dfmcontrol.mutation
+.. automodule:: dfmcontrol.Utility.mutation
    :members:
    :undoc-members:
    :show-inheritance:

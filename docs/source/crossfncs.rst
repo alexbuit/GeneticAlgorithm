@@ -22,7 +22,7 @@ Uniform crossover
 Crossing methods
 ****************
 
-.. automodule:: dfmcontrol.cross_funcs
+.. automodule:: dfmcontrol.Utility.crossover
    :members:
    :undoc-members:
    :show-inheritance:

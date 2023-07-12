@@ -19,11 +19,11 @@ try:
     from dfmcontrol.AdrianPackv402.Helper import compress_ind
 
 except ImportError:
-    from dfmcontrol.DFM_opt_alg import genetic_algoritm, full_mutate
-    from dfmcontrol.cross_funcs import full_equal_prob
-    from dfmcontrol.helper import ndbit2int
-    from dfmcontrol.selection_funcs import *
-    from dfmcontrol.log import log_object, log
+    from dfmcontrol.Optimisation import genetic_algoritm, full_mutate
+    from dfmcontrol.Utility.crossover import full_equal_prob
+    from dfmcontrol.Helper import ndbit2int
+    from dfmcontrol.Utility.selection import *
+    from dfmcontrol.Log import log_object, log
     from dfmcontrol.Mathematical_functions import tfx_decorator
 
     from dfmcontrol.AdrianPackv402.Helper import compress_ind

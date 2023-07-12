@@ -64,7 +64,7 @@ Fitness evaluation
 Selection methods
 -----------------
 
-.. automodule:: dfmcontrol.selection_funcs
+.. automodule:: dfmcontrol.Utility.selection
    :members:
    :undoc-members:
    :show-inheritance:

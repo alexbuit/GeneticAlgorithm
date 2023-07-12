@@ -40,7 +40,7 @@ Converts a population of binary values to a population of integers.
 
 Helper functions:
 ------------------
-.. automodule:: dfmcontrol.helper
+.. automodule:: dfmcontrol.Helper.helper
    :members:
    :undoc-members:
    :show-inheritance:

@@ -10,7 +10,7 @@ genetic algorithm.
 Methods
 =======
 
-.. automodule:: dfmcontrol.log
+.. automodule:: dfmcontrol.Log.log
    :members:
    :undoc-members:
    :show-inheritance:

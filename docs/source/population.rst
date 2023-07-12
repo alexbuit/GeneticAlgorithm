@@ -16,7 +16,7 @@ Population initialisation methods
 Below are the library provided population initialisation methods. These
 methods are used to initialise the population of the genetic algorithm.
 
-.. automodule:: dfmcontrol.population_initatilisation
+.. automodule:: dfmcontrol.Utility.pop
    :members:
    :undoc-members:
    :show-inheritance:
