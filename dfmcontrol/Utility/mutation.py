@@ -1,11 +1,11 @@
 
 import numpy as np
 
-def mutate(bit, bitsize, **kwargs) -> np.ndarray:
+def IEEE_mutate(bit, bitsize, **kwargs) -> np.ndarray:
     """
     Mutate a bit string from mantissa to bitsize
 
-    :param bit: bit array to mutate
+    :param bit: bit array to IEEE_mutate
     :param bitsize: size of the bit array
     :param kwargs: mutate_coeff => number of mutations to apply
 
@@ -33,11 +33,11 @@ def mutate(bit, bitsize, **kwargs) -> np.ndarray:
     return bitc
 
 
-def full_mutate(bit, bitsize, **kwargs) -> np.ndarray:
+def mutate(bit, bitsize, **kwargs) -> np.ndarray:
     """
     Mutate a bit array from 0 to bitsize
 
-    :param bit: bit array to mutate
+    :param bit: bit array to IEEE_mutate
     :param bitsize: size of the bit array
     :param kwargs: mutate_coeff => number of mutations to apply
 

@@ -36,6 +36,6 @@ class TestDFM(unittest.TestCase):
 
         test_pop = pop.uniform_bit_pop([1000, 16], 16, [0, 100])
         parents = selection.roulette_selection(test_pop, fitness, 2, ndbit2int, bitsize=16)
-        crossed = crossover.single_point(parents, 0.5, bitsize=16)
+        crossed = crossover.IEEE_single_point(parents, 0.5, bitsize=16)
 
         self.assertEqual(crossed.shape, (2, 16))

@@ -6,7 +6,7 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
          128: [1, 15, 112], 256: [1, 19, 236]}
 
 
-def double_point(parent1, parent2, bitsize):
+def IEEE_double_point(parent1, parent2, bitsize):
     """
     Double point crossover that doesnt cross the exponent of the floating point number
 
@@ -47,7 +47,7 @@ def double_point(parent1, parent2, bitsize):
     return [child1, child2]
 
 
-def single_point(parent1, parent2, bitsize):
+def IEEE_single_point(parent1, parent2, bitsize):
     """
     Single point crossover that doesnt cross the exponent of the floating point number
 
@@ -85,7 +85,7 @@ def single_point(parent1, parent2, bitsize):
 
     return [child1, child2]
 
-def equal_prob_cross(parent1, parent2, bitsize):
+def IEEE_equal_prob_cross(parent1, parent2, bitsize):
     """
     Equal probability crossover that doesnt cross the exponent of the floating point number
 
@@ -122,7 +122,7 @@ def equal_prob_cross(parent1, parent2, bitsize):
 
     return [child1, child2]
 
-def full_single_point(parent1, parent2, **kwargs):
+def single_point(parent1, parent2, **kwargs):
     """
     Single point crossover that crosses the full bit array.
 
@@ -159,13 +159,10 @@ def full_single_point(parent1, parent2, **kwargs):
     #
     # print("-----")
 
-    print(child1)
-    print(child2)
-
     return [child1, child2]
 
 
-def full_double_point(parent1, parent2, **kwargs):
+def double_point(parent1, parent2, **kwargs):
     """
     Double point crossover that crosses the full bit array.
 
@@ -201,7 +198,7 @@ def full_double_point(parent1, parent2, **kwargs):
 
     return [child1, child2]
 
-def full_equal_prob(parent1, parent2, **kwargs):
+def equal_prob(parent1, parent2, **kwargs):
     """
     Equal probability crossover that crosses the full bit array.
 

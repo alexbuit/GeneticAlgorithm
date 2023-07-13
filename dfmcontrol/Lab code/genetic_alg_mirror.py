@@ -10,7 +10,7 @@ from time import sleep, time
 
 try:
     from .DFM_opt_alg import genetic_algoritm, full_mutate
-    from .cross_funcs import full_equal_prob
+    from .cross_funcs import equal_prob
     from dfmcontrol.Helper import ndbit2int
     from .selection_funcs import *
     from dfmcontrol.Log import log_object, log
@@ -19,8 +19,8 @@ try:
     from dfmcontrol.AdrianPackv402.Helper import compress_ind
 
 except ImportError:
-    from dfmcontrol.Optimisation import genetic_algoritm, full_mutate
-    from dfmcontrol.Utility.crossover import full_equal_prob
+    from dfmcontrol.Optimisation import genetic_algoritm, mutate
+    from dfmcontrol.Utility.crossover import equal_prob
     from dfmcontrol.Helper import ndbit2int
     from dfmcontrol.Utility.selection import *
     from dfmcontrol.Log import log_object, log
@@ -633,9 +633,9 @@ def main():
     ga.logdata(2)
     ga.log.append(log_intensity(ga.b2n, ga.bitsize, ga.b2nkwargs))
 
-    # ga.seed = uniform_bit_pop_float
-    ga.set_cross(full_equal_prob)
-    ga.set_mutate(full_mutate)
+    # ga.seed = uniform_bit_pop_IEEE
+    ga.set_cross(equal_prob)
+    ga.set_mutate(mutate)
     ga.set_select(rank_tournament_selection)
 
     # P value for population of 20?

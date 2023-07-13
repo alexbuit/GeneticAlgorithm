@@ -28,14 +28,14 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
 
 
 # def geneticalg(fx: Callable, pop: np.ndarray, max_iter: int, select: Callable,
-#                cross: Callable, mutate: Callable):
+#                cross: Callable, IEEE_mutate: Callable):
 #     """
 #     :param fx:
 #     :param pop:
 #     :param max_iter:
 #     :param select:
 #     :param cross:
-#     :param mutate:
+#     :param IEEE_mutate:
 #     :return:
 #     """
 #     # fx = np.vectorize(fx)
@@ -45,7 +45,7 @@ bdict = {8: [1, 4, 3], 16: [1, 5, 10], 32: [1, 8, 23], 64: [1, 11, 52],
 #         # Apply the cross function to all parent couples
 #         children = [cross(pop[p[0]], pop[p[1]]) for p in parents]
 #         # Mutate the population (without elitism)
-#         pop = mutate(children)
+#         pop = IEEE_mutate(children)
 #
 #     return pop
 
@@ -64,7 +64,7 @@ class genetic_algoritm:
     generation by the selection algorithm defined by genetic_algortihm.select, the algortihm used can be changed by calling the
     set_select() method or setting it manually by assigning genetic_algorthim.select to a different function.
     The parents are then crossed over and mutated to create the next generation with the crossing and mutation algorithm defined by
-    genetic_algorithm.cross and .mutate respectively. The process is repeated until the maximum number of iterations is reached.
+    genetic_algorithm.cross and .IEEE_mutate respectively. The process is repeated until the maximum number of iterations is reached.
     The results are stored in the results attribute and can be accessed by calling genetic_algorithm.get_results() or by indexing
     the genetic_algorithm object. A log of all fitness, rank, output and time values is also stored in the log attribute and can be accessed
     by calling genetic_algorithm.get_log().<attr>.<value> or by indexing the genetic_algorithm.log.<attr>.<value> object. This log
@@ -88,7 +88,7 @@ class genetic_algoritm:
             self.tfunc = tfx_decorator(self.tfunc)
 
         self.select: Callable = roulette_selection
-        self.cross: Callable = full_equal_prob
+        self.cross: Callable = equal_prob
         self.mutation: Callable = mutate
 
         self.mode: str = "optimise" # or mnimise
@@ -351,11 +351,11 @@ class genetic_algoritm:
                 self.pop = bitpop(**kwargs)
         elif self.b2n is Ndbit2floatIEEE754 and method in ["uniform", "cauchy", "normal"]:
             if method == "uniform":
-                self.pop = uniform_bit_pop_float(**kwargs)
+                self.pop = uniform_bit_pop_IEEE(**kwargs)
             elif method == "cauchy":
-                self.pop = cauchyrand_bit_pop_float(**kwargs)
+                self.pop = cauchyrand_bit_pop_IEEE(**kwargs)
             elif method == "normal":
-                self.pop = normalrand_bit_pop_float(**kwargs) 
+                self.pop = normalrand_bit_pop_IEEE(**kwargs)
         else:
             self.pop = method(**kwargs)
 
@@ -482,10 +482,10 @@ class genetic_algoritm:
         array should equal the shape of the output array.
 
         :param mutation:
-            Method to mutate a single np.ndarray of bits
+            Method to IEEE_mutate a single np.ndarray of bits
 
         Example method:
-         def mutate(bit, **kwargs):
+         def IEEE_mutate(bit, **kwargs):
             ''' Mutate a single bit ''' \n
             # select a random point in the bit \n
             ind = np.random.randint(0, bit.size)
@@ -793,9 +793,9 @@ if __name__ == "__main__":
 
     ga.elitism = 2
 
-    # ga.seed = uniform_bit_pop_float
-    ga.set_cross(full_equal_prob)
-    ga.set_mutate(full_mutate)
+    # ga.seed = uniform_bit_pop_IEEE
+    ga.set_cross(equal_prob)
+    ga.set_mutate(mutate)
     ga.set_select(rank_selection)
 
     ga.save_top = 10

@@ -34,8 +34,8 @@ Optimizing a 1d test function
 
     # Set the selection, mutation and crossover functions
     ga.set_select(dfmc.selection_funcs.rank_tournament_selection) # Rank selection
-    ga.set_mutate(dfmc.mutation.full_mutate) # Mutate the full bit (do not use for IEEE 754 floats)
-    ga.set_cross(dfmc.cross_funcs.full_equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
+    ga.set_mutate(dfmc.mutation.mutate) # Mutate the full bit (do not use for IEEE 754 floats)
+    ga.set_cross(dfmc.cross_funcs.equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
 
     ga.elitism = 4  # Keep the 4 best individuals
     # Run the genetic algorithm
@@ -99,8 +99,8 @@ finds the minimum of the function using the genetic algorithm.
 
     # Set the selection, mutation and crossover functions
     ga.set_select(dfmc.selection_funcs.rank_tournament_selection) # Rank selection
-    ga.set_mutate(dfmc.mutation.full_mutate) # Mutate the full bit (do not use for IEEE 754 floats)
-    ga.set_cross(dfmc.cross_funcs.full_equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
+    ga.set_mutate(dfmc.mutation.mutate) # Mutate the full bit (do not use for IEEE 754 floats)
+    ga.set_cross(dfmc.cross_funcs.equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
 
     ga.elitism = 4  # Keep the 4 best individuals
     # Run the genetic algorithm
@@ -197,8 +197,8 @@ finds the minimum of the function using the genetic algorithm.
 
     # Set the selection, mutation and crossover functions
     ga.set_select(dfmc.selection_funcs.rank_tournament_selection) # Rank selection
-    ga.set_mutate(dfmc.mutation.full_mutate) # Mutate the full bit (do not use for IEEE 754 floats)
-    ga.set_cross(dfmc.cross_funcs.full_equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
+    ga.set_mutate(dfmc.mutation.mutate) # Mutate the full bit (do not use for IEEE 754 floats)
+    ga.set_cross(dfmc.cross_funcs.equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
 
     ga.elitism = 10  # Keep the 10 best individuals
     # Run the genetic algorithm

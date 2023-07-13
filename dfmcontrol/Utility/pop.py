@@ -24,7 +24,7 @@ def rand_bit_pop(n: int, m: int) -> np.ndarray:
 
 # float2NdbitIEEE754 and NdbittofloatIEEE754 routines
 
-def normalrand_bit_pop_float(n, bitsize, lower, upper):  # TODO: implement multi variable
+def normalrand_bit_pop_IEEE(n, bitsize, lower, upper):  # TODO: implement multi variable
     """
     Generate a normal distributed bit population with floats converted with
     float2NdbitIEEE754 and NdbittofloatIEEE754.
@@ -58,8 +58,8 @@ def normalrand_bit_pop_float(n, bitsize, lower, upper):  # TODO: implement multi
     return np.array(blist)
 
 
-def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: float,
-                             scale: float) -> np.ndarray:
+def cauchyrand_bit_pop_IEEE(shape: Union[Iterable, float], bitsize: int, loc: float,
+                            scale: float) -> np.ndarray:
     """
     Generate a cauchy distributed bit population with floats converted with
     float2NdbitIEEE754 and NdbittofloatIEEE754.
@@ -88,8 +88,8 @@ def cauchyrand_bit_pop_float(shape: Union[Iterable, float], bitsize: int, loc: f
     return np.array(blist)
 
 
-def uniform_bit_pop_float(shape: Union[Iterable, float], bitsize: int,
-                          boundaries: List[int]) -> np.ndarray:
+def uniform_bit_pop_IEEE(shape: Union[Iterable, float], bitsize: int,
+                         boundaries: List[int]) -> np.ndarray:
     """
     Generate a uniform distributed bit population with floats converted with
     float2NdbitIEEE754 and NdbittofloatIEEE754.
