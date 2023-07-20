@@ -8,7 +8,7 @@ import unittest
 from dfmcontrol.Helper import *
 from dfmcontrol.Utility import crossover, pop, selection
 
-@pytest.mark.usefixtures("db_class")
+# @pytest.mark.usefixtures("db_class")
 class TestDFM(unittest.TestCase):
 
     def test_convert_bin64(self):
@@ -39,3 +39,15 @@ class TestDFM(unittest.TestCase):
         crossed = crossover.IEEE_single_point(parents, 0.5, bitsize=16)
 
         self.assertEqual(crossed.shape, (2, 16))
+
+    def test_pop_gen(self):
+
+        from dfmcontrol.Utility.pop import _create_pop
+        from numpy.random import normal
+        from scipy.stats import cauchy
+
+        pop = _create_pop(shape=(10, 10), pop_float=cauchy.rvs, pop_kwargs={"loc": 0, "scale": 1, "size": 100},
+                       n2b=int2ndbit, n2bkwargs={"factor": 1, "bitsize": 10})
+
+        assert pop.shape == (10, 100) # 10 Individuals, 10 genes with 10 bits per gene
+

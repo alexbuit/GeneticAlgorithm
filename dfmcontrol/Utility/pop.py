@@ -10,6 +10,33 @@ except ImportError:
     from dfmcontrol.Helper import *
 
 
+def _create_pop(**kwargs):
+    """
+    Generate a population of individuals.
+
+    :param kwargs: Keyword arguments for the population generation.
+    :param kwargs["shape"]: Shape of the population dtype tuple.
+    :param kwargs["pop_float"]: Method for creating the randomized population array
+    :param kwargs["pop_kwargs"]: Keyword arguments for the creation method.
+    :param kwargs["n2b"]: Method for converting the numerical values (or genes) to a binary array (individual).
+
+    :return: List of individuals.
+    """
+
+    shape = kwargs.get("shape", None)
+    size = shape[0] * shape[1]
+
+    pop_float = kwargs.get("pop_float", None)(**kwargs.get("pop_kwargs", None))
+
+    factor = kwargs.get("n2bkwargs", None).get("factor", np.abs(np.max(pop_float)))
+    bias = kwargs.get("n2bkwargs", None).get("bias", 0)
+
+    pop_float = pop_float / np.abs(np.max(pop_float)) * factor + bias
+
+    pop_float = np.array(np.array_split(pop_float, int(size / shape[0])), dtype=float)
+
+    return kwargs.get("n2b", None)(pop_float, **kwargs.get("n2bkwargs", None))
+
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
     """
     Generate a random bit population, n individuals with m variables.
@@ -117,6 +144,13 @@ def uniform_bit_pop_IEEE(shape: Union[Iterable, float], bitsize: int,
 
     return np.array(blist)
 
+def gaussian_bit_pop_IEEE(shape: Union[Iterable, float], bitsize: int,
+                            boundaries: List[int], loc: float, scale: float) -> np.ndarray:
+
+
+
+    return None
+
 
 # int2ndbit and ndbit2int routines
 
@@ -181,7 +215,6 @@ def cauchy_bit_pop(shape: Iterable, bitsize: int, loc: float, scale: float,
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
-    print("shape:", shape[0], shape[1])
     pop_float = np.vstack(np.array_split(cauchy.rvs(loc=loc, scale=scale, size=shape[0] * shape[1]), shape[0]))
 
     pop_float = (pop_float / np.abs(pop_float).max()) * factor + bias
