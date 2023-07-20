@@ -36,10 +36,10 @@ def _create_pop(**kwargs):
 
     pop_float = np.array(np.array_split(pop_float, int(individuals)), dtype=float)
 
-    barr = kwargs.get("n2b", None)(pop_float, **kwargs.get("n2bkwargs", None))
+    barr = kwargs.get("n2b", None)(pop_float, **kwargs.get("n2bkwargs", None)).astype(np.uint8)
 
     if barr.ndim == 1:
-        barr = np.array([barr])
+        barr = np.array([barr], dtype=np.uint8)
 
     return barr
 
@@ -149,13 +149,6 @@ def uniform_bit_pop_IEEE(shape: Union[Iterable, float], bitsize: int,
         blist.append(float2NdbitIEEE754(pop_float[:, val], bitsize))
 
     return np.array(blist)
-
-def gaussian_bit_pop_IEEE(shape: Union[Iterable, float], bitsize: int,
-                            boundaries: List[int], loc: float, scale: float) -> np.ndarray:
-
-
-
-    return None
 
 
 # int2ndbit and ndbit2int routines
