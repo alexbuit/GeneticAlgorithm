@@ -52,7 +52,7 @@ def rand_bit_pop(n: int, m: int) -> np.ndarray:
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
-    return np.array([np.random.randint(0, 2, size=m) for _ in range(n)])
+    return np.array([np.random.randint(0, 2, size=m) for _ in range(n)], dtype=np.uint8)
 
 
 # float2NdbitIEEE754 and NdbittofloatIEEE754 routines

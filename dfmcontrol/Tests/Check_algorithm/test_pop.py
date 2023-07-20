@@ -213,7 +213,7 @@ class Test_rand_bit_pop(unittest.TestCase):
         bitsize = self.bitsize
 
         for _ in range(10):
-            popul = pop.rand_bit_pop(m=shape[0], n=shape[1]*bitsize)
+            popul = pop.rand_bit_pop(n=shape[0], m=shape[1]*bitsize)
 
             self.equality_check(popul, (shape[0], shape[1]*bitsize))
 
@@ -223,7 +223,7 @@ class Test_rand_bit_pop(unittest.TestCase):
         bitsize = self.bitsize
 
         for _ in range(10):
-            popul = pop.rand_bit_pop(m=shape[0], n=shape[1]*bitsize)
+            popul = pop.rand_bit_pop(n=shape[0], m=shape[1]*bitsize)
 
             self.equality_check(popul, (shape[0], shape[1]*bitsize))
 
@@ -233,7 +233,7 @@ class Test_rand_bit_pop(unittest.TestCase):
         bitsize = self.bitsize
 
         for _ in range(10):
-            popul = pop.rand_bit_pop(m=shape[0], n=shape[1]*bitsize)
+            popul = pop.rand_bit_pop(n=shape[0], m=shape[1]*bitsize)
 
             self.equality_check(popul, (shape[0], shape[1]*bitsize))
 
@@ -242,7 +242,7 @@ class Test_rand_bit_pop(unittest.TestCase):
         shape = (1000, 1000)
         bitsize = self.bitsize
 
-        popul = pop.rand_bit_pop(m=shape[0], n=shape[1]*bitsize)
+        popul = pop.rand_bit_pop(n=shape[0], m=shape[1]*bitsize)
 
         self.equality_check(popul, (shape[0], shape[1]*bitsize))
 
