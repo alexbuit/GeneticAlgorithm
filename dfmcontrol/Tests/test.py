@@ -51,3 +51,48 @@ class TestDFM(unittest.TestCase):
 
         assert pop.shape == (10, 100) # 10 Individuals, 10 genes with 10 bits per gene
 
+    def test_pop_gen2(self):
+        from dfmcontrol.Utility.pop import _create_pop, cauchyrand_bit_pop_IEEE
+        from numpy.random import normal
+        from scipy.stats import cauchy
+
+        def old_method(shape, bitsize: int, loc: float, scale: float) -> np.ndarray:
+            """
+            Generate a cauchy distributed bit population with floats converted with
+            float2NdbitIEEE754 and NdbittofloatIEEE754.
+
+            :param shape: Population size dtype tuple [individuals, variables]
+            :param bitsize: Bitsize dtype int
+            :param loc: loc dtype float
+            :param scale: scale dtype float
+
+            :return: List of bits that are cauchy distributed with a bit being a ndarray array of 0 and 1.
+            """
+            if isinstance(shape, int):
+                shape = (shape, 1)
+            elif len(shape) == 1:
+                shape = (shape[0], 1)
+
+            size = shape[0] * shape[1]
+
+            pop_float = cauchy.rvs(loc=loc, scale=scale, size=size)
+            pop_float = np.array(
+                np.array_split(pop_float, int(size / shape[0])), dtype=float)
+
+            blist = []
+            for val in range(pop_float.shape[1]):
+                blist.append(float2NdbitIEEE754(pop_float[:, val], bitsize))
+
+            return np.array(blist)
+
+        shape = (1, 10)
+        size = shape[0] * shape[1]
+        bitsize = 32
+
+        pop = _create_pop(shape=shape, pop_float=cauchy.rvs, pop_kwargs={"loc": 0, "scale": 1, "size": size},
+                       n2b=float2NdbitIEEE754, n2bkwargs={"bitsize": 32})
+
+        pop_method = old_method(shape, 32, 0, 1)
+
+        assert pop.shape == pop_method.shape  # 10 Individuals, 10 genes with 10 bits per gene
+        assert pop.shape == (shape[0], shape[1]*bitsize)

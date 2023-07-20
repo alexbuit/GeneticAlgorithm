@@ -186,14 +186,24 @@ def float2NdbitIEEE754(valarr: np.ndarray, bitsize: int) -> np.ndarray:
 
     f2b = floatToBinary64 if bitsize == 64 else floatToBinary32
 
-    valarr = np.array([f2b(val) for val in valarr])
+    bitlist = []
 
-    sign = valarr[:, 0][:, np.newaxis].flatten()
-    exp = valarr[:, 1:bdict[bitsize][1] + 1].flatten()
-    mantissa = valarr[:, bdict[bitsize][1] + 1:].flatten()
+    if valarr.ndim == 1:
+        valarr = valarr[np.newaxis, :]
 
-    return np.concatenate([sign, exp, mantissa])
+    for individual in valarr:
+        barr = np.array([f2b(val) for val in individual])
 
+        sign = barr[:, 0][:, np.newaxis].flatten()
+        exp = barr[:, 1:bdict[bitsize][1] + 1].flatten()
+        mantissa = barr[:, bdict[bitsize][1] + 1:].flatten()
+
+        bitlist.append(np.concatenate([sign, exp, mantissa]))
+
+    if len(bitlist) == 1:
+        return bitlist[0]
+    else:
+        return np.asarray(bitlist)
 
 def ndbit2int(valarr: np.ndarray, bitsize: int, normalised: bool = True,
               **kwargs):

@@ -24,6 +24,7 @@ def _create_pop(**kwargs):
     """
 
     shape = kwargs.get("shape", None)
+    individuals, variables = shape
     size = shape[0] * shape[1]
 
     pop_float = kwargs.get("pop_float", None)(**kwargs.get("pop_kwargs", None))
@@ -33,9 +34,14 @@ def _create_pop(**kwargs):
 
     pop_float = pop_float / np.abs(np.max(pop_float)) * factor + bias
 
-    pop_float = np.array(np.array_split(pop_float, int(size / shape[0])), dtype=float)
+    pop_float = np.array(np.array_split(pop_float, int(individuals)), dtype=float)
 
-    return kwargs.get("n2b", None)(pop_float, **kwargs.get("n2bkwargs", None))
+    barr = kwargs.get("n2b", None)(pop_float, **kwargs.get("n2bkwargs", None))
+
+    if barr.ndim == 1:
+        barr = np.array([barr])
+
+    return barr
 
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
     """
