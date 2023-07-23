@@ -57,37 +57,27 @@ def rand_bit_pop(n: int, m: int) -> np.ndarray:
 
 # float2NdbitIEEE754 and NdbittofloatIEEE754 routines
 
-def normalrand_bit_pop_IEEE(n, bitsize, lower, upper):  # TODO: implement multi variable
+def normalrand_bit_pop_IEEE(shape, bitsize, loc, scale):  # TODO: implement multi variable
     """
     Generate a normal distributed bit population with floats converted with
     float2NdbitIEEE754 and NdbittofloatIEEE754.
 
-    :param n: Population size dtype int individuals
+    :param shape: Population size (Individuals, genes) dtype tuple individuals
     :param bitsize: Bitsize dtype int
-    :param lower: Lower bound dtype float
-    :param upper: Upper bound dtype float
+    :param loc: midpoint of the distribution
+    :param scale: multiplier over the distribution
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
+    size = shape[0]*shape[1]
+    pop_float = np.random.normal(loc, scale, size=size)
+    pop_float = np.array(np.array_split(pop_float, int(size / shape[0])),
+                         dtype=float)
 
-    pop_float = np.linspace(lower, upper, num=n)
     blist = []
-    if bitsize == 32:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary32(pop_float[val]))
-            # tval, tres = pop_float[val], b2sfloat(floatToBinary64(pop_float[val]))[0]
-            # try: np.testing.assert_almost_equal(tres, tval )
-            # except AssertionError: print("Fail")
+    for val in range(pop_float.shape[1]):
+        blist.append(float2NdbitIEEE754(pop_float[:, val], bitsize))
 
-    elif bitsize == 64:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary64(pop_float[val]))
-            # tval, tres = pop_float[val], b2dfloat(blist[-1])[0]
-            # try: np.testing.assert_almost_equal(tres, tval )
-            # except AssertionError: print("Fail")
-
-    else:
-        pass
     return np.array(blist)
 
 
