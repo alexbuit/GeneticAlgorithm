@@ -9,6 +9,14 @@ import dfmcontrol.Utility.pop as pop
 
 import inspect
 
+"""
+Tests in this file:
+    - Test createpop
+    - randbitpop
+    - 
+
+"""
+
 def get_methods_count(file_path):
     with open(file_path) as file:
         lines = file.readlines()
