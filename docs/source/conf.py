@@ -5,6 +5,10 @@
 
 import os
 import sys
+
+from hawkmoth.util import readthedocs
+readthedocs.clang_setup()
+
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('sphinxext'))
 
@@ -29,7 +33,7 @@ release = '0.1'
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon',
               'sphinx.ext.autosectionlabel','sphinx.ext.intersphinx','sphinx_c_autodoc', 'sphinx_c_autodoc.napoleon',
-              'sphinx_c_autodoc.viewcode',]
+              'sphinx_c_autodoc.viewcode']
 
 templates_path = ['_templates']
 exclude_patterns = []
