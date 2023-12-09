@@ -2,6 +2,9 @@
 == Genetic algorithm for a DM
 The files included contain a set of functions/classes to build a genetic algorithm that can be used on an N-channel deformable mirror.
 
+Extensive documentation available on:
+https://kth-dfm-control.readthedocs.io/en/latest/index.html
+
 :toc:
 
 == Todo within DFM_opt_alg.py
