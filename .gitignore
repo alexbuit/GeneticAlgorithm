@@ -183,3 +183,5 @@ dfmcontrol/.idea/dfmcontrol.iml
 dfmcontrol/.idea/aws.xml
 dfmcontrol/.idea/.gitignore
 .idea/jupyter-settings.xml
+.vscode/tasks.json
+dfmcontrol_C/Tests/TestMutation.exe
