@@ -30,3 +30,7 @@ Methods in python
 Methods in C
 ============
 
+.. autocmodule:: dfmcontrol_C.Utility.mutation.c
+   :members:
+
+"""
