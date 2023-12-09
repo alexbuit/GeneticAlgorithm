@@ -8,14 +8,13 @@ import sys
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append(os.path.abspath('sphinxext'))
 
-import mock
 
-MOCK_MODULES = ['numpy', 'matplotlib', 'matplotlib.pyplot',
+autodoc_mock_imports = ['numpy', 'matplotlib', 'matplotlib.pyplot',
                 'mpl_toolkits.axes_grid1', 'scipy', 'scipy.optimize',
                 'matplotlib.animation', 'numpy.random', 'scipy.stats']
 
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+# for mod_name in MOCK_MODULES:
+#     sys.modules[mod_name] = mock.Mock()
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
