@@ -10,6 +10,39 @@ except ImportError:
     from dfmcontrol.Helper import *
 
 
+def _create_pop(**kwargs):
+    """
+    Generate a population of individuals.
+
+    :param kwargs: Keyword arguments for the population generation.
+    :param kwargs["shape"]: Shape of the population dtype tuple.
+    :param kwargs["pop_float"]: Method for creating the randomized population array
+    :param kwargs["pop_kwargs"]: Keyword arguments for the creation method.
+    :param kwargs["n2b"]: Method for converting the numerical values (or genes) to a binary array (individual).
+
+    :return: List of individuals.
+    """
+
+    shape = kwargs.get("shape", None)
+    individuals, variables = shape
+    size = shape[0] * shape[1]
+
+    pop_float = kwargs.get("pop_float", None)(**kwargs.get("pop_kwargs", None))
+
+    factor = kwargs.get("n2bkwargs", None).get("factor", np.abs(np.max(pop_float)))
+    bias = kwargs.get("n2bkwargs", None).get("bias", 0)
+
+    pop_float = pop_float / np.abs(np.max(pop_float)) * factor + bias
+
+    pop_float = np.array(np.array_split(pop_float, int(individuals)), dtype=float)
+
+    barr = kwargs.get("n2b", None)(pop_float, **kwargs.get("n2bkwargs", None)).astype(np.uint8)
+
+    if barr.ndim == 1:
+        barr = np.array([barr], dtype=np.uint8)
+
+    return barr
+
 def rand_bit_pop(n: int, m: int) -> np.ndarray:
     """
     Generate a random bit population, n individuals with m variables.
@@ -19,42 +52,32 @@ def rand_bit_pop(n: int, m: int) -> np.ndarray:
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
-    return np.array([np.random.randint(0, 2, size=m) for _ in range(n)])
+    return np.array([np.random.randint(0, 2, size=m) for _ in range(n)], dtype=np.uint8)
 
 
 # float2NdbitIEEE754 and NdbittofloatIEEE754 routines
 
-def normalrand_bit_pop_IEEE(n, bitsize, lower, upper):  # TODO: implement multi variable
+def normalrand_bit_pop_IEEE(shape, bitsize, loc, scale):  # TODO: implement multi variable
     """
     Generate a normal distributed bit population with floats converted with
     float2NdbitIEEE754 and NdbittofloatIEEE754.
 
-    :param n: Population size dtype int individuals
+    :param shape: Population size (Individuals, genes) dtype tuple individuals
     :param bitsize: Bitsize dtype int
-    :param lower: Lower bound dtype float
-    :param upper: Upper bound dtype float
+    :param loc: midpoint of the distribution
+    :param scale: multiplier over the distribution
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
+    size = shape[0]*shape[1]
+    pop_float = np.random.normal(loc, scale, size=size)
+    pop_float = np.array(np.array_split(pop_float, int(size / shape[0])),
+                         dtype=float)
 
-    pop_float = np.linspace(lower, upper, num=n)
     blist = []
-    if bitsize == 32:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary32(pop_float[val]))
-            # tval, tres = pop_float[val], b2sfloat(floatToBinary64(pop_float[val]))[0]
-            # try: np.testing.assert_almost_equal(tres, tval )
-            # except AssertionError: print("Fail")
+    for val in range(pop_float.shape[1]):
+        blist.append(float2NdbitIEEE754(pop_float[:, val], bitsize))
 
-    elif bitsize == 64:
-        for val in range(pop_float.size):
-            blist.append(floatToBinary64(pop_float[val]))
-            # tval, tres = pop_float[val], b2dfloat(blist[-1])[0]
-            # try: np.testing.assert_almost_equal(tres, tval )
-            # except AssertionError: print("Fail")
-
-    else:
-        pass
     return np.array(blist)
 
 
@@ -181,7 +204,6 @@ def cauchy_bit_pop(shape: Iterable, bitsize: int, loc: float, scale: float,
 
     :return: List of random bits with a bit being a ndarray array of 0 and 1.
     """
-    print("shape:", shape[0], shape[1])
     pop_float = np.vstack(np.array_split(cauchy.rvs(loc=loc, scale=scale, size=shape[0] * shape[1]), shape[0]))
 
     pop_float = (pop_float / np.abs(pop_float).max()) * factor + bias
