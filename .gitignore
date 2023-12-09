@@ -131,3 +131,55 @@ dmypy.json
 /dfmcontrol/token
 /dfmcontrol/Lab code/examplefile.py
 /dfmcontrol/Lab code/examplelab.py
+docs/source/_images/wavefront.png
+docs/source/_images/tournament.png
+docs/source/_images/testsetup.png
+docs/source/_images/StybImprove2d.png
+docs/source/_images/single_cross.png
+docs/source/_images/sigmoid.png
+docs/source/_images/scheme.png
+docs/source/_images/Result2.png
+docs/source/_images/Result.png
+docs/source/_images/reldistmichstyb.png
+docs/source/_images/rank_prob.png
+docs/source/_images/rank_prob_REPORT.png
+docs/source/_images/reldist2d.png
+docs/source/_images/mutation.png
+docs/source/_images/MicheaImprove2d.png
+docs/source/_images/lin_fit.png
+docs/source/_images/labresults.png
+docs/source/_images/exp_fit.png
+docs/source/_images/equal_cross.png
+docs/source/_images/double_cross.png
+docs/source/_images/comms.png
+docs/source/_images/comb_fit.png
+docs/source/_images/diffraction.png
+docs/source/_images/boltz_prob.png
+docs/source/_images/airydisk.png
+docs/source/_images/actuators.png
+docs/source/_images/AckleyImprove2d.png
+docs/source/_images/50_150hist.png
+docs/source/_images/39dtests.png
+docs/source/_images/39dtests_Ackley3.png
+docs/source/_images/39dackley2.png
+docs/source/_images/39d_styb.png
+docs/source/_images/39d_ackley.png
+docs/source/_images/2d_ackley.png
+docs/source/_images/2dtests_Ackley.png
+docs/source/_images/2dtests.png
+docs/source/_images/39_styb_calculation.png
+docs/source/_images/39d_ackley12.png
+dfmcontrol/Optimisation/Booth16b_p10.pickle
+dfmcontrol/Lab code/test4.txt
+dfmcontrol/Lab code/test4.pickle
+dfmcontrol/Lab code/intensity.txt
+dfmcontrol_C/Tests/TestCrossover.exe
+dfmcontrol/.idea/inspectionProfiles/Project_Default.xml
+dfmcontrol/.idea/inspectionProfiles/profiles_settings.xml
+dfmcontrol/.idea/vcs.xml
+dfmcontrol/.idea/modules.xml
+dfmcontrol/.idea/misc.xml
+dfmcontrol/.idea/dfmcontrol.iml
+dfmcontrol/.idea/aws.xml
+dfmcontrol/.idea/.gitignore
+.idea/jupyter-settings.xml
