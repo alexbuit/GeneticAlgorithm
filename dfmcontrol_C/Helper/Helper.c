@@ -30,9 +30,7 @@ void int2bin(int value, int bitsize, int* result){
     bitsize is the size of the bitarray
     result is the bitarray to be filled with the converted values
     */
-    printf("int2bin\n");
-    printf("value: %d\n", value);
-    printf("result: %d\n", result);
+
     // first bit is the sign bit
     if (value < 0){
         result[0] = 1;
@@ -60,9 +58,6 @@ void intarr2binarr(int* valarr, int bitsize, int genes, int* result){
     result is the array of bitarrays to be filled with the converted values (n * bitsize)
 
     */
-    printf("intarr2binarr\n");
-    printf("genes: %d\n", genes);
-    printf("bitsize: %d\n", bitsize);
 
     for (int i = 0; i < genes; i++){
         printf("valarr[%d]: %d \n", i, valarr[i]);
@@ -91,12 +86,6 @@ void intmat2binmat(int** valmat, int bitsize, int genes, int individuals, int** 
     result is the matrix of bitarrays to be filled with the converted values (m x n)
     
     */
-
-    printf("intmat2binmat\n");
-    printf("individuals: %d\n", individuals);
-    printf("genes: %d\n", genes);
-    printf("bitsize: %d\n", bitsize);
-    printMatrix(valmat, individuals, genes);
 
     // convert the values to bitarrays
     for (int i = 0; i < individuals; i++){
@@ -134,8 +123,6 @@ void bin2int(int* value, int bitsize, int* result){
     res = res * sign;
 
     result = res;
-
-
 }
 
 
@@ -149,10 +136,6 @@ void binarr2intarr(int* value, int bitsize, int genes, int* result){
     //     exit(1);
     // }
 
-    printf("binarr2intarr\n");
-    printf("genes: %d\n", genes);
-    printf("bitsize: %d\n", bitsize);
-    printMatrix(&value, 1, genes * bitsize);
 
     // convert the values to integers
     for(int i = 0; i < genes; i++){
@@ -172,11 +155,6 @@ void binmat2intmat(int** valmat, int bitsize, int genes, int individuals, int** 
     result is the matrix of integers to be filled with the converted values (m x n)
     
     */
-    printf("individuals: %d\n", individuals);
-    printf("genes: %d\n", genes);
-    printf("bitsize: %d\n", bitsize);
-
-    printMatrix(valmat, individuals, genes * bitsize);
 
     for (int i = 0; i < individuals; i++){
         binarr2intarr(valmat[i], bitsize, genes, result[i * genes]);
