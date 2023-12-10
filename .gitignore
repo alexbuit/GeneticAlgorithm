@@ -185,3 +185,5 @@ dfmcontrol/.idea/.gitignore
 .idea/jupyter-settings.xml
 .vscode/tasks.json
 dfmcontrol_C/Tests/TestMutation.exe
+dfmcontrol_C/Tests/Utility/TestMutation.exe
+dfmcontrol_C/Tests/Utility/TestCrossover.exe

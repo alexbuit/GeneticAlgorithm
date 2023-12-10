@@ -2,6 +2,8 @@
 #include "stdlib.h"
 #include "math.h"
 
+#include "mutation.h"
+
 void mutate(int *bit, int size, float mutate_coeff_rate){
 
     // mutate_coeff_rate is the amount of mutations over the bit;

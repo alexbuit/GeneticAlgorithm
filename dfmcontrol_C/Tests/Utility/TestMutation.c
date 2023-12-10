@@ -3,7 +3,7 @@
 #include "stdlib.h"
 #include "math.h"
 
-#include "../Utility/mutation.c"
+#include "../../Utility/mutation.c"
 
 int main(){
 
