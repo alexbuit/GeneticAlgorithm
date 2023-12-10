@@ -295,6 +295,7 @@ def int2ndbit(valarr: np.ndarray, bitsize: int, **kwargs):
 
     valarr = np.array((valarr - bias)/factor * 2**(bitsize - 1), dtype=int)
 
+
     shape = list(valarr.shape)
     if len(shape) == 1:
         shape.append(1)

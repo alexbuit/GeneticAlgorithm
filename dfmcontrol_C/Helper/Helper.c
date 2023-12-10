@@ -18,8 +18,58 @@ void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
     If normalised is 0, the values will be normalised to the range [0, 2^bitsize - 1]
     */
 
-    // 
+    // convert the values to integers
+    binmat2intmat(valarr, bitsize, genes, individuals, result);
 
+    // cast the values to floats
+    for (int i = 0; i < individuals; i++){
+        for (int j = 0; j < genes; j++){
+            result[i][j] = (float) result[i][j];
+        }
+    }
+
+    // normalise the values and apply the factor and bias
+    if (normalised == 1){
+        for (int i = 0; i < individuals; i++){
+            for (int j = 0; j < genes; j++){
+                result[i][j] = result[i][j] / (pow(2, bitsize - 1)) * factor + bias;
+            }
+        }
+    }
+
+}
+
+void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
+               float factor, float bias, int normalised, int** result){
+
+    /*
+    Convert an array of integers to an array of bitarrays
+
+    valarr is the array of integers to be converted to bitarrays (a)
+    bitsize is the size of the bitarrays
+    genes is the number of genes in the bitarrays (n = genes * bitsize; n = a * bitsize)
+    individuals is the number of individuals in the bitarrays (m = individuals; m = a)
+    result is the array of bitarrays to be filled with the converted values (m x n)
+
+    If normalised is 1, the values will be normalised to the range [0, 1] multiplied by factor and added bias
+    If normalised is 0, the values will be normalised to the range [0, 2^bitsize - 1]
+    
+
+    */
+
+    // normalise the values and apply the factor and bias and cast to integers
+    if (normalised == 1){
+        for (int i = 0; i < individuals; i++){
+            for (int j = 0; j < genes; j++){
+                valarr[i][j] = (int) round((valarr[i][j] - bias) / factor * pow(2, bitsize - 1));
+
+            }
+        }
+    }
+
+    // convert the values to bitarrays
+
+    intmat2binmat((int**) valarr, bitsize, genes, individuals, result);
 }
 
 void int2bin(int value, int bitsize, int* result){
@@ -58,13 +108,6 @@ void intarr2binarr(int* valarr, int bitsize, int genes, int* result){
     result is the array of bitarrays to be filled with the converted values (n * bitsize)
 
     */
-
-    for (int i = 0; i < genes; i++){
-        printf("valarr[%d]: %d \n", i, valarr[i]);
-    }
-    for (int i = 0; i < genes * bitsize; i++){
-        printf("result[%d]: %d \n", i, result[i]);
-    }
 
     // convert the values to bitarrays
     for (int i = 0; i < genes; i++){
@@ -105,10 +148,6 @@ void bin2int(int* value, int bitsize, int* result){
 
     int sign = 1;
     int res = 0;
-
-    for(int i = 0; i < bitsize; i++){
-        printf("%d", value);
-    }
 
     if (value[0] == 1){
         sign = -1;
@@ -171,6 +210,27 @@ void printMatrix(int** matrix, int rows, int cols) {
         printf("[");
         for (int j = 0; j < cols; j++) {
             printf("%d", matrix[i][j]);
+            if (j < cols - 1) {
+                printf(", ");
+            }
+        }
+        printf("]");
+        if (i < rows - 1) {
+            printf(", \n");
+        }
+    }
+    printf("]\n");
+}
+
+void printfMatrix(float** matrix, int rows, int cols) {
+    printf("cols: %d\n", cols);
+    printf("rows: %d\n", rows);
+
+    printf("[");
+    for (int i = 0; i < rows; i++) {
+        printf("[");
+        for (int j = 0; j < cols; j++) {
+            printf("%.4f", matrix[i][j]);
             if (j < cols - 1) {
                 printf(", ");
             }
