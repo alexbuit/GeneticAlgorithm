@@ -182,3 +182,43 @@ void printMatrix(int** matrix, int rows, int cols) {
     }
     printf("]\n");
 }
+
+void sigmoid(float* x, float* result, int size){
+    /*
+    Calculate the sigmoid of x
+
+    x is the input
+    result is the output
+    */
+
+    for (int i = 0; i < size; i++){
+        result[i] = 1 / (1 + exp(-x[i]));
+    }
+}
+
+void sigmoid_derivative(float* x, float* result, int size){
+    /*
+    Calculate the derivative of the sigmoid of x
+
+    x is the input
+    result is the output
+    */
+
+    for (int i = 0; i < size; i++){
+        result[i] = x[i] * (1 - x[i]);
+    }
+}
+
+void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,float* result, int size){
+
+    /*
+    Calculate the sigmoid of x
+
+    x is the input
+    result is the output
+    */
+
+    for (int i = 0; i < size; i++){
+        result[i] = a + (b - a) / (1 + Q * pow(exp(-c * (x[i] - d)), (1/nu)));
+    }
+}

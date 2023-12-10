@@ -9,3 +9,6 @@ void bin2int(int* value, int bitsize, int* result);
 void binarr2intarr(int* value, int bitsize, int genes, int* result);
 void binmat2intmat(int** valmat, int bitsize, int genes, int individuals, int** result);
 void printMatrix(int** matrix, int rows, int cols);
+void sigmoid(float* x, float* result, int size);
+void sigmoid_derivative(float* x, float* result, int size);
+void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,float* result, int size);
