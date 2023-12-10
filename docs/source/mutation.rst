@@ -31,5 +31,3 @@ Methods in C
 ============
 
 .. c:autodoc:: dfmcontrol_c.Utility.mutation.c
-
-"""

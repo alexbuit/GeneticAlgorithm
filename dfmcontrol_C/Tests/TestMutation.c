@@ -74,6 +74,8 @@ int main(){
     }
     
     free(bit);
+    free(bitcopy);
+    free(mutate_coeff_rate);
 
 
 }
