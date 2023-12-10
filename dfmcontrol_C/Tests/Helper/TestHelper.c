@@ -3,7 +3,7 @@
 #include "math.h"
 
 #include "../../Helper/Helper.c"
-#include "../../Helper/Helper.h"
+// #include "../../Helper/Helper.h"
 
 #include "TestHelper.h"
 
@@ -76,9 +76,9 @@ int main(){
 
     // Test binmat2intmat
     
-    int individuals = 10;
-    int genes = 12;
-    int bitsize = 16;
+    int individuals = 20;
+    int genes = 24;
+    int bitsize = 32;
 
     int** valmat = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of integers
     int** result = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of bitarrays
@@ -97,10 +97,15 @@ int main(){
             sign = (rand() % 2 == 0) ? 1 : -1;
             valmat[i][j] = rand() % (int) pow(2, bitsize - 1) * sign; // random integer between -2^bitsize-1 and 2^bitsize - 1
             copyvalmat[i][j] = valmat[i][j];
-            printf("%d ", valmat[i][j]);
         }
     }
-    printf("\n");
+
+    // print the size of the matrices
+    printf("valmat: %d x %d\n", individuals, genes);
+    printf("result: %d x %d\n", individuals, genes * bitsize);
+
+
+
 
     intmat2binmat(valmat, bitsize, genes, individuals, result);
 
@@ -108,16 +113,16 @@ int main(){
     printf("valmat (in-between): \n");
     printMatrix(valmat, individuals, genes);
 
-    // printf("\nresult (in-between): \n");
-    // for (int i = 0; i < individuals; i++) {
-    //     for (int j = 0; j < genes * bitsize; j++) {
-    //         printf("%d ", result[i][j]);
-    //     }
-    // }
+    printf("\nresult (in-between): \n");
+    for (int i = 0; i < individuals; i++) {
+        for (int j = 0; j < genes; j++) {
+            printf("%d ", result[i]);
+        }
+    }
     
-    // printMatrix(result, individuals, genes * bitsize, 1);
+    printMatrix(result, individuals, genes * bitsize);
 
-    // printf("\n");
+    printf("\n");
 
     binmat2intmat(result, bitsize, genes, individuals, valmat);
 
@@ -161,7 +166,7 @@ int main(){
     free(valmat);
     free(result);
     free(copyvalmat);
-    free(same);
+    // free(same);
 
 }
 
