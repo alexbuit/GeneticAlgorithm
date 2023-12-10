@@ -64,7 +64,7 @@ These functions include:
 And use the same bias and factor parameters as the python functions to compute
 the floating point values.
 
-note:: The C library does not initialise arrays/matrices these should be
+.. note:: The C library does not initialise arrays/matrices these should be
        initialised before calling the functions in the form of a value-array,
        the amount of genes/individuals/bitsize and a correctly sized result-array.
        The functions will not check if the result-array is correctly sized 
@@ -74,6 +74,21 @@ The C library also includes the sigmoid function and its derivative. These
 functions are named as in the python library. The sigmoid functions operate
 on arrays and are used in the same way as the conversion functions where it
 is expected that the result-array is correctly sized.
+
+Known errors
+************
+
+The conversion routines for ndbit2int and int2ndbit are prone to rounding
+errors. This is due to the fact that the conversion routines use the
+floating point representation of the integers. This means that the
+conversion routines are not exact and can be off by a small amount.
+
+These errors become very present when working with large bitsizes (>32 bits)
+and when using small bitsizes (<4 bits). In C and python the error rates can
+be found in the figure below.
+
+.. image:: _images/Helper/error_rate_zoom.png
+    :class: with-border
 
 
 Helper functions:
