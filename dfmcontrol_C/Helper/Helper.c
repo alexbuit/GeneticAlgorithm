@@ -196,7 +196,7 @@ void binmat2intmat(int** valmat, int bitsize, int genes, int individuals, int** 
     */
 
     for (int i = 0; i < individuals; i++){
-        binarr2intarr(valmat[i], bitsize, genes, result[i * genes]);
+        binarr2intarr(valmat[i], bitsize, genes, result[i]);
     }
 
 }

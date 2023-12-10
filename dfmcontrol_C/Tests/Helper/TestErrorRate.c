@@ -16,8 +16,8 @@ int normalised = 1;
 
 int main(){
 
-    int individuals = 40;
-    int genes = 50;
+    int individuals = 10000;
+    int genes = 65;
     
     int bitstepsize = 1;
     int bitstart = 4;
@@ -43,7 +43,7 @@ int main(){
 
     // write the results to a file
     FILE *fp;
-    fp = fopen("error_rate_zoom_c.txt", "w");
+    fp = fopen("error_rate_zoom100x1000_c.txt", "w");
     fprintf(fp, "bitsize error_rate\n");
     for(int i=4; i<bitrange; i++){
         fprintf(fp, "%d %f\n", bitarray[i], error_rate[i]);
