@@ -243,6 +243,7 @@ def rank_tournament_selection(*args, **kwargs):
     elif mode == "minimisation":
         fit_rng = np.argsort(fitness)
     else:
+        print(mode)
         raise ValueError("mode must be either 'optimisation' or 'minimisation'")
 
     prob_param = kwargs.get("p", 1.9)

@@ -91,8 +91,7 @@ class genetic_algoritm:
         self.cross: Callable = equal_prob
         self.mutation: Callable = mutate
 
-        self.mode: str = "optimise" # or mnimise
-        self.modebool: bool = True if self.mode == "optimise" else False
+        self.mode: str = "optimisation" # or mnimise
 
         self.tstart = time()
 
@@ -176,7 +175,7 @@ class genetic_algoritm:
         selargs["b2n"] = self.b2n
         selargs["b2nkwargs"] = self.b2nkwargs
         selargs["verbosity"] = verbosity
-        selargs["mode"] = self.modebool
+        selargs["mode"] = self.mode
 
         self.tfunc.set_dimension(self.shape[1])
 

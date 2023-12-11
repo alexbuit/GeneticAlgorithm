@@ -7,24 +7,26 @@ Optimizing a 1d test function
 
 .. code-block:: python
 
-    from dfmcontrol.DFM_opt_alg import genetic_algoritm
+    from dfmcontrol.Optimisation.DFM_opt_alg import genetic_algoritm
     import dfmcontrol as dfmc
-    from dfmcontrol.test_functions import tfx
+    from dfmcontrol.Mathematical_functions.t_functions import tfx
 
-    import dfmcontrol.helper as dfmh
+    import dfmcontrol.Helper.helper as dfmh
 
     # Create a genetic algorithm object
     ga = genetic_algoritm(bitsize=16)
+    ga.mode = "minimisation"
     tfunc = tfx
 
     # use the default bit2num function
     ga.b2n = dfmh.ndbit2int
 
     # The range of possible floats is now -10 to 10
-    ga.b2nkwargs = {"factor": 10}
+    ga.b2nkwargs = {"factor": 50}
 
-    # Initiate a population of 16 individuals with 2 genes each
-    ga.init_pop("normal", shape=[20, 1], bitsize=ga.bitsize, factor=ga.b2nkwargs["factor"])
+    # Initiate a population of 12 individuals with 1 gene each, confined to the range -50 to -30
+    ga.init_pop(dfmc.Utility.pop.uniform_bit_pop, shape=[12, 1], bitsize=ga.bitsize, factor=ga.b2nkwargs["factor"],
+                boundaries=[-50, -30])
 
     # Initiate the log
     ga.logdata(2)
@@ -43,7 +45,7 @@ Optimizing a 1d test function
 
     # The runcond argument is a string that is evaluated as a condition for the algorithm to stop
     # The string can use any of the attributes of the genetic algorithm object
-    runcond = r"np.min(np.abs(self.log.ranking.distancefx[-1])) > 0.01"  # Stop when the minimum distance from the best solution to the mathematical is less than 0.1
+    runcond = r"np.min(np.abs(self.log.ranking.distancefx[-1])) > 0.1"  # Stop when the minimum distance from the best solution to the mathematical is less than 0.1
 
     # The verbosity argument is an integer that controls the amount of output
     # 0: No output
@@ -64,6 +66,55 @@ Optimizing a 1d test function
 
 Plotting the results
 ====================
+
+Due to the stoastic nature of the genetic algorithm, the results will vary from run to run.
+The following code plots the results from the previous run.
+
+.. code-block:: python
+
+    import numpy as np
+
+    from dfmcontrol.AdrianPackv402 import Fileread
+    from dfmcontrol.AdrianPackv402 import Aplot
+
+    data = Fileread.Fileread(r"results.txt", dtype=float)()
+    data = list(data.values())
+
+    datamat = np.array(data)
+
+    # calculate the average fitness
+    avgfit = np.average(datamat, axis=1)
+    # calculate the standard deviation
+    stdfit = np.std(datamat, axis=1)
+
+    # calculate the minimum fitness
+    minfit = np.min(datamat, axis=1)
+    # calculate the maximum fitness
+    maxfit = np.max(datamat, axis=1)
+
+    # plot the average fitness
+    plmin = Aplot.Default(np.arange(len(minfit)), minfit, colour="C1", data_label="Minimum fitness", legend_loc="upper right")
+
+    pl = Aplot.Default(np.arange(len(avgfit)), avgfit, colour="C0", data_label="Average fitness", add_mode=True)
+    plmax = Aplot.Default(np.arange(len(maxfit)), maxfit, colour="C2", data_label="Maximum fitness", add_mode=True)
+
+    plmin += pl
+    plmin += plmax
+
+    plmin()
+
+This should produce a plot similar to the following:
+
+.. image:: _images/Examples/TFXresults.png
+    :width: 400
+    :alt: plot
+
+When excluding the average and maximum fitness to focus on the "best" members of the population, the plot should look like this:
+
+.. image:: _images/Examples/TFX_Minimum_fitness.png
+    :width: 400
+    :alt: plot
+
 
 Optimizing Ackley's function for 2 variables
 ############################################
@@ -158,7 +209,7 @@ Acquiring the results from a saved log
 
 Which results in the following plot:
 
-.. figure:: /_images/2d_ackley.png
+.. figure:: _images/Examples/2d_ackley.png
 
 .. note::
     Due to the stochastic nature of the genetic algorithm, the results will vary from run to run.
@@ -227,7 +278,7 @@ finds the minimum of the function using the genetic algorithm.
 
 The results are shown in the following plot:
 
-.. figure:: /_images/39d_styb.png
+.. figure:: _images/Examples39d_styb.png
 
 The log object can also be used to extract data on the time / calculations required to find the minimum.
 
@@ -239,4 +290,4 @@ The log object can also be used to extract data on the time / calculations requi
                  marker="")
     pl()
 
-.. figure:: /_images/39_styb_calculation.png
+.. figure:: _images/Examples/39_styb_calculation.png

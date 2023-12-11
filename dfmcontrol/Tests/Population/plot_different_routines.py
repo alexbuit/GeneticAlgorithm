@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 # Create a genetic algorithm object
 ga = genetic_algoritm(bitsize=16)
+ga.mode = "minimisation"
 tfunc = michealewicz
 
 # use the default bit2num function

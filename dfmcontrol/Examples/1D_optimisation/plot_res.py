@@ -5,10 +5,27 @@ from dfmcontrol.AdrianPackv402 import Aplot
 
 data = Fileread.Fileread(r"results.txt", dtype=float)()
 data = list(data.values())
-print(data)
 
-# plot the final epoch
-pl = Aplot.Default(np.arange(len(data[-1])), data[-1], add_mode=True, colour="C1", data_label="Final epoch")
-pl1 = Aplot.Default(np.arange(len(data[0])), data[0], x_label="Individual", y_label="fitness", data_label="First epoch", colour="C0")
-pl1 += pl
-pl1()
+datamat = np.array(data)
+
+# calculate the average fitness
+avgfit = np.average(datamat, axis=1)
+# calculate the standard deviation
+stdfit = np.std(datamat, axis=1)
+
+# calculate the minimum fitness
+minfit = np.min(datamat, axis=1)
+# calculate the maximum fitness
+maxfit = np.max(datamat, axis=1)
+
+# plot the average fitness
+plmin = Aplot.Default(np.arange(len(minfit)), minfit, colour="C1", data_label="Minimum fitness", legend_loc="upper right")
+
+pl = Aplot.Default(np.arange(len(avgfit)), avgfit, colour="C0", data_label="Average fitness", add_mode=True)
+plmax = Aplot.Default(np.arange(len(maxfit)), maxfit, colour="C2", data_label="Maximum fitness", add_mode=True)
+
+plmin += pl
+plmin += plmax
+
+plmin()
+
