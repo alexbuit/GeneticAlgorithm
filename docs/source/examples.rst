@@ -278,7 +278,7 @@ finds the minimum of the function using the genetic algorithm.
 
 The results are shown in the following plot:
 
-.. figure:: _images/Examples39d_styb.png
+.. figure:: _images/Examples/39d_styb.png
 
 The log object can also be used to extract data on the time / calculations required to find the minimum.
 

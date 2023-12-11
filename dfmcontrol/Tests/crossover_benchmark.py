@@ -14,12 +14,16 @@ def cross(y, method):
     parents, _, _, _ = selection.rank_selection(test_pop, fitness, 16, ndbit2int, b2nkwargs={"factor": 1})
 
     children = []
+
+    tstart = t.time()
+
     for p in parents:
         c1, c2 = method(test_pop[p[0]], test_pop[p[1]], bitsize=16)
         children.append(c1)
         children.append(c2)
 
-    return np.asarray(convertpop2n(ndbit2int, children, 16)) - np.asarray(convertpop2n(ndbit2int, test_pop, 16))
+
+    return np.asarray(convertpop2n(ndbit2int, children, 16)) - np.asarray(convertpop2n(ndbit2int, test_pop, 16)), t.time() - tstart
 
 x = list(range(1, 40))
 
@@ -40,25 +44,28 @@ for param in x:
     t_results_list2 = []
     t_results_list3 = []
 
-    t_runtime_single = [t.time()]
-    t_runtime_double = [t.time()]
-    t_runtime_equal = [t.time()]
+    t_runtime_single = [0]
+    t_runtime_double = [0]
+    t_runtime_equal = [0]
 
     for i in range(100):
-        t_results_list1.append(cross(param, crossover.single_point)[0])
-        t_runtime_single.append(t.time())
-        t_results_list2.append(cross(param, crossover.double_point)[0])
-        t_runtime_double.append(t.time())
-        t_results_list3.append(cross(param, crossover.equal_prob)[0])
-        t_runtime_equal.append(t.time())
+        res = cross(param, crossover.single_point)
+        t_results_list1.append(res[0])
+        t_runtime_single.append(res[1])
+        res = cross(param, crossover.double_point)
+        t_results_list2.append(res[0])
+        t_runtime_double.append(res[1])
+        res = cross(param, crossover.equal_prob)
+        t_results_list3.append(res[0])
+        t_runtime_equal.append(res[1])
 
     t_runtime_single = np.diff(t_runtime_single)
     t_runtime_double = np.diff(t_runtime_double)
     t_runtime_equal = np.diff(t_runtime_equal)
 
-    runtime_single.append(np.average(t_runtime_single))
-    runtime_double.append(np.average(t_runtime_double))
-    runtime_equal.append(np.average(t_runtime_equal))
+    runtime_single.append(np.average(t_runtime_single) * 1000) # convert to ms
+    runtime_double.append(np.average(t_runtime_double) * 1000)
+    runtime_equal.append(np.average(t_runtime_equal) * 1000)
 
     zeros1 = np.count_nonzero(np.asarray(t_results_list1) == 0)
     zeros2 = np.count_nonzero(np.asarray(t_results_list2) == 0)
@@ -81,7 +88,6 @@ plt.legend()
 plt.show()
 
 plt.clf()
-
 plt.scatter(x, runtime_single[1:]
             , label="Single Point Crossover")
 plt.scatter(x, runtime_double[1:]
@@ -90,6 +96,13 @@ plt.scatter(x, runtime_equal[1:]
             , label="Equal Probability Crossover")
 plt.title("Crossover Comparison for 16 individuals in a population")
 plt.xlabel("Number of genes in an individual")
-plt.ylabel("Average runtime of crossover")
+plt.ylabel("Average runtime of crossover [ms]")
 plt.legend()
 plt.show()
+# save data of time to txt
+
+# concatenate data to one matrix
+datamat = np.asarray([x, runtime_single[1:], runtime_double[1:], runtime_equal[1:]]).T
+
+# save data to txt
+np.savetxt("crossover_benchmarks.txt", datamat, delimiter=" ", fmt="%1.4f")

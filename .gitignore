@@ -190,3 +190,7 @@ dfmcontrol_C/Tests/Utility/TestCrossover.exe
 dfmcontrol_C/Tests/Helper/TestHelper.exe
 dfmcontrol_C/Tests/Helper/Testndbitconv.exe
 dfmcontrol_C/Tests/Helper/TestErrorRate.exe
+dfmcontrol_C/Tests/Utility/Benchmark/TestTimeCrossover.exe
+dfmcontrol_C/Tests/Utility/Benchmark/crossover_benchmarks.txt
+dfmcontrol/Tests/Benchmark_results/crossover_benchmarks.txt
+dfmcontrol/Examples/1D_optimisation/results.txt
