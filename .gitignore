@@ -194,3 +194,8 @@ dfmcontrol_C/Tests/Utility/Benchmark/TestTimeCrossover.exe
 dfmcontrol_C/Tests/Utility/Benchmark/crossover_benchmarks.txt
 dfmcontrol/Tests/Benchmark_results/crossover_benchmarks.txt
 dfmcontrol/Examples/1D_optimisation/results.txt
+dfmcontrol/Tests/Benchmark_results/crossover_benchmarksC.txt
+dfmcontrol/Tests/Benchmark_results/crossover_benchmarksPYTHON.txt
+dfmcontrol/Tests/crossover_benchmarksPYTHON.txt
+.vscode/launch.json
+.vscode/settings.json
