@@ -16,8 +16,8 @@ int normalised = 1;
 
 int main(){
 
-    int individuals = 10000;
-    int genes = 65;
+    int individuals = 1000;
+    int genes = 650;
     
     int bitstepsize = 1;
     int bitstart = 4;

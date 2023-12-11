@@ -212,5 +212,26 @@ def cauchy_bit_pop(shape: Iterable, bitsize: int, loc: float, scale: float,
 
     return int2ndbit(pop_float, bitsize, factor=factor, bias=bias)
 
+def normal_bit_pop(shape: Iterable, bitsize: int, loc: float, scale: float,
+                   factor: float = 1.0, bias: float = 0.0) -> np.ndarray:
+    """
+    Generate a normal bit population with floats converted with
+    int2ndbit and ndbit2int.
+
+    :param shape: Population size dtype tuple [individuals, variables]
+    :param bitsize: Bitsize dtype int
+    :param loc: loc dtype float
+    :param scale: scale dtype float
+
+    :return: List of random bits with a bit being a ndarray array of 0 and 1.
+    """
+
+    pop_float = np.vstack(np.array_split(np.random.normal(loc=loc, scale=scale, size=shape[0] * shape[1]), shape[0]))
+
+    pop_float = (pop_float / np.abs(pop_float).max()) * factor + bias
+    if factor < np.abs(loc):
+        factor = np.abs(loc)
+
+    return int2ndbit(pop_float, bitsize, factor=factor, bias=bias)
 if __name__ == "__main__":
     print(ndbit2int(cauchy_bit_pop([10, 4], 8, 4, 10, factor=10), bitsize=8, factor=10))
