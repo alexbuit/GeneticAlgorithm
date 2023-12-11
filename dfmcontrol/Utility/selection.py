@@ -142,13 +142,22 @@ def roulette_selection(*args, **kwargs):
     """
     pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
 
-    :param args:
-        args, kwargs passed onto the calc_fx function
-    :param kwargs:
-        k => parameteres passed onto the fitness function
-        fitness_func => the function to determine the fitness of a value y
-        calculated from input population
-    :return:
+    :param args: args, kwargs passed onto the calc_fx function, these can be ignored by the user
+
+    The following kwargs are used by the function and can be set by the user through the selargs dict:
+
+    :param k: list of paramters for the flattening function (IE fitness_func), default is [1.5]
+    :type k: list
+
+    :param mode: the mode of the optimisation (IE minimisation or optimisation)
+    :type mode: str
+
+    :param fitness_func: the fitness function to use
+    :type fitness_func: function
+
+    :return: selected parents based on their probability, the fitness values, probablity values
+             and the calculated values
+    :rtype: tuple
     """
 
     if not kwargs.get("avoid_calc_fx", False):
@@ -160,7 +169,7 @@ def roulette_selection(*args, **kwargs):
 
     k = kwargs.get("k", 1)
 
-    mode = kwargs.get("mode", True)
+    mode = kwargs.get("mode", "minimisation") # the optimasation or minimisation mode
 
     if not isinstance(k, Iterable):
         k = [k]
@@ -170,10 +179,12 @@ def roulette_selection(*args, **kwargs):
     fitness = fitness_func(y, *k)
 
     # If the modebool is set to true a higher cost function value is better
-    if mode:
+    if mode == "optimisation":
         p = fitness / sum(fitness)
-    else:
+    elif mode == "minimisation":
         p = 1 - (fitness / sum(fitness))
+    else:
+        raise ValueError("mode must be either 'optimisation' or 'minimisation'")
 
 
     return sort_list(fitness, p, **kwargs), fitness, p, y
@@ -182,10 +193,29 @@ def roulette_selection(*args, **kwargs):
 def rank_tournament_selection(*args, **kwargs):
     """
     pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
-    
-    :param args: 
-    :param kwargs: 
-    :return: 
+
+    :param args: args, kwargs passed onto the calc_fx function, these can be ignored by the user
+
+    The following kwargs are used by the function and can be set by the user through the selargs dict:
+
+    :param k: list of paramters for the flattening function (IE fitness_func), default is [1.5]
+    :type k: list
+
+    :param p: the probability of selecting the best individual, default is 1.9
+    :type p: float
+
+    :param tournament_size: the size of the tournament, default is 4
+    :type tournament_size: int
+
+    :param mode: the mode of the optimisation (IE minimisation or optimisation)
+    :type mode: str
+
+    :param fitness_func: the fitness function to use
+    :type fitness_func: function
+
+    :return: selected parents based on their probability, the fitness values, probablity values
+             and the calculated values
+    :rtype: tuple
     """
 
     if not kwargs.get("avoid_calc_fx", False):
@@ -206,14 +236,16 @@ def rank_tournament_selection(*args, **kwargs):
     fitness = fitness_func(y, *k)
 
     # The mode for opt/min
-    mode = kwargs.get("mode", True)
+    mode = kwargs.get("mode", "minimisation")
 
-    if mode:
+    if mode == "optimisation":
         fit_rng = np.flip(np.argsort(fitness))
-    else:
+    elif mode == "minimisation":
         fit_rng = np.argsort(fitness)
+    else:
+        raise ValueError("mode must be either 'optimisation' or 'minimisation'")
 
-    prob_param = kwargs.get("p", 0.1)
+    prob_param = kwargs.get("p", 1.9)
 
     tournament_size = kwargs.get("tournament_size", 4)
 
@@ -247,9 +279,25 @@ def rank_selection(*args, **kwargs):
 
     calc_fx params: pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
 
-    :param args: args, kwargs passed onto the calc_fx function
-    :param kwargs: k => parameteres passed onto the fitness function
-    :return: selected parents based on their probability
+    :param args: args, kwargs passed onto the calc_fx function, these can be ignored by the user
+
+    The following kwargs are used by the function and can be set by the user through the selargs dict:
+
+    :param k: list of paramters for the flattening function (IE fitness_func), default is [1.5]
+    :type k: list
+
+    :param p: the probability parameter for the rank selection, default is 1.9
+    :type p: float
+
+    :param mode: the mode of the optimisation (IE minimisation or optimisation)
+    :type mode: str
+
+    :param fitness_func: the fitness function to use
+    :type fitness_func: function
+
+    :return: selected parents based on their probability, the fitness values, probablity values
+             and the calculated values
+    :rtype: tuple
     """
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
@@ -259,7 +307,7 @@ def rank_selection(*args, **kwargs):
     y = y.flatten()
 
     # probability paramter for rank selection
-    prob_param = 0.1
+    prob_param = 1.9
     if "p" in kwargs:
         prob_param = kwargs["p"]
 
@@ -278,7 +326,16 @@ def rank_selection(*args, **kwargs):
 
     fitness = fitness_func(y, np.asarray(k))
 
-    fit_rng = np.argsort(fitness)
+
+    # The mode for opt/min
+    mode = kwargs.get("mode", "minimisation")
+
+    if mode == "optimisation":
+        fit_rng = np.flip(np.argsort(fitness))
+    elif mode == "minimisation":
+        fit_rng = np.argsort(fitness)
+    else:
+        raise ValueError("mode must be either 'optimisation' or 'minimisation'")
 
     p = np.abs((prob_param * (1 - prob_param)**(np.arange(1, fitness.size + 1, dtype=float) - 1)))
     p = p/np.sum(p)
@@ -308,13 +365,32 @@ def rank_selection(*args, **kwargs):
 
 def rank_space_selection(*args, **kwargs):
     """
-        Select parents out the pool pop according to rank space selection
+    Select parents out the pool pop according to rank space selection
 
-        calc_fx params: pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
-        :param args: args, kwargs passed onto the calc_fx function
-        :param kwargs: k => parameteres passed onto the fitness function
-        :return: selected parents based on their probability
-        """
+    calc_fx params: pop, fx, bitsize, nbit2num = Ndbit2float, **kwargs
+    :param args: args, kwargs passed onto the calc_fx function, these can be ignored by the user
+
+    The following kwargs are used by the function and can be set by the user through the selargs dict:
+
+    :param k: list of paramters for the flattening function (IE fitness_func), default is [1.5]
+    :type k: list
+
+    :param p: the probability parameter for the rank selection, default is 1.9
+    :type p: float
+
+    :param d: the diversity parameter for the rank selection, default is 1
+    :type d: float
+
+    :param mode: the mode of the optimisation (IE minimisation or optimisation)
+    :type mode: str
+
+    :param fitness_func: the fitness function to use
+    :type fitness_func: function
+
+    :return: selected parents based on their probability, the fitness values, probablity values
+             and the calculated values
+    :rtype: tuple
+    """
     pop = args[0]
     if not kwargs.get("avoid_calc_fx", False):
         y = calc_fx(*args, **kwargs)
@@ -342,13 +418,25 @@ def rank_space_selection(*args, **kwargs):
         fitness_func = kwargs["fitness_func"]
 
     fitness = fitness_func(y, *k)
-    print(fitness)
-    fit_rng = np.argsort(fitness)
+
+    # The mode for opt/min
+    mode = kwargs.get("mode", "minimisation")
+
+    if mode == "optimisation":
+        fit_rng = np.flip(np.argsort(fitness))
+    elif mode == "minimisation":
+        fit_rng = np.argsort(fitness)
+    else:
+        raise ValueError("mode must be either 'optimisation' or 'minimisation'")
 
     best = fit_rng[0]
     diversity = np.sqrt(np.asarray([y[best]**2 - y[i]**2 for i in fit_rng])) * div_param
     fitness = fitness + diversity
-    fit_rng = np.argsort(fitness)
+
+    if mode == "optimisation":
+        fit_rng = np.flip(np.argsort(fitness))
+    elif mode == "minimisation":
+        fit_rng = np.argsort(fitness)
 
     p = (prob_param * (1 - prob_param) ** (
                 np.arange(1, fitness.size + 1, dtype=float) - 1))
@@ -382,7 +470,25 @@ def rank_space_selection(*args, **kwargs):
 
 def boltzmann_selection(*args, **kwargs):
     """
+    :param args: args, kwargs passed onto the calc_fx function, these can be ignored by the user
 
+    The following kwargs are used by the function and can be set by the user through the selargs dict:
+
+    :param k: list of paramters for the flattening function (IE fitness_func), default is [1.5]
+    :type k: list
+
+    :param T: the temperature parameter for the boltzmann selection, default is 10
+    :type T: float
+
+    :param mode: the mode of the optimisation (IE minimisation or optimisation)
+    :type mode: str
+
+    :param fitness_func: the fitness function to use
+    :type fitness_func: function
+
+    :return: selected parents based on their probability, the fitness values, probablity values
+             and the calculated values
+    :rtype: tuple
     """
     pop = args[0]
 
@@ -405,7 +511,16 @@ def boltzmann_selection(*args, **kwargs):
     T = kwargs.get("T", 10)
 
     fitness = fitness_func(y, *k)  # minimise (remove for optimise)
-    fit_rng = np.flip(np.argsort(fitness).flatten())
+
+    # The mode for opt/min
+    mode = kwargs.get("mode", "minimisation")
+
+    if mode == "optimisation":
+        fit_rng = np.flip(np.argsort(fitness).flatten())
+    elif mode == "minimisation":
+        fit_rng = np.argsort(fitness).flatten()
+    else:
+        raise ValueError("mode must be either 'optimisation' or 'minimisation'")
 
     pind = []
 

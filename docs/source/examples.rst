@@ -33,9 +33,10 @@ Optimizing a 1d test function
     ga.target_func(tfunc)
 
     # Set the selection, mutation and crossover functions
-    ga.set_select(dfmc.selection_funcs.rank_tournament_selection) # Rank selection
-    ga.set_mutate(dfmc.mutation.mutate) # Mutate the full bit (do not use for IEEE 754 floats)
-    ga.set_cross(dfmc.cross_funcs.equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
+    # Set the selection, mutation and crossover functions
+    ga.set_select(dfmc.Utility.selection.rank_tournament_selection) # Rank selection
+    ga.set_mutate(dfmc.Utility.mutation.mutate) # Mutate the full bit (do not use for IEEE 754 floats)
+    ga.set_cross(dfmc.Utility.crossover.equal_prob) # Crossover the full bit (do not use for IEEE 754 floats)
 
     ga.elitism = 4  # Keep the 4 best individuals
     # Run the genetic algorithm
@@ -53,7 +54,7 @@ Optimizing a 1d test function
     muargs = {"mutate_coeff": 4}
 
     # The selargs argument is a dictionary that is passed to the selection function as the kwargs argument
-    selargs = {"nbit2num": ga.b2n, "fitness_func": dfmc.selection_funcs.no_fitness,
+    selargs = {"nbit2num": ga.b2n, "fitness_func": dfmc.Utility.selection.no_fitness,
                 "allow_duplicates": True}
 
     ga.run(muargs=muargs, selargs=selargs, verbosity=verbosity, runcond=runcond)
