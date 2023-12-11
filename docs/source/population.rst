@@ -50,7 +50,7 @@ amount of individuals in the population resulting in the population matrix.
 A two-dimensional representation of the population on the michealwicz function
 is shown below.
 
-.. figure:: _images/population/bitpop_method.png
+.. figure:: _images/Population/bitpop_method.png
    :align: center
    :scale: 75 %
 
@@ -93,7 +93,7 @@ amount of individuals in the population and converted to binary using the
 The figure below shows a two-dimensional representation of the population on
 the michealwicz function.
 
-.. figure:: _images/population/bitpopuniform_method.png
+.. figure:: _images/Population/bitpopuniform_method.png
    :align: center
    :scale: 75 %
 
@@ -125,7 +125,7 @@ values are "split" into m parts (the amount of individuals in the
 population) and then stacked into a matrix. This process is visualised in the
 figure below.
 
-.. figure:: _images/population/population_initialisation_method.png
+.. figure:: _images/Population/population_initialisation_method.png
    :align: center
    :scale: 50 %
 
@@ -138,7 +138,7 @@ the :attr:`factor` and :attr:`bias` parameters.
 The figure below shows a two-dimensional representation of the population on
 the michealwicz function.
 
-.. figure:: _images/population/bitpopnormal_method.png
+.. figure:: _images/Population/bitpopnormal_method.png
    :align: center
    :scale: 75 %
 
@@ -169,7 +169,7 @@ The population is generated in the same way as the gaussian population to retain
 the cauchy distribution. The figure below shows a two-dimensional
 representation of the population on the michealwicz function.
 
-.. figure:: _images/population/bitpopcauchy_method.png
+.. figure:: _images/Population/bitpopcauchy_method.png
    :align: center
    :scale: 75 %
 
