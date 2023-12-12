@@ -199,3 +199,5 @@ dfmcontrol/Tests/Benchmark_results/crossover_benchmarksPYTHON.txt
 dfmcontrol/Tests/crossover_benchmarksPYTHON.txt
 .vscode/launch.json
 .vscode/settings.json
+dfmcontrol_C/Tests/Utility/TestPop.exe
+dfmcontrol_C/Tests/Utility/TestPop.txt
