@@ -122,8 +122,44 @@ void uniform_bit_pop(int bitsize, int genes, int individuals,
 void normal_bit_pop(int bitsize, int genes, int individuals,
                     float factor, float bias, int normalised,
                     float loc, float scale, int** result){
-    /*
+    /* 
+    Fill a matrix with bits according to a normal distribution.
+    using the following probability density function:
+
+    .. math::
+        f(x) = \\frac{1}{\\sigma \\sqrt{2 \\pi}} e^{-\\frac{1}{2} (\\frac{x - \\mu}{\\sigma})^2}
+
+    Calculate them using a Box-Muller transform, where two random numbers are generated 
+    according to a uniform distribution and then transformed to a normal distribution with
+    the following formula:
+
+    .. math::
+        z_0 = \\sqrt{-2 \\ln{U_1}} \\cos{(2 \\pi U_2)} \\
+        z_1 = \\sqrt{-2 \\ln{U_1}} \\sin{(2 \\pi U_2)}
+
+    Where :math:`U_1` and :math:`U_2` are random numbers between 0 and 1.
+
+    :param bitsize: The size of the bitstring.
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitstring.
+    :type genes: int
+
+    :param individuals: The number of individuals in the bitstring.
+    :type individuals: int
+
+    :param factor: The factor by which the normal distribution is scaled.
+    :type factor: float
+
+    :param bias: The bias of the normal distribution.
+    :type bias: float
+
+    The factor and bias are used for the conversion to the integer domain according to the following formula:
     
+
+
+    
+
     */
 
 }
