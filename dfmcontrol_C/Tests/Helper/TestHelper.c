@@ -76,9 +76,9 @@ int main(){
 
     // Test binmat2intmat
     
-    int individuals = 20;
-    int genes = 24;
-    int bitsize = 32;
+    int individuals = 4;
+    int genes = 4;
+    int bitsize = 16;
 
     int** valmat = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of integers
     int** result = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of bitarrays
@@ -116,9 +116,10 @@ int main(){
     printf("\nresult (in-between): \n");
     for (int i = 0; i < individuals; i++) {
         for (int j = 0; j < genes; j++) {
-            printf("%d ", result[i]);
+            printf("%d ", result[i][j]);
         }
     }
+    printf("\n");
     
     printMatrix(result, individuals, genes * bitsize);
 

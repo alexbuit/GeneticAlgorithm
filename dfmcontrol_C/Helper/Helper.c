@@ -5,38 +5,75 @@
 
 #include "Helper.h"
 
+// Remove the duplicate function declaration
 void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
                 float factor, float bias, int normalised, float** result){
     /*
-    valarr is the array of bitarrays to be converted to integers (a x b)
-    bitsize is the size of the bitarrays
-    genes is the number of genes in the bitarrays (n = genes / bitsize; n = b / bitsize)
-    individuals is the number of individuals in the bitarrays (m = individuals; m = a)
-    result is the array of integers to be filled with the converted values (m x n)
+    Convert an array of bitarrays to an array of floats
 
-    If normalised is 1, the values will be normalised to the range [0, 1] multiplied by factor and added bias
-    If normalised is 0, the values will be normalised to the range [0, 2^bitsize - 1]
+    :param valarr: The array of binary data to be converted to floats (a x b) (individuals x (bitsize * genes))
+    :type valarr: array of floats (float **)
+
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = length of a row / bitsize; n = a / bitsize)
+    :type genes: int
+
+    :param individuals: the number of individuals in the bitarrays (m = individuals; m = a)
+    :type individuals: int
+    
+    :param result: The array of floats to be filled with the converted values (m x n)
+    :type result: array of ints (float **)
+
+    :param factor: The factor of the uniform distribution.
+    :type factor: float
+
+    :param bias: The bias of the uniform distribution.
+    :type bias: float
+
+    :param normalised: If normalised is 1, the values will be normalised to the range [0, 1] multiplied by factor and added bias
+                       If normalised is 0, the values will be normalised to the range [0, 2^bitsize - 1]
+    :type normalised: int
+
+    :return: void
+    :rtype: void
     */
 
-    // convert the values to integers
-    binmat2intmat(valarr, bitsize, genes, individuals, result);
+    // temp int array to store the values
+    int** temp = (int**)malloc(individuals * sizeof(int*));
 
-    // cast the values to floats
     for (int i = 0; i < individuals; i++){
-        for (int j = 0; j < genes; j++){
-            result[i][j] = (float) result[i][j];
-        }
+        temp[i] = (int*)malloc(genes * sizeof(int));
     }
+
+
+    // convert the values to integers
+    binmat2intmat(valarr, bitsize, genes, individuals, temp);
 
     // normalise the values and apply the factor and bias
     if (normalised == 1){
         for (int i = 0; i < individuals; i++){
             for (int j = 0; j < genes; j++){
-                result[i][j] = result[i][j] / (pow(2, bitsize - 1)) * factor + bias;
+                result[i][j] = (float) temp[i][j] / (pow(2, bitsize - 1)) * factor + bias;
+            }
+        }
+    }
+    else if (normalised == 0)
+    {
+        // cast to floats
+        for (int i = 0; i < individuals; i++){
+            for (int j = 0; j < genes; j++){
+                result[i][j] = (float) temp[i][j];
             }
         }
     }
 
+    // free the temp array
+    for (int i = 0; i < individuals; i++){
+        free(temp[i]);
+    }
+    free(temp);
 }
 
 void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
@@ -45,40 +82,76 @@ void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
     /*
     Convert an array of integers to an array of bitarrays
 
-    valarr is the array of integers to be converted to bitarrays (a)
-    bitsize is the size of the bitarrays
-    genes is the number of genes in the bitarrays (n = genes * bitsize; n = a * bitsize)
-    individuals is the number of individuals in the bitarrays (m = individuals; m = a)
-    result is the array of bitarrays to be filled with the converted values (m x n)
+    :param valarr: The array of integers to be converted to bitarrays (a)
+    :type valarr: array of floats (float **)
 
-    If normalised is 1, the values will be normalised to the range [0, 1] multiplied by factor and added bias
-    If normalised is 0, the values will be normalised to the range [0, 2^bitsize - 1]
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = genes * bitsize; n = a * bitsize)
+    :type genes: int
+
+    :param individuals: the number of individuals in the bitarrays (m = individuals; m = a)
+    :type individuals: int
     
+    :param result: The array of bitarrays to be filled with the converted values (m x n)
+    :type result: array of ints (int **)
 
+    :param factor: The factor of the uniform distribution.
+    :type factor: float
+
+    :param bias: The bias of the uniform distribution.
+    :type bias: float
+
+    :param normalised: If normalised is 1, the values will be normalised to the range [0, 1] multiplied by factor and added bias
+                       If normalised is 0, the values will be normalised to the range [0, 2^bitsize - 1]
+    :type normalised: int
+
+    :return: void
+    :rtype: void
     */
+
+   // create a copy of valarr for integer conversion
+    int **copyvalarr = (int**)malloc(individuals * sizeof(int*));
+
+    for (int i = 0; i < individuals; i++){
+        copyvalarr[i] = (int*)malloc(genes * sizeof(int));
+    }
 
     // normalise the values and apply the factor and bias and cast to integers
     if (normalised == 1){
         for (int i = 0; i < individuals; i++){
             for (int j = 0; j < genes; j++){
-                valarr[i][j] = (int) round((valarr[i][j] - bias) / factor * pow(2, bitsize - 1));
+                copyvalarr[i][j] = (int) round((valarr[i][j] - bias) / factor * pow(2, bitsize - 1));
 
             }
         }
     }
 
-    // convert the values to bitarrays
 
-    intmat2binmat((int**) valarr, bitsize, genes, individuals, result);
+    // convert the values to bitarrays
+    intmat2binmat(copyvalarr, bitsize, genes, individuals, result);
+
+    // free the copyvalarr array
+    for (int i = 0; i < individuals; i++){
+        free(copyvalarr[i]);
+    }
+
+    free(copyvalarr);
 }
 
 void int2bin(int value, int bitsize, int* result){
     /*
     Convert an integer to a bitarray
     
-    valuel is the integer to be converted to a bitarray
-    bitsize is the size of the bitarray
-    result is the bitarray to be filled with the converted values
+    :param value: The integer to be converted to a bitarray
+    :type value: int
+
+    :param bitsize: is the size of the bitarray
+    :type bitsize: int
+
+    :param result: is the bitarray to be filled with the converted values
+    :type result: array of ints (int *)
     */
 
     // first bit is the sign bit
@@ -102,11 +175,19 @@ void intarr2binarr(int* valarr, int bitsize, int genes, int* result){
 
     Convert an array of integers to an array of bitarrays
 
-    valarr is the array of integers to be converted to bitarrays (a)
-    bitsize is the size of the bitarrays
-    genes is the number of genes in the bitarrays (n = genes / bitsize; n = a / bitsize)
-    result is the array of bitarrays to be filled with the converted values (n * bitsize)
+    :param valarr: The array of integers to be converted to bitarrays (a)
+    :type valarr: array of ints (int *)
 
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = genes / bitsize; n = a / bitsize)
+    :type genes: int
+
+    :param result: The array of bitarrays to be filled with the converted values (n * bitsize)
+    :type result: array of ints (int *)
+    
+    :return: void
     */
 
     // convert the values to bitarrays
@@ -122,12 +203,21 @@ void intmat2binmat(int** valmat, int bitsize, int genes, int individuals, int** 
     
     Convert a matrix of integers to a matrix of bitarrays (a x b) (individuals x genes)
 
-    valmat is the matrix of integers to be converted to bitarrays (a x b) (individuals x genes)
-    bitsize is the size of the bitarrays
-    genes is the number of genes in the bitarrays (n = genes * bitsize; n = b * bitsize)
-    individuals is the number of individuals in the bitarrays (m = individuals; m = a)
-    result is the matrix of bitarrays to be filled with the converted values (m x n)
+    :param valmat: The matrix of integers to be converted to bitarrays (a x b) (individuals x genes)
+    :type valmat: array of ints (int **)
     
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+    
+    :param genes: The number of genes in the bitarrays (n = genes * bitsize; n = b * bitsize)
+    :type genes: int
+
+    :param individuals: The number of individuals in the bitarrays (m = individuals; m = a)
+    :type individuals: int
+
+    :param result: The matrix of bitarrays to be filled with the converted values (m x n)
+    :type result: array of ints (int **)
+
     */
 
     // convert the values to bitarrays
@@ -136,7 +226,7 @@ void intmat2binmat(int** valmat, int bitsize, int genes, int individuals, int** 
     }
 }
 
-void bin2int(int* value, int bitsize, int* result){
+int bin2int(int* value, int bitsize){
 
     // check if the dimensions are correct
     // if (sizeof(result) != bitsize){
@@ -148,6 +238,7 @@ void bin2int(int* value, int bitsize, int* result){
 
     int sign = 1;
     int res = 0;
+    
 
     if (value[0] == 1){
         sign = -1;
@@ -161,7 +252,7 @@ void bin2int(int* value, int bitsize, int* result){
     }
     res = res * sign;
 
-    result = res;
+    return res;
 }
 
 
@@ -178,7 +269,7 @@ void binarr2intarr(int* value, int bitsize, int genes, int* result){
 
     // convert the values to integers
     for(int i = 0; i < genes; i++){
-        bin2int(&value[i * bitsize], bitsize, &result[i]);
+        result[i] = bin2int(&value[i * bitsize], bitsize);
     }
 }
 

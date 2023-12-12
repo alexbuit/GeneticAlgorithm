@@ -8,12 +8,12 @@
 
 int main(){
 
-    int individuals = 40;
-    int genes = 50;
+    int individuals = 16;
+    int genes = 4;
     int bitsize = 16; // large difference for high bit sizes >= 32 (error rate 380/2000)
 
     int factor = 10;
-    int bias = 5;
+    int bias = 1;
     int normalised = 1;
 
 
@@ -32,7 +32,7 @@ int main(){
     for(int i=0; i<individuals; i++){
         for(int j=0; j<genes; j++){
             sign = (rand() % 2 == 0) ? 1 : -1;
-            valmat[i][j] = rand() % 10 * sign; // random integer between -2^bitsize-1 and 2^bitsize - 1
+            valmat[i][j] = rand() % 9 * sign; // random integer between -2^bitsize-1 and 2^bitsize - 1
             copyvalmat[i][j] = valmat[i][j];
         }
     }
