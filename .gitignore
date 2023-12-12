@@ -201,3 +201,8 @@ dfmcontrol/Tests/crossover_benchmarksPYTHON.txt
 .vscode/settings.json
 dfmcontrol_C/Tests/Utility/TestPop.exe
 dfmcontrol_C/Tests/Utility/TestPop.txt
+dfmcontrol_C/Tests/Helper/conversion_benchmarks.txt
+dfmcontrol_C/Tests/Helper/Benchmark_conversion.exe
+dfmcontrol/Tests/Helper/benchmark_conversion.txt
+/dfmcontrol/Tests/Helper/conversion_benchmarks_C.txt
+dfmcontrol_C/Tests/Helper/conversion_benchmarks_C.txt

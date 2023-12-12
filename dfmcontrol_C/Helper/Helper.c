@@ -228,11 +228,20 @@ void intmat2binmat(int** valmat, int bitsize, int genes, int individuals, int** 
 
 int bin2int(int* value, int bitsize){
 
-    // check if the dimensions are correct
-    // if (sizeof(result) != bitsize){
-    //     printf("Error: result and bitsize have different dimensions\n");
-    //     exit(1);
-    // }
+    /*
+
+    Convert a bitarray to an integer
+
+    :param value: The bitarray to be converted to an integer
+    :type value: array of ints (int *)
+
+    :param bitsize: The size of the bitarray
+    :type bitsize: int
+
+    :return: The integer value of the bitarray
+    :rtype: int
+
+    */
 
     // convert the bitarray to an integer
 
@@ -258,13 +267,23 @@ int bin2int(int* value, int bitsize){
 
 void binarr2intarr(int* value, int bitsize, int genes, int* result){
     
-    // check if the dimensions are correct
-    // if (sizeof(result) / sizeof(result[0]) != (sizeof(value) / sizeof(value[0])) / bitsize){
-    //     printf("Error: result and size have different dimensions\n");
-    //     printf("sizeof(result): %d\n", sizeof(result) / sizeof(result[0]));
-    //     printf("sizeof(value): %d\n", sizeof(value) / sizeof(value[0]) / bitsize);
-    //     exit(1);
-    // }
+    /*
+    Convert an array of bitarrays to an array of integers
+
+    :param valarr: The array of bitarrays to be converted to integers (a)
+    :type valarr: array of ints (int *)
+
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = genes / bitsize; n = a / bitsize)
+    :type genes: int
+
+    :param result: The array of integers to be filled with the converted values (n)
+    :type result: array of ints (int *)
+
+    :return: void
+    */
 
 
     // convert the values to integers
@@ -276,14 +295,22 @@ void binarr2intarr(int* value, int bitsize, int genes, int* result){
 void binmat2intmat(int** valmat, int bitsize, int genes, int individuals, int** result){
 
     /*
-    Convert a matrix of bitarrays to a matrix of integers
-    
-    valmat is the matrix of bitarrays to be converted to integers (a x b) (individuals x (bitsize * genes))
-    bitsize is the size of the bitarrays
-    genes is the number of genes in the bitarrays (n = genes / bitsize; n = b / bitsize)
-    individuals is the number of individuals in the bitarrays (m = individuals; m = a)
-    result is the matrix of integers to be filled with the converted values (m x n)
-    
+    Convert a matrix of bitarrays to a matrix of integers (a x b) (individuals x genes)
+
+    :param valmat: The matrix of bitarrays to be converted to integers (a x b) (individuals x genes)
+    :type valmat: array of ints (int **)
+
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = genes * bitsize; n = b * bitsize)
+    :type genes: int
+
+    :param individuals: The number of individuals in the bitarrays (m = individuals; m = a)
+    :type individuals: int
+
+    :param result: The matrix of integers to be filled with the converted values (m x n)
+    :type result: array of ints (int **)
     */
 
     for (int i = 0; i < individuals; i++){
@@ -293,6 +320,24 @@ void binmat2intmat(int** valmat, int bitsize, int genes, int individuals, int** 
 }
 
 void printMatrix(int** matrix, int rows, int cols) {
+
+    /*
+
+    Print a matrix of integers
+
+    :param matrix: The matrix to be printed
+    :type matrix: array of ints (int **)
+
+    :param rows: The number of rows in the matrix
+    :type rows: int
+
+    :param cols: The number of columns in the matrix
+    :type cols: int
+
+    :return: void
+
+    */
+
     printf("cols: %d\n", cols);
     printf("rows: %d\n", rows);
 
@@ -314,6 +359,24 @@ void printMatrix(int** matrix, int rows, int cols) {
 }
 
 void printfMatrix(float** matrix, int rows, int cols) {
+
+    /*
+    Print a matrix of floats
+
+    :param matrix: The matrix to be printed
+    :type matrix: array of floats (float **)
+
+    :param rows: The number of rows in the matrix
+    :type rows: int
+
+    :param cols: The number of columns in the matrix
+    :type cols: int
+
+    :return: void
+
+    */
+   
+
     printf("cols: %d\n", cols);
     printf("rows: %d\n", rows);
 
