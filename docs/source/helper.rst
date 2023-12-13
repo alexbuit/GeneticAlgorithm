@@ -467,7 +467,7 @@ Helper functions in C:
     Calculate the cauchy (pdf) of a float using the following equation:
 
     .. math::
-        f(x) = \frac{1}{\pi} \cdot \left[ \dfrac{\sigma}{\left( \frac{x - \mu}\right)^2 + sigma^2} \right]}
+        f(x) = \frac{1}{\pi} \cdot [ \dfrac{\sigma}{( \frac{x - \mu})^2 + sigma^2} ]}
 
     :param x: The float to be converted to cauchy values
     :type x: float
