@@ -4,6 +4,8 @@
 #include "math.h"
 
 #include "Helper.h"
+#undef PI
+#define PI   3.14159265358979323846264338327950288419716939937510f
 
 void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
                 float factor, float bias, int normalised, float** result){
@@ -357,7 +359,7 @@ void printMatrix(int** matrix, int rows, int cols) {
     printf("]\n");
 }
 
-void printfMatrix(float** matrix, int rows, int cols) {
+void printfMatrix(float** matrix, int rows, int cols, int precision) {
 
     /*
     Print a matrix of floats
@@ -371,6 +373,9 @@ void printfMatrix(float** matrix, int rows, int cols) {
     :param cols: The number of columns in the matrix
     :type cols: int
 
+    :param precision: The number of decimals to be printed
+    :type precision: int
+
     :return: void
 
     */
@@ -383,7 +388,7 @@ void printfMatrix(float** matrix, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         printf("[");
         for (int j = 0; j < cols; j++) {
-            printf("%.4f", matrix[i][j]);
+            printf("%.*f", precision, matrix[i][j]);
             if (j < cols - 1) {
                 printf(", ");
             }
@@ -478,4 +483,89 @@ void uniform_random(int m, int n,int lower, int upper,int** result){
     }
 
 
+}
+
+float gaussian(float x, float mu, float sigma){
+    /*
+    Calculate the gaussian of x
+
+    x is the input
+    mu is the mean
+    sigma is the standard deviation
+    */
+
+    float result = (1 / (sigma * sqrtf(2 * PI))) * expf(-powf(x - mu, 2) / (2 * powf(sigma, 2)));
+
+    return result;
+}
+
+void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
+
+    /*
+    Roulette wheel selection of an index based on probabilities
+
+    :param probabilities: The probabilities of the indices
+    :type probabilities: array of floats (float *)
+
+    :param size: The size of the probabilities array
+    :type size: int
+
+    :param ressize: The size of the result array (amount of indices to be selected)
+    :type ressize: int
+
+    :param result: The index selected
+    :type result: array of ints (int *)
+
+    */
+
+    // create a copy of the probabilities array
+    double* copy = (double*)malloc(size * sizeof(double));
+    int* indices = (int*)malloc(size * sizeof(int));
+
+    for (int i = 0; i < size; i++){
+        copy[i] = probabilities[i];
+        indices[i] = i;
+    }
+
+    // sort the copy array in ascending order and keep track of the indices
+    for (int i = 0; i < size; i++){ // expensive sorting algorithm
+        for (int j = i + 1; j > size; j++){
+            if (copy[i] < copy[j]){
+                float temp = copy[i];
+                copy[i] = copy[j];
+                copy[j] = temp;
+
+                int temp2 = indices[i];
+                indices[i] = indices[j];
+                indices[j] = temp2;
+            }
+        }
+    }
+
+
+    // calculate the cumulative sum of the probabilities
+    double* cumsum = (double*)malloc(size * sizeof(double));
+    cumsum[0] = copy[0];
+
+    for (int i = 1; i < size; i++){
+        cumsum[i] = cumsum[i - 1] + copy[i];
+    }
+
+    // generate random numbers and select the indices
+
+    for (int i = 0; i < ressize; i++){
+        double randnum = (double)rand() / RAND_MAX;
+
+        for (int j = 0; j < size; j++){
+            if (randnum < cumsum[j]){
+                result[i] = indices[j];
+                break;
+            }
+        }
+    }
+
+    // free the arrays
+    free(copy);
+    free(indices);
+    free(cumsum);
 }
