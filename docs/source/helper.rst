@@ -91,6 +91,12 @@ functions are named as in the python library. The sigmoid functions operate
 on arrays and are used in the same way as the conversion functions where it
 is expected that the result-array is correctly sized.
 
+Furthermore, it is possible to print matrices of integers and floats in a similar manner to numpy
+using the functions :func:`printMatrix` and :func:`printMatrixf`.
+
+And routines for performing roulette wheel selection on an array of probabilities using the function :func:`roulette_wheel`.
+
+
 Known errors
 ************
 
@@ -318,35 +324,68 @@ Helper functions in C:
                     values (m x n) (individuals x genes * bitsize)
     :type result: array of ints (int **)
 
+.. c:function:: void printMatrix(int** matrix, int rows, int cols)
+
+    Print a matrix of integers
+
+    :param matrix: The matrix to be printed
+    :type matrix: array of ints (int **)
+
+    :param rows: The number of rows in the matrix
+    :type rows: int
+
+    :param cols: The number of columns in the matrix
+    :type cols: int
+
+    :return: void
+
+.. c:function:: void printMatrixf(float** matrix, int rows, int cols, int precision)
+
+    Print a matrix of floats
+
+    :param matrix: The matrix to be printed
+    :type matrix: array of floats (float **)
+
+    :param rows: The number of rows in the matrix
+    :type rows: int
+
+    :param cols: The number of columns in the matrix
+    :type cols: int
+
+    :param precision: The precision of the floats to be printed
+    :type precision: int
+
+    :return: void
+
 .. c:function:: void sigmoid(float *value, float *result, int size)
 
-        Calculate the sigmoid of an array of floats
+    Calculate the sigmoid of an array of floats
 
-        :param value: The array of floats to be converted to sigmoid values (a)
-        :type value: array of floats (float *)
+    :param value: The array of floats to be converted to sigmoid values (a)
+    :type value: array of floats (float *)
 
-        :param size: The size of the array
-        :type size: int
+    :param size: The size of the array
+    :type size: int
 
-        :param result: The array of floats to be filled with the converted values (a)
-        :type result: array of floats (float *)
+    :param result: The array of floats to be filled with the converted values (a)
+    :type result: array of floats (float *)
 
-        :return: void
+    :return: void
 
 .. c:function:: void sigmoid_derivative(float *value, float *result, int size)
 
-            Calculate the sigmoid derivative of an array of floats
+    Calculate the sigmoid derivative of an array of floats
 
-            :param value: The array of floats to be converted to sigmoid derivative values (a)
-            :type value: array of floats (float *)
+    :param value: The array of floats to be converted to sigmoid derivative values (a)
+    :type value: array of floats (float *)
 
-            :param size: The size of the array
-            :type size: int
+    :param size: The size of the array
+    :type size: int
 
-            :param result: The array of floats to be filled with the converted values (a)
-            :type result: array of floats (float *)
+    :param result: The array of floats to be filled with the converted values (a)
+    :type result: array of floats (float *)
 
-            :return: void
+    :return: void
 
 .. c:function:: void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,float* result, int size)
 
@@ -385,5 +424,75 @@ Helper functions in C:
     :return: void
 
 
+.. c:function:: void uniform_random(int m, int n,int lower, int upper,int** result)
+    
+    Create a matrix filled with uniformly distributed integers.
 
+    :param m: Amount of rows
+    :type m: int
+    :param n: Amount of cols
+    :type n: int
 
+    :param lower: Lower bound of the distribution
+    :type lower: int
+    :param upper: Upper bound of the distribution
+    :type upper: int
+
+    :param result: Result matrix to which the distibutution is written to
+    :type result: **int (m x n)
+
+    :return: void
+
+.. c:function:: float gaussian(float x, float mu, float sigma)
+    
+    Calculate the gaussian (pdf) of a float using the following equation:
+
+    .. math::
+        f(x) = \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( - \frac{(x - \mu)^2}{2 \sigma^2} \right)
+
+    :param x: The float to be converted to gaussian values
+    :type x: float
+
+    :param mu: The mu parameter of the gaussian function
+    :type mu: float
+
+    :param sigma: The sigma parameter of the gaussian function
+    :type sigma: float
+
+    :return: The gaussian value of the float
+    :rtype: float
+
+.. c:function:: float cauchy(float x, float mu, float sigma)
+    
+    Calculate the cauchy (pdf) of a float using the following equation:
+
+    .. math::
+        f(x) = \frac{1}{\pi} \cdot \left[ \dfrac{\sigma}{\left( \frac{x - \mu}\right)^2 + sigma^2} \right]}
+
+    :param x: The float to be converted to cauchy values
+    :type x: float
+
+    :param mu: The mu parameter of the cauchy function
+    :type mu: float
+
+    :param sigma: The sigma parameter of the cauchy function
+    :type sigma: float
+
+    :return: The cauchy value of the float
+    :rtype: float
+
+.. c:function:: void roulette_wheel(double* probabilities, int size, int ressize ,int* result)
+    
+    Roulette wheel selection of an index based on probabilities
+
+    :param probabilities: The probabilities of the indices
+    :type probabilities: array of floats (float *)
+
+    :param size: The size of the probabilities array
+    :type size: int
+
+    :param ressize: The size of the result array (amount of indices to be selected)
+    :type ressize: int
+
+    :param result: The index selected
+    :type result: array of ints (int *)
