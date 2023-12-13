@@ -211,3 +211,4 @@ dfmcontrol_C/Tests/Utility/TestBitPop.txt
 /dfmcontrol/.idea/
 dfmcontrol_C/Tests/Utility/TestBitNormalPopBoxMuller.txt
 dfmcontrol_C/Tests/Utility/TestBitNormalPop.txt
+dfmcontrol_C/Tests/Utility/TestBitCauchyPop.txt

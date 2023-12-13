@@ -365,5 +365,74 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
     /*
     
     */
+// Determine the steps between the values in the normal distribution
+    float step = (2 * factor) / (genes *individuals);
 
+    // Determine the lower and upper bounds of the normal distribution
+    float lower = scale * (-factor) + loc;
+    float upper = scale * factor + loc;
+
+    // Determine the number of values in the normal distribution
+    int numvalues = genes * individuals;
+
+    // Fill the normal distribution with values using the formula
+    double* normal_dist = malloc(sizeof(double) * numvalues);
+
+    double* range = malloc(sizeof(double) * numvalues);
+    for(int i = 0; i < numvalues; i++){
+        range[i] = -factor + (i * step);
+    }
+
+    float sum = 0;
+    for(int i = 0; i < numvalues; i++){
+        normal_dist[i] = cauchy(range[i], loc, scale);
+        sum += normal_dist[i];
+    } 
+
+    // normalise the normal distribution
+    for(int i = 0; i < numvalues; i++){
+        normal_dist[i] = normal_dist[i] / sum;
+    }
+
+    // use the probability density function to compute random numbers
+    // according to the normal distribution
+
+
+
+    // printf("probability density function: \n");
+    // for(int i = 0; i < numvalues; i++){
+    //     printf("p: %f; val: %f; idx: %d \n", normal_dist[i], range[i], i);
+    // }
+
+    // printf("\n");
+
+    float** normal_distmat = malloc(sizeof(float*) * numvalues);
+    int* indices = malloc(sizeof(int) * numvalues);
+    roulette_wheel(normal_dist, numvalues, numvalues, indices);
+
+    // printf("indices: \n");
+    // for(int i = 0; i < numvalues; i++){
+    //     printf("idx: %d ;p: %f ; val: %f; i: %d\n", indices[i], normal_dist[indices[i]], range[indices[i]], i);
+    // }
+
+    for(int i = 0; i < individuals; i++){  
+        normal_distmat[i] = malloc(sizeof(float) * genes);    
+        for(int j = 0; j < genes; j++){
+            normal_distmat[i][j] = range[indices[(i * genes) + j]];
+        }
+    }
+
+
+    free(normal_dist);
+    free(range);
+
+    // convert to binary matrix
+    int2ndbit(normal_distmat, bitsize, genes, individuals, factor, bias, 1, result);
+
+    // free the memory
+    for(int i=0; i<individuals; i++){
+        free(normal_distmat[i]);
+    }
+
+    free(normal_distmat);
 }

@@ -14,7 +14,8 @@ int main(){
     float scale = 2.0f;
     float factor = 10.0f;
     float bias = 1.0f;
-    Testnormalpop(32, 64, 64, loc, scale, factor, bias, 1, 1);
+    Testnormalpop(16, 16, 16, loc, scale, factor, bias, 1, 1);
+    Testcauchypop(16, 16, 16, loc, scale, factor, bias, 1, 1);
     // TestnormalpopBM(32, 64, 16, 5.0f, 1.0f, 10.0f, 0.0f, 1, 1);
 }
 
@@ -166,6 +167,46 @@ void Testnormalpop(int bitsize, int genes, int individuals, float loc, float sca
 
     if (writeresult == 1){
         char filename[] = "TestBitNormalPop.txt";
+        write2file(bitsize, genes, individuals, factor, bias, normalised ,filename, result, numresult);
+    }   
+
+    for (int i = 0; i < individuals; i++){
+    free(numresult[i]);
+    free(result[i]);
+    
+    }
+    
+    free(numresult);
+    free(result);
+
+}
+
+void Testcauchypop(int bitsize, int genes, int individuals, float loc, float scale,
+                     float factor, float bias, int normalised, int writeresult){
+
+    /*
+
+    */
+    int** result = (int**)malloc(individuals * sizeof(int*));
+    for (int i = 0; i < individuals; i++){
+        result[i] = (int*)malloc(genes * bitsize * sizeof(int));
+    }
+
+    float** numresult = malloc(individuals * sizeof(float*));
+
+    for (int i = 0; i < individuals; i++){
+        numresult[i] = malloc(genes * sizeof(float));
+    }
+
+    cauchy_bit_pop(bitsize, genes, individuals, factor, bias, normalised, loc, scale,result);
+
+    ndbit2int(result, bitsize, genes, individuals, factor, bias,(int) 1, numresult);
+
+    // printMatrix(result, individuals, genes * bitsize);
+    // printfMatrix(numresult, individuals, genes, 8);
+
+    if (writeresult == 1){
+        char filename[] = "TestBitCauchyPop.txt";
         write2file(bitsize, genes, individuals, factor, bias, normalised ,filename, result, numresult);
     }   
 
