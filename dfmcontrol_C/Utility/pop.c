@@ -364,6 +364,41 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
                     float loc, float scale, int** result){
     /*
     
+    Produce a normal distributed set of values using the Cauchy distribution:
+
+    .. math::
+        f(x) = \frac{1}{\pi \gamma [1 + (\frac{x - x_0}{\gamma})^2]}
+
+    Where x is linearly spaced between (-factor and factor) + bias.
+
+    :param bitsize: The size of the bitstring.
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitstring.
+    :type genes: int
+
+    :param individuals: The number of individuals in the bitstring.
+    :type individuals: int
+
+    :param factor: The factor by which the normal distribution is scaled.
+    :type factor: float
+
+    :param bias: The bias of the normal distribution.
+    :type bias: float
+
+    :param normalised: Whether the normal distribution is normalised.
+    :type normalised: int
+
+    :param loc: The location of the peak of the distribution.
+    :type loc: float
+
+    :param scale: The width of the distribution.
+    :type scale: float   
+
+    :param result: The matrix to be filled with bits according to a normal distribution.
+                   shape = (individuals, genes * bitsize)
+    :type result: int** 
+
     */
 // Determine the steps between the values in the normal distribution
     float step = (2 * factor) / (genes *individuals);
