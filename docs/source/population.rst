@@ -258,9 +258,9 @@ C methods for population initialisation
                   shape = (individuals, genes * bitsize)
    :type result: int**
 
-    References
-    ----------
-    .. [1] https://stackoverflow.com/questions/11641629/generating-a-uniform-distribution-of-integers-in-c Lior Kogan (2012)
+   References
+   ----------
+   .. [1] https://stackoverflow.com/questions/11641629/generating-a-uniform-distribution-of-integers-in-c Lior Kogan (2012)
 
 
 .. c:function:: void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals, float factor, float bias, int normalised, float loc, float scale, int** result)
@@ -269,7 +269,7 @@ C methods for population initialisation
    using the following probability density function:
 
    .. math::
-      f(x) = \\frac{1}{\\sigma \\sqrt{2 \\pi}} e^{-\\frac{1}{2} (\\frac{x - \\mu}{\\sigma})^2}
+      f(x) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} (\frac{x - \mu}{\sigma})^2}
 
    Calculate them using a Box-Muller transform, where two random numbers are generated 
    according to a uniform distribution and then transformed to a normal distribution with
