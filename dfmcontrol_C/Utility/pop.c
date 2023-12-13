@@ -1,9 +1,11 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
+#define PI   3.14159f
 
 #include "../Helper/Helper.c"
 #include "pop.h"
+
 
 void bitpop(int bitsize, int genes, int individuals, int** result){
 
@@ -134,8 +136,8 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
     the following formula:
 
     .. math::
-        z_0 = \\sqrt{-2 \\ln{U_1}} \\cos{(2 \\pi U_2)} \\
-        z_1 = \\sqrt{-2 \\ln{U_1}} \\sin{(2 \\pi U_2)}
+        z_0 = \sqrt{-2 \ln U_1 } \cos{(2 \pi U_2)} \\
+        z_1 = \sqrt{-2 \ln U_1 } \sin{(2 \pi U_2)}
 
     Where :math:`U_1` and :math:`U_2` are random numbers between 0 and 1.
 
@@ -162,6 +164,70 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
 
     */
 
+    int numbers_inuni = genes;
+
+    // fill temp with uniform numbers
+    // if the amount of genes is not div by 2 add one
+    if(genes % 2 !=0 ){
+        numbers_inuni ++;
+    }
+
+    int** temp = malloc(sizeof(int*) * individuals );
+
+    for(int i=0; i<individuals; i++){
+        temp[i] = malloc(sizeof(int) * numbers_inuni);
+    }
+
+
+
+    int lower_uniform = 0;
+    int upper_uniform = pow(2, bitsize);
+
+    uniform_random(individuals, numbers_inuni, lower_uniform, upper_uniform, temp);
+
+    // convert to floats between 0 and 1
+
+    float** normal_dist = malloc(sizeof(float*) * numbers_inuni );
+    for(int i=0; i<individuals; i++){
+        normal_dist[i] = malloc(sizeof(float) * numbers_inuni);
+        for(int j =0; j< numbers_inuni; j++){
+            normal_dist[i][j] = (float) (temp[i][j] / pow(2, bitsize));
+        }
+    }
+
+    for(int i=0; i<individuals; i++){
+        free(temp[i]);
+    }
+
+    free(temp);
+
+    float Z0;
+    float Z1;
+
+    for(int i = 0; i<individuals; i++){
+        for(int j = 0; j<(int) roundf(numbers_inuni/2); j+=2){
+            
+            Z0 = (sqrtf(-2 * logbf(normal_dist[i][j])) * cosf(2 * PI * normal_dist[i][j + 1]) * scale) + loc;
+            Z1 = (sqrtf(-2 * logbf(normal_dist[i][j])) * sinf(2 * PI * normal_dist[i][j + 1]) * scale) + loc;
+
+            normal_dist[i][j] = Z0;
+            normal_dist[i][j + 1] = Z1;
+            printf("%f\n", normal_dist[i][j]);
+            printf("%f\n", normal_dist[i][j + 1]);
+        }
+    }
+
+    // Convert to binary matrix
+    int2ndbit(normal_dist, bitsize, genes, individuals, factor, bias, 1, result);
+
+
+    
+    // free the memory
+    for(int i=0; i<individuals; i++){
+        free(normal_dist[i]);
+    }
+
+    free(normal_dist);
 }
 void cauchy_bit_pop(int bitsize, int genes, int individuals,
                     float factor, float bias, int normalised,

@@ -10,6 +10,7 @@
 int main(){
     Testbitpop(32, 16, 16, 1);
     Testuniformpop(32, 16, 16, 10.0f, 1.0f, 1, 1);
+    Testnormalpop(32, 16, 16, 5.0f, 1.0f, 10.0f, 0.0f, 1, 1);
 }
 
 void Testbitpop(int bitsize, int genes, int individuals, int writeresult){
@@ -33,36 +34,8 @@ void Testbitpop(int bitsize, int genes, int individuals, int writeresult){
     printfMatrix(numresult, individuals, genes);
 
     if (writeresult == 1){
-        // Write result to file
-        FILE* fp;
-        fp = fopen("TestBitPop.txt", "w");
-        fprintf(fp, "Binarystring\n");
-        for (int i = 0; i < individuals; i++) {
-            fprintf(fp, "");
-            for (int j = 0; j < genes * bitsize; j++) {
-                fprintf(fp, "%d", result[i][j]);
-            }
-            fprintf(fp, "\n");
-        }
-        fprintf(fp, "\n");
-
-        // print numerical values
-        fprintf(fp, "inidviduals %d genes %d bitsize %d \n", individuals, genes, bitsize);
-        fprintf(fp, "x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15\n");
-
-        for (int i = 0; i < individuals; i++) {
-            for (int j = 0; j < genes; j++) {
-                fprintf(fp, "%.4f", numresult[i][j]);
-                if (j < genes - 1) {
-                    fprintf(fp, ",");
-                }
-            }
-            fprintf(fp, "\n");
-        }
-
-        fprintf(fp, "\n");
-
-        fclose(fp);
+        const char filename[] = "TestBitPop.txt";
+        write2file(bitsize, genes, individuals, filename, result, numresult);
     }   
 
 
@@ -101,9 +74,71 @@ void Testuniformpop(int bitsize, int genes, int individuals,
     printfMatrix(numresult, individuals, genes);
 
     if (writeresult == 1){
-        // Write result to file
+        const char filename[] = "Testbituniformpop.txt";
+        write2file(bitsize, genes, individuals, filename, result, numresult);
+    }   
+
+
+
+    for (int i = 0; i < individuals; i++){
+        free(numresult[i]);
+        free(result[i]);
+        
+    }
+    
+    free(numresult);
+    free(result);
+
+}
+
+void Testnormalpop(int bitsize, int genes, int individuals, float loc, float scale,
+                     float factor, float bias, int normalised, int writeresult){
+
+    /*
+
+    */
+    int** result = (int**)malloc(individuals * sizeof(int*));
+    for (int i = 0; i < individuals; i++){
+        result[i] = (int*)malloc(genes * bitsize * sizeof(int));
+    }
+
+    float** numresult = malloc(individuals * sizeof(float*));
+
+    for (int i = 0; i < individuals; i++){
+        numresult[i] = malloc(genes * sizeof(float));
+    }
+
+    normal_bit_pop(bitsize, genes, individuals, factor, bias, normalised, loc, scale,result);
+
+    ndbit2int(result, bitsize, genes, individuals, factor, bias,(int) 1, numresult);
+
+    printMatrix(result, individuals, genes * bitsize);
+    printfMatrix(numresult, individuals, genes);
+
+    if (writeresult == 1){
+        const char filename[] = "TestBitNormalPop.txt";
+        write2file(bitsize, genes, individuals, filename, result, numresult);
+    }   
+
+    for (int i = 0; i < individuals; i++){
+    free(numresult[i]);
+    free(result[i]);
+    
+    }
+    
+    free(numresult);
+    free(result);
+
+}
+
+void write2file(int bitsize, int genes, int individuals, char* filename, int** result, float** numresult){
+
+    /*
+
+    */
+           // Write result to file
         FILE* fp;
-        fp = fopen("TestBitUniformPop.txt", "w");
+        fp = fopen(filename, "w");
         fprintf(fp, "Binarystring\n");
         for (int i = 0; i < individuals; i++) {
             fprintf(fp, "");
@@ -115,7 +150,7 @@ void Testuniformpop(int bitsize, int genes, int individuals,
         fprintf(fp, "\n");
 
         // print numerical values
-        fprintf(fp, "inidviduals %d genes %d bitsize %d factor %.4f bias %.4f normalised %d\n", individuals, genes, bitsize, factor, bias, normalised);
+        fprintf(fp, "inidviduals %d genes %d bitsize %d \n", individuals, genes, bitsize);
         fprintf(fp, "x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15\n");
 
         for (int i = 0; i < individuals; i++) {
@@ -131,17 +166,4 @@ void Testuniformpop(int bitsize, int genes, int individuals,
         fprintf(fp, "\n");
 
         fclose(fp);
-    }   
-
-
-
-    for (int i = 0; i < individuals; i++){
-        free(numresult[i]);
-        free(result[i]);
-        
-    }
-    
-    free(numresult);
-    free(result);
-
 }

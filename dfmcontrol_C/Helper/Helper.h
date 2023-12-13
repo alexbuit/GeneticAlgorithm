@@ -16,5 +16,6 @@ void printfMatrix(float** matrix, int rows, int cols);
 void sigmoid(float* x, float* result, int size);
 void sigmoid_derivative(float* x, float* result, int size);
 void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,float* result, int size);
+void uniform_random(int m, int n,int lower, int upper, int** result);
 
 #endif

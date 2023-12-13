@@ -5,7 +5,6 @@
 
 #include "Helper.h"
 
-// Remove the duplicate function declaration
 void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
                 float factor, float bias, int normalised, float** result){
     /*
@@ -435,4 +434,48 @@ void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,f
     for (int i = 0; i < size; i++){
         result[i] = a + (b - a) / (1 + Q * pow(exp(-c * (x[i] - d)), (1/nu)));
     }
+}
+
+void uniform_random(int m, int n,int lower, int upper,int** result){
+    /*
+    Create a matrix filled with uniformly distributed integers.
+
+    :param m: Amount of rows
+    :type m: int
+    :param n: Amount of cols
+    :type n: int
+
+    :param lower: Lower bound of the distribution
+    :type lower: int
+    :param upper: Upper bound of the distribution
+    :type upper: int
+
+    :param result: Result matrix to which the distibutution is written to
+    :type result: **int (m x n)
+
+    :return: void
+    */
+
+    // the range in which the numbers can be generated
+    unsigned int nRange = (unsigned int)(upper - lower);
+    // The amount of bits generated for a number
+    unsigned int nRangeBits = (unsigned int) ceil(log2((double) (nRange)));
+
+    unsigned int nRand; // random number
+
+
+    // for the matrix write uniformly distributed numbers
+    for(int i=0; i<m; i++){
+        for(int j=0; j<n; j++){
+            do{
+                nRand = 0;
+                for(int k=0; k<nRangeBits; k++){
+                    nRand = (nRand << 1) | (rand() & 1); // lshift and rand or 1
+                }
+            } while(nRand >= nRange);
+            result[i][j] = (int) (nRand + lower);
+        }
+    }
+
+
 }
