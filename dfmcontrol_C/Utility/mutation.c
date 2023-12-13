@@ -4,7 +4,21 @@
 
 #include "mutation.h"
 
-void mutate(int *bit, int size, float mutate_coeff_rate){
+void mutate(int *bit, int size, int mutate_coeff_rate){
+
+    /*
+    
+    This function mutates a bitarray by flipping a random bit.
+
+    :param bit: bitarray to mutate
+    :type bit: int*
+
+    :param size: size of the bitarray
+    :type size: int
+
+    :param mutate_coeff_rate: amount of mutations over the bitarray
+    :type mutate_coeff_rate: int
+    */
 
     // mutate_coeff_rate is the amount of mutations over the bit;
     // check if mutate_coeff_rate is < size

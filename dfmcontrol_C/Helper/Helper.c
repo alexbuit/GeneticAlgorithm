@@ -499,6 +499,20 @@ float gaussian(float x, float mu, float sigma){
     return result;
 }
 
+float cauchy(float x, float mu, float sigma){
+    /*
+    Calculate the cauchy of x
+
+    x is the input
+    mu is the mean
+    sigma is the standard deviation
+    */
+
+    float result = (1 / PI) * (sigma / powf(x - mu, 2) + powf(sigma, 2));
+
+    return result;
+}
+
 void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
 
     /*

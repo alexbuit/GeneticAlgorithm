@@ -1,1 +1,1 @@
-void mutate(int *bit, int size, float mutate_coeff_rate);
+void mutate(int *bit, int size, int mutate_coeff_rate);
