@@ -177,7 +177,19 @@ representation of the population on the michealwicz function.
 
 Differences between Python and C methods
 ****************************************
+The main difference between the Python and C methods is the addition of the :function:`normal_bit_pop_boxmuller`
+method. This method is used to generate normally distributed values for the population using the Box-Muller method.
 
+This method can be generalised in the following two equations:
+
+.. math::
+
+   z_0 = \sqrt{-2 \ln{U_1}} \cos{(2 \pi U_2)} \\
+   z_1 = \sqrt{-2 \ln{U_1}} \sin{(2 \pi U_2)}
+
+Where :math:`z_0` and :math:`z_1` are the normally distributed values, :math:`U_1` and :math:`U_2` are uniformly distributed values between 0 and 1.
+
+The other function uses the gaussian pdf in a similar fashion to the python method. 
 
 Python methods for population initialisation
 ********************************************
@@ -193,3 +205,193 @@ methods are used to initialise the population of the genetic algorithm.
 C methods for population initialisation
 ***************************************
 
+.. c:function:: void bitpop(int bitsize, int genes, int individuals, int** result)
+
+   Fill a matrix with random bits.
+
+   :param bitsize: The size of the integer in binary.
+   :type bitsize: int
+
+   :param genes: The number of genes in an individual.
+   :type genes: int
+
+   :param individuals: The number of individuals in the population.
+   :type individuals: int
+
+   :param result: The matrix to be filled with random bits.
+                  shape = (individuals, genes * bitsize)
+   :type result: int**
+
+.. c:function:: void uniform_bit_pop(int bitsize, int genes, int individuals, float factor, float bias, int normalised, int** result)
+
+   Fill a matrix with bits according to a uniform distribution.
+
+   :param bitsize: The size of the bitstring.
+   :type bitsize: int
+
+   :param genes: The number of genes in the bitstring.
+   :type genes: int
+
+   :param individuals: The number of individuals in the bitstring.
+   :type individuals: int
+
+   :param factor: The factor by which the uniform distribution is scaled.
+   :type factor: float
+
+   :param bias: The bias of the uniform distribution.
+   :type bias: float
+
+   The factor and bias are used to calculate the upper and lower bounds of the uniform distribution 
+   according to the following formula: [1]
+
+   .. math::
+      upper = round((bias + factor) * 2^{bitsize}) \\
+      lower = round((bias - factor) * 2^{bitsize})
+
+   Which results in the integer domain between round(lower * 2^{bitsize}) and round(upper * 2^{bitsize}).
+
+   :param normalised: Whether the uniform distribution is normalised.
+   :type normalised: int
+
+
+   :param result: The matrix to be filled with bits according to a uniform distribution.
+                  shape = (individuals, genes * bitsize)
+   :type result: int**
+
+    References
+    ----------
+    .. [1] https://stackoverflow.com/questions/11641629/generating-a-uniform-distribution-of-integers-in-c Lior Kogan (2012)
+
+
+.. c:function:: void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals, float factor, float bias, int normalised, float loc, float scale, int** result)
+
+   Fill a matrix with bits according to a normal distribution.
+   using the following probability density function:
+
+   .. math::
+      f(x) = \\frac{1}{\\sigma \\sqrt{2 \\pi}} e^{-\\frac{1}{2} (\\frac{x - \\mu}{\\sigma})^2}
+
+   Calculate them using a Box-Muller transform, where two random numbers are generated 
+   according to a uniform distribution and then transformed to a normal distribution with
+   the following formula: [1]
+
+   .. math::
+      z_0 = \sqrt{-2 \ln U_1 } \cos{(2 \pi U_2)} \\
+      z_1 = \sqrt{-2 \ln U_1 } \sin{(2 \pi U_2)}
+
+   Where :math:`U_1` and :math:`U_2` are random numbers between 0 and 1.
+
+   :param bitsize: The size of the bitstring.
+   :type bitsize: int
+
+   :param genes: The number of genes in the bitstring.
+   :type genes: int
+
+   :param individuals: The number of individuals in the bitstring.
+   :type individuals: int
+
+   :param factor: The factor by which the normal distribution is scaled.
+   :type factor: float
+
+   :param bias: The bias of the normal distribution.
+   :type bias: float
+
+   The factor and bias are used for the conversion to the integer domain according to the following formula:
+
+   .. math::
+      float = (int - bias) / factor
+
+   :param normalised: Whether the normal distribution is normalised.
+   :type normalised: int
+
+   :param loc: The mean of the normal distribution.
+   :type loc: float
+
+   :param scale: The standard deviation of the normal distribution.
+   :type scale: float
+
+   :param result: The matrix to be filled with bits according to a normal distribution.
+                  shape = (individuals, genes * bitsize)
+   :type result: int**
+
+
+   References
+   ----------
+   .. [1] https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform Wikipedia contributors (2019)
+
+.. c:function:: void normal_bit_pop(int bitsize, int genes, int individuals, float factor, float bias, int normalised, float loc, float scale, int** result)
+   Produce a normal distributed set of values using the Gaussian distribution:
+
+      .. math::
+         f(x) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} (\frac{x - \mu}{\sigma})^2}
+
+      Where x is linearly spaced between (-factor and factor) + bias.
+
+   :param bitsize: The size of the bitstring.
+   :type bitsize: int
+
+   :param genes: The number of genes in the bitstring.
+   :type genes: int
+
+   :param individuals: The number of individuals in the bitstring.
+   :type individuals: int
+
+   :param factor: The factor by which the normal distribution is scaled.
+   :type factor: float
+
+   :param bias: The bias of the normal distribution.
+   :type bias: float
+
+   The factor and bias are used for the conversion to the integer domain according to the following formula:
+
+   .. math::
+      float = (int - bias) / factor
+
+   :param normalised: Whether the normal distribution is normalised.
+   :type normalised: int
+
+   :param loc: The mean of the normal distribution.
+   :type loc: float
+
+   :param scale: The standard deviation of the normal distribution. Due to the use of floats the scale should be > 2.
+   :type scale: float
+
+   :param result: The matrix to be filled with bits according to a normal distribution.
+                  shape = (individuals, genes * bitsize)
+
+.. c:function:: void cauchy_bit_pop(int bitsize, int genes, int individuals, float factor, float bias, int normalised, float loc, float scale, int** result)
+
+   Produce a normal distributed set of values using the Cauchy distribution:
+
+   .. math::
+      f(x) = \frac{1}{\pi \gamma [1 + (\frac{x - x_0}{\gamma})^2]}
+
+   Where x is linearly spaced between (-factor and factor) + bias.
+
+   :param bitsize: The size of the bitstring.
+   :type bitsize: int
+
+   :param genes: The number of genes in the bitstring.
+   :type genes: int
+
+   :param individuals: The number of individuals in the bitstring.
+   :type individuals: int
+
+   :param factor: The factor by which the normal distribution is scaled.
+   :type factor: float
+
+   :param bias: The bias of the normal distribution.
+   :type bias: float
+
+   :param normalised: Whether the normal distribution is normalised.
+   :type normalised: int
+
+   :param loc: The location of the peak of the distribution.
+   :type loc: float
+
+   :param scale: The width of the distribution.
+   :type scale: float   
+
+   :param result: The matrix to be filled with bits according to a normal distribution.
+                  shape = (individuals, genes * bitsize)
+   :type result: int** 
