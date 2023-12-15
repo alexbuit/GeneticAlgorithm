@@ -78,7 +78,7 @@ int main(){
     
     int individuals = 4;
     int genes = 4;
-    int bitsize = 16;
+    int bitsize = 32;
 
     int** valmat = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of integers
     int** result = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of bitarrays

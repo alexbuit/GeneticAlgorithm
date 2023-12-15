@@ -6,12 +6,12 @@
 void calc_fx(float** pop, int individuals, int genes, float(*fx)(float), float** result);
 
 // Flattening functions
-void lin_flattening(float** pop, int individuals, int genes, float a, float b,float** result);
-void exp_flattening(float** pop, int individuals, int genes, float a, float b,float** result);
-void log_flattening(float** pop, int individuals, int genes, float a, float b,float** result);
-void norm_flattening(float** pop, int individuals, int genes, float a, float b,float** result);
-void sig_flattening(float** pop, int individuals, int genes, float a, float b,float** result);
-void no_flattening(float** pop, int individuals, int genes, float a, float b,float** result);
+void lin_flattening(float* pop, int individuals, int genes, float a, float b,float* result);
+void exp_flattening(float* pop, int individuals, int genes, float a, float b,float* result);
+void log_flattening(float* pop, int individuals, int genes, float a, float b,float* result);
+void norm_flattening(float* pop, int individuals, int genes, float a, float b,float* result);
+void sig_flattening(float* pop, int individuals, int genes, float a, float b,float* result);
+void no_flattening(float* pop, int individuals, int genes, float a, float b,float* result);
 
 
 // Selection functions

@@ -8,12 +8,12 @@
 
 int main(){
 
-    int individuals = 16;
+    int individuals = 4;
     int genes = 4;
-    int bitsize = 16; // large difference for high bit sizes >= 32 (error rate 380/2000)
+    int bitsize = 32;
 
-    int factor = 10;
-    int bias = 1;
+    int factor = 10.4;
+    int bias = 0;
     int normalised = 1;
 
 
@@ -32,7 +32,7 @@ int main(){
     for(int i=0; i<individuals; i++){
         for(int j=0; j<genes; j++){
             sign = (rand() % 2 == 0) ? 1 : -1;
-            valmat[i][j] = rand() % 9 * sign; // random integer between -2^bitsize-1 and 2^bitsize - 1
+            valmat[i][j] = (float) (rand() % 9 * sign); // random integer between -2^bitsize-1 and 2^bitsize - 1
             copyvalmat[i][j] = valmat[i][j];
         }
     }
@@ -45,14 +45,25 @@ int main(){
     }
 
     // convert the values to bitarrays
-    int2ndbit(valmat, bitsize, genes, individuals, factor, bias, normalised, result);
+    int2ndbit(valmat, bitsize, genes, individuals, factor, bias, result);
+
+    printf("result: \n");
+    for(int i=0; i<individuals; i++){
+        for(int j=0; j<genes; j++){
+            printf("%#10x", result[i][j]);
+            // for(uint32_t k = 1; k != 0x00000000; k = k << 1){
+            //     printf("%c", (result[i][j]&k ? '1':'0'));
+            // }
+        }
+        printf("\n");
+    }
 
     // print the size of the matrices and the values
     printf("Size of valmat: %d x %d\n", individuals, genes);
     printf("Size of result: %d x %d\n", individuals, genes * bitsize);
 
     printf("valmat: \n");
-    printfMatrix(copyvalmat, individuals, genes);
+    printfMatrix(copyvalmat, individuals, genes, 6);
 
     printf("\n");
 
@@ -64,14 +75,14 @@ int main(){
 
     int same_count = 0;
 
-    ndbit2int(result, bitsize, genes, individuals, factor, bias, normalised, valmat);
+    ndbit2int(result, bitsize, genes, individuals, factor, bias, valmat);
 
         // print the size of the matrices and the values
     printf("Size of valmat: %d x %d\n", individuals, genes);
     printf("Size of result: %d x %d\n", individuals, genes * bitsize);
 
     printf("valmat after: \n");
-    printfMatrix(valmat, individuals, genes);
+    printfMatrix(valmat, individuals, genes, 6);
 
     printf("\n");
 

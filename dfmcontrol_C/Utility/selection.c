@@ -10,22 +10,74 @@ void calc_fx(float** pop, int individuals, int genes, float(*fx)(float), float**
 }
 
 // Flattening functions
-void lin_flattening(float** pop, int individuals, int genes, float a, float b,float** result){
+void lin_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+
+    float sum;
+
+    for(int i = 0; i< individuals; i++){
+            sum += pop[i];
+    }
+
+    for(int i = 0; i< individuals; i++){
+            result[i] = (pop[i]/sum) * a + b;
+    }
 
 }
-void exp_flattening(float** pop, int individuals, int genes, float a, float b,float** result){
+void exp_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+
+    float sum;
+
+    for(int i = 0; i< individuals; i++){
+            sum += pop[i];
+    }
+
+    for(int i = 0; i< individuals; i++){
+            result[i] = exp((pop[i]/sum) * a) + b;
+    }
 
 }
-void log_flattening(float** pop, int individuals, int genes, float a, float b,float** result){
+void log_flattening(float* pop, int individuals, float a, float b,float* result){
+
+    /*
+    
+    Compute:
+
+    .. math::
+        f(x) = a^\log(\dfrac{x}{\mathrm{sum}(x)) + b
+
+    For all fitness values in pop (individuals)
+
+    :param pop: matrix of fitness values or 
+
+    */
+    
+    float sum;
+
+    for(int i = 0; i< individuals; i++){
+            sum += pop[i];
+    }
+
+    for(int i = 0; i< individuals; i++){
+            result[i] = logf((pop[i]/sum))/logf(a) + b;
+    }
+}
+void norm_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+
+    float sum;
+
+    for(int i = 0; i< individuals; i++){
+            sum += pop[i];
+    }
+
+    for(int i = 0; i< individuals; i++){
+            result[i] = pop[i]/sum;
+    }
 
 }
-void norm_flattening(float** pop, int individuals, int genes, float a, float b,float** result){
+void sig_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
 
 }
-void sig_flattening(float** pop, int individuals, int genes, float a, float b,float** result){
-
-}
-void no_flattening(float** pop, int individuals, int genes, float a, float b,float** result){
+void no_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
 
 }
 

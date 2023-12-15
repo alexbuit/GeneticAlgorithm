@@ -6,29 +6,26 @@
 
 int main(){
 
-    int length = 64;
+    srand(__TIME__);
+
+    int length = 8 ;
     
     // test single point crossover
-    int *parent1 = malloc(length * sizeof(int));
-    int *parent2 = malloc(length * sizeof(int));
+    int* parent1 = malloc(length * sizeof(int));
+    int* parent2 = malloc(length * sizeof(int));
 
     for(int i=0; i<length; i++){
-        if(rand() % 2 == 0){
-            parent1[i] = 1;
-            parent2[i] = 0;
-        } else {
-            parent1[i] = 0;
-            parent2[i] = 1;
-        }
+        parent1[i] = random_int();
+        parent2[i] = random_int();
     }
 
-    int *child1 = malloc(length * sizeof(int));
-    int *child2 = malloc(length * sizeof(int));
-
+    int* child1 = malloc(length * sizeof(int));
+    int* child2 = malloc(length * sizeof(int));
+    printf("int size %d\n", sizeof(int));
     single_point_crossover(parent1, parent2, child1, child2, length);
 
     // Check that the children are different
-    int *same;
+    int* same;
     same = malloc(length * sizeof(int));
     for(int i=0; i<length; i++){
         if(child1[i] == child2[i]){
@@ -51,19 +48,19 @@ int main(){
 
     printf("Parent 1: ");
     for(int i=0; i<length; i++){
-        printf("%d ", parent1[i]);
+        printf("%#010x ", parent1[i]);
     }
-    printf("\nChild 1: ");
+    printf("\nChild 1:  ");
     for(int i=0; i<length; i++){
-        printf("%d ", child1[i]);
+        printf("%#010x ", child1[i]);
     }
     printf("\nParent 2: ");
     for(int i=0; i<length; i++){
-        printf("%d ", parent2[i]);
+        printf("%#010x ", parent2[i]);
     }
-    printf("\nChild 2: ");
+    printf("\nChild 2:  ");
     for(int i=0; i<length; i++){
-        printf("%d ", child2[i]);
+        printf("%#010x ", child2[i]);
     }
 
     printf("\n");
@@ -85,19 +82,14 @@ int main(){
     parent2 = malloc(length * sizeof(int));
 
     for(int i=0; i<length; i++){
-        if(rand() % 2 == 0){
-            parent1[i] = 1;
-            parent2[i] = 0;
-        } else {
-            parent1[i] = 0;
-            parent2[i] = 1;
-        }
+        parent1[i] = random_int();
+        parent2[i] = random_int();
     }
 
     child1 = malloc(length * sizeof(int));
     child2 = malloc(length * sizeof(int));
 
-    two_point_crossover(parent1, parent2, child1, child2, length);
+    two_point_crossover(parent1, parent2, child1, child2, length );
 
     // Check that the children are different
     same = malloc(length * sizeof(int));
@@ -122,21 +114,21 @@ int main(){
         }
     }
 
-    printf("\nParent 1: ");
+    printf("Parent 1: ");
     for(int i=0; i<length; i++){
-        printf("%d ", parent1[i]);
+        printf("%#010x ", parent1[i]);
     }
-    printf("\nChild 1: ");
+    printf("\nChild 1:  ");
     for(int i=0; i<length; i++){
-        printf("%d ", child1[i]);
+        printf("%#010x ", child1[i]);
     }
     printf("\nParent 2: ");
     for(int i=0; i<length; i++){
-        printf("%d ", parent2[i]);
+        printf("%#010x ", parent2[i]);
     }
-    printf("\nChild 2: ");
+    printf("\nChild 2:  ");
     for(int i=0; i<length; i++){
-        printf("%d ", child2[i]);
+        printf("%#010x ", child2[i]);
     }
     printf("\n");
     if(same_count == length){
@@ -156,19 +148,14 @@ int main(){
     parent2 = malloc(length * sizeof(int));
 
     for(int i=0; i<length; i++){
-        if(rand() % 2 == 0){
-            parent1[i] = 1;
-            parent2[i] = 0;
-        } else {
-            parent1[i] = 0;
-            parent2[i] = 1;
-        }
+        parent1[i] = random_int();
+        parent2[i] = random_int();
     }
 
     child1 = malloc(length * sizeof(int));
     child2 = malloc(length * sizeof(int));
 
-    uniform_crossover(parent1, parent2, child1, child2, length);
+    uniform_crossover(parent1, parent2, child1, child2, length );
 
     // Check that the children are different
     same = malloc(length * sizeof(int));
@@ -192,21 +179,21 @@ int main(){
         }
     }
 
-    printf("\nParent 1: ");
+    printf("Parent 1: ");
     for(int i=0; i<length; i++){
-        printf("%d ", parent1[i]);
+        printf("%#010x ", parent1[i]);
     }
     printf("\nChild 1: ");
     for(int i=0; i<length; i++){
-        printf("%d ", child1[i]);
+        printf("%#010x ", child1[i]);
     }
     printf("\nParent 2: ");
     for(int i=0; i<length; i++){
-        printf("%d ", parent2[i]);
+        printf("%#010x ", parent2[i]);
     }
     printf("\nChild 2: ");
     for(int i=0; i<length; i++){
-        printf("%d ", child2[i]);
+        printf("%#010x ", child2[i]);
     }
     printf("\n");
     if(same_count == length){
@@ -215,6 +202,65 @@ int main(){
         printf("Uniform crossover passed\n");
     }
 
+
+    // test uniform crossover
+    parent1 = malloc(length * sizeof(int));
+    parent2 = malloc(length * sizeof(int));
+
+    for(int i=0; i<length; i++){
+        parent1[i] = random_int();
+        parent2[i] = random_int();
+    }
+
+    child1 = malloc(length * sizeof(int));
+    child2 = malloc(length * sizeof(int));
+
+    complete_crossover(parent1, parent2, child1, child2, length );
+
+    // Check that the children are different
+    same = malloc(length * sizeof(int));
+    for(int i=0; i<length; i++){
+        if(child1[i] == child2[i]){
+            same[i] = 1;
+        } 
+        else if (child1[i] == parent1[i] && child2[i] == parent2[i])
+        {
+            same[i] = 1;
+        } 
+        else {
+            same[i] = 0;
+        }
+    }
+
+    same_count = 0;
+    for(int i=0; i<length; i++){
+        if(same[i] == 1){
+            same_count++;
+        }
+    }
+
+    printf("Parent 1: ");
+    for(int i=0; i<length; i++){
+        printf("%#010x ", parent1[i]);
+    }
+    printf("\nChild 1: ");
+    for(int i=0; i<length; i++){
+        printf("%#010x ", child1[i]);
+    }
+    printf("\nParent 2: ");
+    for(int i=0; i<length; i++){
+        printf("%#010x ", parent2[i]);
+    }
+    printf("\nChild 2: ");
+    for(int i=0; i<length; i++){
+        printf("%#010x ", child2[i]);
+    }
+    printf("\n");
+    if(same_count == length){
+        printf("Complete crossover failed\n");
+    } else {
+        printf("Complete crossover passed\n");
+    }
 
     free(parent1);
     free(parent2);

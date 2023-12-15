@@ -4,6 +4,7 @@
 #include "math.h"
 
 #include "../../Utility/mutation.c"
+#include "../../Helper/Helper.c"
 
 int main(){
 
@@ -14,11 +15,7 @@ int main(){
     int *bitcopy = malloc(length * sizeof(int));
 
     for(int i=0; i<length; i++){
-        if(rand() % 2 == 0){
-            bit[i] = 1;
-        } else {
-            bit[i] = 0;
-        }
+        bit[i] = random_int();
     }
 
     for(int i=0; i<length; i++){

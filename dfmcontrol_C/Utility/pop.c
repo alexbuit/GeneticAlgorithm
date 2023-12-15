@@ -35,7 +35,7 @@ void bitpop(int bitsize, int genes, int individuals, int** result){
 
 }
 void uniform_bit_pop(int bitsize, int genes, int individuals,
-                     float factor, float bias, int normalised, int** result){
+                     float factor, float bias, int** result){
     /*
     Fill a matrix with bits according to a uniform distribution.
 
@@ -122,7 +122,7 @@ void uniform_bit_pop(int bitsize, int genes, int individuals,
     free(temp);
 }
 void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
-                    float factor, float bias, int normalised,
+                    float factor, float bias,
                     float loc, float scale, int** result){
     /* 
     Fill a matrix with bits according to a normal distribution.
@@ -227,7 +227,7 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
     }
 
     // Convert to binary matrix
-    int2ndbit(normal_dist, bitsize, genes, individuals, factor, bias, 1, result);
+    int2ndbit(normal_dist, bitsize, genes, individuals, factor, bias, result);
 
 
     
@@ -240,7 +240,7 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
 }
 
 void normal_bit_pop(int bitsize, int genes, int individuals,
-                    float factor, float bias, int normalised,
+                    float factor, float bias,
                     float loc, float scale, int** result){
     /*
 
@@ -347,7 +347,7 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
     free(range);
 
     // convert to binary matrix
-    int2ndbit(normal_distmat, bitsize, genes, individuals, factor, bias, 1, result);
+    int2ndbit(normal_distmat, bitsize, genes, individuals, factor, bias, result);
 
     // free the memory
     for(int i=0; i<individuals; i++){
@@ -360,7 +360,7 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
 
 
 void cauchy_bit_pop(int bitsize, int genes, int individuals,
-                    float factor, float bias, int normalised,
+                    float factor, float bias,
                     float loc, float scale, int** result){
     /*
     
@@ -406,6 +406,11 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
     // Determine the lower and upper bounds of the normal distribution
     float lower = scale * (-factor) + loc;
     float upper = scale * factor + loc;
+
+    // print when bias is not in the range of the normal distribution
+    if(bias < lower || bias > upper){
+        printf("Warning: bias is not in the range of the normal distribution\n");
+    }
 
     // Determine the number of values in the normal distribution
     int numvalues = genes * individuals;
@@ -462,7 +467,7 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
     free(range);
 
     // convert to binary matrix
-    int2ndbit(normal_distmat, bitsize, genes, individuals, factor, bias, 1, result);
+    int2ndbit(normal_distmat, bitsize, genes, individuals, factor, bias, result);
 
     // free the memory
     for(int i=0; i<individuals; i++){
