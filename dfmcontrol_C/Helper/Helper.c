@@ -8,7 +8,7 @@
 #undef PI
 #define PI   3.14159265358979323846264338327950288419716939937510f
 
-void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
+void ndbit2int32(int** valarr, int genes, int individuals,
                 float factor, float bias, float** result){
     /*
     Convert an array of bitarrays to an array of floats
@@ -49,12 +49,12 @@ void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
             else{
                 temp = valarr[i][j];
             }
-            result[i][j] = (float) temp * factor / (pow(2, bitsize - 1)) + bias;
+            result[i][j] = (float) temp * factor / (pow(2, 8*sizeof(int) - 1)) + bias;
         }
     }
 }
 
-void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
+void int2ndbit32(float** valarr, int genes, int individuals,
                float factor, float bias, int** result){
 
     /*
@@ -89,7 +89,7 @@ void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
     int temp;
     for (int i = 0; i < individuals; i++){
         for (int j = 0; j < genes; j++){
-            temp = (int) roundf((valarr[i][j] - bias) * pow(2, bitsize - 1) / factor);
+            temp = (int) roundf((valarr[i][j] - bias) * pow(2, 8*sizeof(int) - 1) / factor);
             if (temp < 0){
                 result[i][j] = ~(temp-1) | 0x80000000; // bitflip and subtract 1
             }
@@ -99,6 +99,123 @@ void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
         }
     }
 
+}
+
+void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
+                float factor, float bias, float** result){
+    /*
+    Convert an array of bitarrays to an array of floats
+
+    :param valarr: The array of binary data to be converted to floats (a x b) (individuals x (bitsize * genes))
+    :type valarr: array of floats (float **)
+
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = length of a row / bitsize; n = a / bitsize)
+    :type genes: int
+
+    :param individuals: the number of individuals in the bitarrays (m = individuals; m = a)
+    :type individuals: int
+    
+    :param result: The array of floats to be filled with the converted values (m x n)
+    :type result: array of ints (float **)
+
+    :param factor: The factor of the uniform distribution.
+    :type factor: float
+
+    :param bias: The bias of the uniform distribution.
+    :type bias: float
+
+    :return: void
+    :rtype: void
+    */
+
+    // temp int array to store the values
+    int** temp = (int**)malloc(individuals * sizeof(int*));
+
+    for (int i = 0; i < individuals; i++){
+        temp[i] = (int*)malloc(genes * sizeof(int));
+    }
+
+
+    // convert the values to integers
+    binmat2intmat(valarr, bitsize, genes, individuals, temp);
+
+    // normalise the values and apply the factor and bias
+    for (int i = 0; i < individuals; i++){
+        for (int j = 0; j < genes; j++){
+            result[i][j] = (float) temp[i][j] / (pow(2, bitsize - 1)) * factor + bias;
+        }
+    }
+    
+
+
+    // free the temp array
+    for (int i = 0; i < individuals; i++){
+        free(temp[i]);
+    }
+    free(temp);
+}
+
+void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
+               float factor, float bias, int** result){
+
+    /*
+    Convert an array of integers to an array of bitarrays
+
+    :param valarr: The array of integers to be converted to bitarrays (a)
+    :type valarr: array of floats (float **)
+
+    :param bitsize: The size of the bitarrays
+    :type bitsize: int
+
+    :param genes: The number of genes in the bitarrays (n = genes * bitsize; n = a * bitsize)
+    :type genes: int
+
+    :param individuals: the number of individuals in the bitarrays (m = individuals; m = a)
+    :type individuals: int
+    
+    :param result: The array of bitarrays to be filled with the converted values (m x n)
+    :type result: array of ints (int **)
+
+    :param factor: The factor of the uniform distribution.
+    :type factor: float
+
+    :param bias: The bias of the uniform distribution.
+    :type bias: float
+
+
+    :return: void
+    :rtype: void
+    */
+
+   // create a copy of valarr for integer conversion
+    int **copyvalarr = (int**)malloc(individuals * sizeof(int*));
+
+    for (int i = 0; i < individuals; i++){
+        copyvalarr[i] = (int*)malloc(genes * sizeof(int));
+    }
+
+    // normalise the values and apply the factor and bias and cast to integers
+    for (int i = 0; i < individuals; i++){
+        for (int j = 0; j < genes; j++){
+            copyvalarr[i][j] = (int) round((valarr[i][j] - bias) / factor * pow(2, bitsize - 1));
+
+        }
+    }
+    
+
+
+    // convert the values to bitarrays
+    intmat2binmat(copyvalarr, bitsize, genes, individuals, result);
+
+    // free the copyvalarr array
+    for (int i = 0; i < individuals; i++){
+        free(copyvalarr[i]);
+    }
+
+    free(copyvalarr);
 }
 
 void int2bin(int value, int bitsize, int result){
@@ -537,6 +654,46 @@ void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
     free(cumsum);
 }
 
-int random_int(){
+int random_int32(){
     return (rand() % 0x00008000) * 0x00020000 +  (rand() % 0x00008000) * 4 + (rand() % 4);
+}
+
+void convert_int32_to_binary(int** valarr, int genes, int individuals,
+                             float factor, float bias){
+    
+
+    float** temp = (float**)malloc(individuals * sizeof(float*));
+
+    for (int i = 0; i < individuals; i++){
+        temp[i] = (float*)malloc(genes * sizeof(float) * 8*sizeof(int));
+    }
+
+    ndbit2int32(valarr, genes, individuals, factor, bias, temp);
+    int2ndbit(temp, 8*sizeof(int), genes, individuals, factor, bias, valarr);
+
+    for (int i = 0; i < individuals; i++){
+        free(temp[i]);
+    }
+
+    free(temp);
+}
+
+void convert_binary_to_int32(int** valarr, int genes, int individuals,
+                             float factor, float bias){
+    
+    float** temp = (float**)malloc(individuals * sizeof(float*));
+
+    for (int i = 0; i < individuals; i++){
+        temp[i] = (float*)malloc(genes * sizeof(float) * 8 * sizeof(int));
+    }
+
+
+    ndbit2int(valarr, 8*sizeof(int), genes, individuals, factor, bias, temp);
+    int2ndbit32(temp, genes, individuals, factor, bias, valarr);
+
+    for (int i = 0; i < individuals; i++){
+        free(temp[i]);
+    }
+
+    free(temp);
 }
