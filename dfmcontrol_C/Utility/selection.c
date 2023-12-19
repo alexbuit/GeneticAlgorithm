@@ -31,7 +31,7 @@ void exp_flattening(float* pop, int individuals, int genes, float a, float b,flo
             sum += pop[i];
     }
 
-    for(int i = 0; i< individuals; i++){
+    for(int i = 0; i< individuals; i++){ 
             result[i] = exp((pop[i]/sum) * a) + b;
     }
 
