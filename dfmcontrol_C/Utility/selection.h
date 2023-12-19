@@ -15,10 +15,10 @@ void no_flattening(float* pop, int individuals, int genes, float a, float b,floa
 
 
 // Selection functions
-void roulette(float** pop, int individuals, int genes, float(*fx)(float),int mode, int** result);
-void rank_tournament_selection(float** pop, int individuals, int genes, float(*fx)(float), int tournament_size, float prob_param, int mode, int** result);
-void rank_selection(float** pop, int individuals, int genes, float(*fx)(float), float prob_param, int mode, int** result);
-void rank_space_selection(float** pop, int individuals, int genes, float(*fx)(float), float prob_param, float div_param, int mode, int** result);
-void boltzmann_selection(float** pop, int individuals, int genes, float(*fx)(float), float temp_param, int mode, int** result);
+void roulette(float** pop, int individuals, int genes, float(*fx)(float),int mode, float a, float b, int** result);
+void rank_tournament_selection(float** pop, int individuals, int genes, float(*fx)(float), int tournament_size, float prob_param, int mode, float a, float b, int** result);
+void rank_selection(float** pop, int individuals, int genes, float(*fx)(float), float prob_param, int mode, float a, float b, int** result);
+void rank_space_selection(float** pop, int individuals, int genes, float(*fx)(float), float prob_param, float div_param, int mode, float a, float b, int** result);
+void boltzmann_selection(float** pop, int individuals, int genes, float(*fx)(float), float temp_param, int mode, float a, float b, int** result);
 
 #endif
