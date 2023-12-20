@@ -10,7 +10,7 @@ void calc_fx(float** pop, int individuals, int genes, float(*fx)(float), float**
 }
 
 // Flattening functions
-void lin_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+void lin_flattening(float* pop, int individuals, float a, float b,float* result){
 
     float sum;
 
@@ -23,7 +23,7 @@ void lin_flattening(float* pop, int individuals, int genes, float a, float b,flo
     }
 
 }
-void exp_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+void exp_flattening(float* pop, int individuals, float a, float b,float* result){
 
     float sum;
 
@@ -61,7 +61,7 @@ void log_flattening(float* pop, int individuals, float a, float b,float* result)
             result[i] = logf((pop[i]/sum))/logf(a) + b;
     }
 }
-void norm_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+void norm_flattening(float* pop, int individuals, float a, float b,float* result){
 
     float sum;
 
@@ -74,16 +74,16 @@ void norm_flattening(float* pop, int individuals, int genes, float a, float b,fl
     }
 
 }
-void sig_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+void sig_flattening(float* pop, int individuals,float a, float b,float* result){
 
 }
-void no_flattening(float* pop, int individuals, int genes, float a, float b,float* result){
+void no_flattening(float* pop, int individuals, float a, float b, float* result){
 
 }
 
 
 // Selection functions
-void roulette(float** pop, int individuals, int genes, float(*fx)(float),int mode, float a, float b,int** result){
+void roulette(float** pop, int individuals, int genes, float(*fx)(float), float(*flatten)(float*, int, float, float, float*), int mode, float a, float b,int** result){
         /*
 
         :param pop: matrix of individuals as float (individuals x genes)
@@ -133,15 +133,67 @@ void roulette(float** pop, int individuals, int genes, float(*fx)(float),int mod
                 result[i][1] = selected[i+1];
         }
 }
-void rank_tournament_selection(float** pop, int individuals, int genes, float(*fx)(float), int tournament_size, float prob_param, int mode, float a, float b, int** result){
+void rank_tournament_selection(float** pop, int individuals, int genes, float(*fx)(float), float(*flatten)(float*, int, float, float, float*), int tournament_size, float prob_param, int mode, float a, float b, int** result){
+        /*
+
+        :param pop: matrix of individuals as float (individuals x genes)
+        :param individuals: number of individuals
+        :param genes: number of genes
+        :param fx: fitness function (float array x0 x1 ... xn)
+        :param flatten: flattening function (float array, int, float, float, float array)
+        :param a: parameter for flattening function
+        :param b: parameter for flattening function
+        :param mode: 0 for minimisation, 1 for maximisation
+        :param result: matrix of the indices of selected individuals (individuals x 2)
+
+        */
 
 }
-void rank_selection(float** pop, int individuals, int genes, float(*fx)(float), float prob_param, int mode, float a, float b, int** result){
+void rank_selection(float** pop, int individuals, int genes, float(*fx)(float), float(*flatten)(float*, int, float, float, float*), float prob_param, int mode, float a, float b, int** result){
+        /*
+
+        :param pop: matrix of individuals as float (individuals x genes)
+        :param individuals: number of individuals
+        :param genes: number of genes
+        :param fx: fitness function (float array x0 x1 ... xn)
+        :param flatten: flattening function (float array, int, float, float, float array)
+        :param a: parameter for flattening function
+        :param b: parameter for flattening function
+        :param mode: 0 for minimisation, 1 for maximisation
+        :param result: matrix of the indices of selected individuals (individuals x 2)
+
+        */
 
 }
-void rank_space_selection(float** pop, int individuals, int genes, float(*fx)(float), float prob_param, float div_param, int mode, float a, float b, int** result){
+void rank_space_selection(float** pop, int individuals, int genes, float(*fx)(float), float(*flatten)(float*, int, float, float, float*), float prob_param, float div_param, int mode, float a, float b, int** result){
+        /*
+
+        :param pop: matrix of individuals as float (individuals x genes)
+        :param individuals: number of individuals
+        :param genes: number of genes
+        :param fx: fitness function (float array x0 x1 ... xn)
+        :param flatten: flattening function (float array, int, float, float, float array)
+        :param a: parameter for flattening function
+        :param b: parameter for flattening function
+        :param mode: 0 for minimisation, 1 for maximisation
+        :param result: matrix of the indices of selected individuals (individuals x 2)
+
+        */
 
 }
-void boltzmann_selection(float** pop, int individuals, int genes, float(*fx)(float), float temp_param, int mode, float a, float b, int** result){
-    
+void boltzmann_selection(float** pop, int individuals, int genes, float(*fx)(float), float(*flatten)(float*, int, float, float, float*), float temp_param, int mode, float a, float b, int** result){
+            /*
+
+        :param pop: matrix of individuals as float (individuals x genes)
+        :param individuals: number of individuals
+        :param genes: number of genes
+        :param fx: fitness function (float array x0 x1 ... xn)
+        :param flatten: flattening function (float array, int, float, float, float array)
+        :param a: parameter for flattening function
+        :param b: parameter for flattening function
+        :param mode: 0 for minimisation, 1 for maximisation
+        :param result: matrix of the indices of selected individuals (individuals x 2)
+
+        */
+
 }
