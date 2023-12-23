@@ -3,7 +3,7 @@
 #include "math.h"
 
 #include "crossover.h"
-#include "../Helper/Helper.c"
+
 
 
 // Path: Utility/crossover.c
@@ -21,7 +21,7 @@ void single_point_crossover32(int *parent1, int *parent2, int *child1, int *chil
     int bit_i;
     for(int i=0; i < genes; i++){
         bit_i = i*sizeof(int)*8;
-        printf("bit_i: %d\n", bit_i);
+
         if(bit_i < point - sizeof(int)*8){
             mask = 0x0;
         }
@@ -97,9 +97,12 @@ void uniform_crossover32(int* parent1, int* parent2, int* child1, int* child2, i
     // int mask = pow(2, point) - 1;
 
     int mask ;
+
+    seed_intXOR32();
+
     for(int i=0; i < genes; i++){
         
-        mask = random_int();
+        mask = random_intXOR32();
 
         child1[i] = (parent1[i] & ~mask) | (parent2[i] & mask);
         child2[i] = (parent1[i] & mask) | (parent2[i] & ~mask);
@@ -194,7 +197,7 @@ void uniform_crossover(int *parent1, int *parent2, int *child1, int *child2, int
 
     // for each value, copy from the first parent with probability prob
     for(int i; i<genes*bitsize; i++){
-        if(rand() % 100 < 50){
+        if(rand() % 2){
             child1[i] = parent1[i];
             child2[i] = parent2[i];
         }

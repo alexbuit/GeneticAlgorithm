@@ -3,7 +3,6 @@
 #include "math.h"
 #define PI   3.14159265358979323846264338327950288419716939937510f
 
-#include "../Helper/Helper.c"
 #include "pop.h"
 
 

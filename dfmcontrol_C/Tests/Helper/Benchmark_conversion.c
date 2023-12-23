@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "../../Utility/pop.c"
+#include "../../Helper/Helper.c"
 #include "Benchmark_conversion.h"
 
 
@@ -61,7 +62,7 @@ void matrix_conversion_benchmark(int individual, int genes, int bitsize){
 
     start = clock();
     for(int i=0; i<1000; i++){
-        ndbit2int(result, bitsize, genes, individual, 5.0f, 0.0f, 1, valmat);
+        ndbit2int32(result, genes, individual, 5.0f, 0.0f, valmat);
     }
     end = clock();
 
@@ -75,7 +76,7 @@ void matrix_conversion_benchmark(int individual, int genes, int bitsize){
     start = clock();
 
     for(int i=0; i<1000; i++){
-        int2ndbit(valmat, bitsize, genes, individual, 5.0f, 0.0f, 1, result);
+        int2ndbit32(valmat, genes, individual, 5.0f, 0.0f, result);
     }
     end = clock();
 

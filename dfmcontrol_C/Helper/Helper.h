@@ -1,6 +1,8 @@
 
-#ifndef _Helper_
-#define _Helper_
+#ifndef _HELPER_H
+#define _HELPER_H
+
+int state;
 
 // Convesrion functions
 void ndbit2int32(int** valarr, int genes, int individuals,
@@ -31,14 +33,20 @@ void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,f
 void uniform_random(int m, int n,int lower, int upper, int** result);
 float gaussian(float x, float mu, float sigma);
 
+
 // Roulette wheel selection
 void roulette_wheel(double* probabilities, int size, int ressize, int* result);
 
 // random 32 bit integer in binary
 int random_int32();
+void seed_intXOR32();
+int random_intXOR32();
+int intXORshift32(int a);
+
 // usefull for debugging and eventual conversion to numpy arrays
 void convert_int32_to_binary(int** valarr, int genes, int individuals,
                              float factor, float bias);
 void convert_binary_to_int32(int** valarr, int genes, int individuals,
                              float factor, float bias);
+
 #endif

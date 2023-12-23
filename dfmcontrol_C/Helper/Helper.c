@@ -3,10 +3,12 @@
 #include "stdlib.h"
 #include "math.h"
 #include "stdint.h"
+#include "time.h"
 
 #include "Helper.h"
 #undef PI
 #define PI   3.14159265358979323846264338327950288419716939937510f
+
 
 void ndbit2int32(int** valarr, int genes, int individuals,
                 float factor, float bias, float** result){
@@ -655,7 +657,26 @@ void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
 }
 
 int random_int32(){
-    return (rand() % 0x00008000) * 0x00020000 +  (rand() % 0x00008000) * 4 + (rand() % 4);
+    return (rand() << 30) & (rand() << 15) & (rand());
+}
+
+int random_intXOR32(){
+    int a  = state;
+    state = xorshift32(a);
+    return a;
+}
+
+void seed_intXOR32(){
+    if(state == 0){
+        state = random_int32();
+    }
+}
+
+int xorshift32(int a){
+    a ^= a << 13;
+    a ^= a >> 17;
+    a ^= a << 5;
+    return a;
 }
 
 void convert_int32_to_binary(int** valarr, int genes, int individuals,

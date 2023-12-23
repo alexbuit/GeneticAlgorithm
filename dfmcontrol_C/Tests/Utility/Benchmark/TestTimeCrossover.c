@@ -76,7 +76,7 @@ void crossoverbench(int bitsize, int genes, int individuals, int i){
     
     for (int j = 0; j < 100000; j++)
     for (int i = 0; i < (int) roundf(individuals/2); i+=2){
-        single_point_crossover(valmat1[i], valmat2[i+1], result1, result2, bitsize * genes);
+        single_point_crossover32(valmat1[i], valmat2[i+1], result1, result2, bitsize * genes);
     }
     
     end = clock();
@@ -86,7 +86,7 @@ void crossoverbench(int bitsize, int genes, int individuals, int i){
     start = clock();
     for (int j = 0; j < 100000; j++)
     for (int i = 0; i < (int) roundf(individuals/2); i+=2){
-        two_point_crossover(valmat1[i], valmat2[i+1], result1, result2, bitsize * genes);
+        two_point_crossover32(valmat1[i], valmat2[i+1], result1, result2, bitsize * genes);
     }
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -97,7 +97,7 @@ void crossoverbench(int bitsize, int genes, int individuals, int i){
 
     for (int j = 0; j < 100000; j++)
     for (int i = 0; i < (int) roundf(individuals/2); i+=2){
-        uniform_crossover(valmat1[i], valmat2[i+1], result1, result2, bitsize * genes);
+        uniform_crossover32(valmat1[i], valmat2[i+1], result1, result2, bitsize * genes);
     }
 
 
