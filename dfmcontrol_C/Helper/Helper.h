@@ -1,21 +1,19 @@
 
-#ifndef _HELPER_H
-#define _HELPER_H
 
 int state;
 
 // Convesrion functions
 void ndbit2int32(int** valarr, int genes, int individuals,
-                float factor, float bias, float** result);
-void int2ndbit32(float** valarr, int genes, int individuals,
-               float factor, float bias, int** result);
+                double factor, double bias, double** result);
+void int2ndbit32(double** valarr, int genes, int individuals,
+               double factor, double bias, int** result);
 void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
-                float factor, float bias, float** result);
-void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
-               float factor, float bias, int** result);  
+                double factor, double bias, double** result);
+void int2ndbit(double** valarr, int bitsize, int genes, int individuals,
+               double factor, double bias, int** result);  
 
 // conversion helper functions
-void int2bin(int value, int bitsize, int result);
+void int2bin(int value, int bitsize, int* result);
 void intarr2binarr(int* valarr, int bitsize, int size, int* result);
 void intmat2binmat(int** valmat, int bitsize, int genes, int individuals, int** result);
 int bin2int(int* value, int bitsize);
@@ -24,14 +22,14 @@ void binmat2intmat(int** valmat, int bitsize, int genes, int individuals, int** 
 
 // Printing functions
 void printMatrix(int** matrix, int rows, int cols);
-void printfMatrix(float** matrix, int rows, int cols, int precision);
+void printfMatrix(double** matrix, int rows, int cols, int precision);
 
 // Mathemathical functions
-void sigmoid(float* x, float* result, int size);
-void sigmoid_derivative(float* x, float* result, int size);
-void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,float* result, int size);
+void sigmoid(double* x, double* result, int size);
+void sigmoid_derivative(double* x, double* result, int size);
+void sigmoid2(double* x, double a, double b, double c, double d, double Q, double nu ,double* result, int size);
 void uniform_random(int m, int n,int lower, int upper, int** result);
-float gaussian(float x, float mu, float sigma);
+double gaussian(double x, double mu, double sigma);
 
 
 // Roulette wheel selection
@@ -45,8 +43,6 @@ int intXORshift32(int a);
 
 // usefull for debugging and eventual conversion to numpy arrays
 void convert_int32_to_binary(int** valarr, int genes, int individuals,
-                             float factor, float bias);
+                             double factor, double bias);
 void convert_binary_to_int32(int** valarr, int genes, int individuals,
-                             float factor, float bias);
-
-#endif
+                             double factor, double bias);

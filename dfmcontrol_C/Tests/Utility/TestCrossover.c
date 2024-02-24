@@ -2,7 +2,7 @@
 #include "stdlib.h"
 #include "math.h"
 
-#include "../../Utility/crossover.c"
+#include "../../Utility/crossover.h"
 
 int main(){
 

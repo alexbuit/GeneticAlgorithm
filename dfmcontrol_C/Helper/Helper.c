@@ -11,12 +11,12 @@
 
 
 void ndbit2int32(int** valarr, int genes, int individuals,
-                float factor, float bias, float** result){
+                double factor, double bias, double** result){
     /*
-    Convert an array of bitarrays to an array of floats
+    Convert an array of bitarrays to an array of doubles
 
-    :param valarr: The array of binary data to be converted to floats (a x b) (individuals x (bitsize * genes))
-    :type valarr: array of floats (float **)
+    :param valarr: The array of binary data to be converted to doubles (a x b) (individuals x (bitsize * genes))
+    :type valarr: array of doubles (double **)
 
     :param bitsize: The size of the bitarrays
     :type bitsize: int
@@ -27,14 +27,14 @@ void ndbit2int32(int** valarr, int genes, int individuals,
     :param individuals: the number of individuals in the bitarrays (m = individuals; m = a)
     :type individuals: int
     
-    :param result: The array of floats to be filled with the converted values (m x n)
-    :type result: array of ints (float **)
+    :param result: The array of doubles to be filled with the converted values (m x n)
+    :type result: array of ints (double **)
 
     :param factor: The factor of the uniform distribution.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the uniform distribution.
-    :type bias: float
+    :type bias: double
 
     :return: void
     :rtype: void
@@ -44,26 +44,26 @@ void ndbit2int32(int** valarr, int genes, int individuals,
 
     for (int i = 0; i < individuals; i++){
         for (int j = 0; j < genes; j++){
-            // result[i][j] = (float) temp[i][j] / (pow(2, bitsize - 1)) * factor + bias;
+            // result[i][j] = (double) temp[i][j] / (pow(2, bitsize - 1)) * factor + bias;
             if(valarr[i][j] < 0){
                 temp = ~(valarr[i][j] & 0x7fffffff) + 1 ;
             }
             else{
                 temp = valarr[i][j];
             }
-            result[i][j] = (float) temp * factor / (pow(2, 8*sizeof(int) - 1)) + bias;
+            result[i][j] = (double) temp * factor / (pow(2, 8*sizeof(int) - 1)) + bias;
         }
     }
 }
 
-void int2ndbit32(float** valarr, int genes, int individuals,
-               float factor, float bias, int** result){
+void int2ndbit32(double** valarr, int genes, int individuals,
+               double factor, double bias, int** result){
 
     /*
     Convert an array of integers to an array of bitarrays
 
     :param valarr: The array of integers to be converted to bitarrays (a)
-    :type valarr: array of floats (float **)
+    :type valarr: array of doubles (double **)
 
     :param bitsize: The size of the bitarrays
     :type bitsize: int
@@ -78,10 +78,10 @@ void int2ndbit32(float** valarr, int genes, int individuals,
     :type result: array of ints (int **)
 
     :param factor: The factor of the uniform distribution.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the uniform distribution.
-    :type bias: float
+    :type bias: double
 
     :return: void
     :rtype: void
@@ -104,12 +104,12 @@ void int2ndbit32(float** valarr, int genes, int individuals,
 }
 
 void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
-                float factor, float bias, float** result){
+                double factor, double bias, double** result){
     /*
-    Convert an array of bitarrays to an array of floats
+    Convert an array of bitarrays to an array of doubles
 
-    :param valarr: The array of binary data to be converted to floats (a x b) (individuals x (bitsize * genes))
-    :type valarr: array of floats (float **)
+    :param valarr: The array of binary data to be converted to doubles (a x b) (individuals x (bitsize * genes))
+    :type valarr: array of doubles (double **)
 
     :param bitsize: The size of the bitarrays
     :type bitsize: int
@@ -120,14 +120,14 @@ void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
     :param individuals: the number of individuals in the bitarrays (m = individuals; m = a)
     :type individuals: int
     
-    :param result: The array of floats to be filled with the converted values (m x n)
-    :type result: array of ints (float **)
+    :param result: The array of doubles to be filled with the converted values (m x n)
+    :type result: array of ints (double **)
 
     :param factor: The factor of the uniform distribution.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the uniform distribution.
-    :type bias: float
+    :type bias: double
 
     :return: void
     :rtype: void
@@ -147,7 +147,7 @@ void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
     // normalise the values and apply the factor and bias
     for (int i = 0; i < individuals; i++){
         for (int j = 0; j < genes; j++){
-            result[i][j] = (float) temp[i][j] / (pow(2, bitsize - 1)) * factor + bias;
+            result[i][j] = (double) temp[i][j] / (pow(2, bitsize - 1)) * factor + bias;
         }
     }
     
@@ -160,14 +160,14 @@ void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
     free(temp);
 }
 
-void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
-               float factor, float bias, int** result){
+void int2ndbit(double** valarr, int bitsize, int genes, int individuals,
+               double factor, double bias, int** result){
 
     /*
     Convert an array of integers to an array of bitarrays
 
     :param valarr: The array of integers to be converted to bitarrays (a)
-    :type valarr: array of floats (float **)
+    :type valarr: array of doubles (double **)
 
     :param bitsize: The size of the bitarrays
     :type bitsize: int
@@ -182,10 +182,10 @@ void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
     :type result: array of ints (int **)
 
     :param factor: The factor of the uniform distribution.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the uniform distribution.
-    :type bias: float
+    :type bias: double
 
 
     :return: void
@@ -220,7 +220,7 @@ void int2ndbit(float** valarr, int bitsize, int genes, int individuals,
     free(copyvalarr);
 }
 
-void int2bin(int value, int bitsize, int result){
+void int2bin(int value, int bitsize, int* result){
     /*
     Convert an integer to a bitarray
     
@@ -234,13 +234,19 @@ void int2bin(int value, int bitsize, int result){
     :type result: array of bytes
     */
 
-    // first bit is the sign bit
     if (value < 0){
-        result = ~(value-1); // bitflip and subtract 1
+        result[0] = 1;
+        value = value * -1;
     }
     else {
-        result = value;
-    }    
+        result[0] = 0;
+    }
+
+    // convert the value to a bitarray
+    for (int i = 1; i < bitsize; i++){
+        result[i] = value % 2;
+        value = value / 2;
+    }
 }
 
 void intarr2binarr(int* valarr, int bitsize, int genes, int* result){
@@ -431,13 +437,13 @@ void printMatrix(int** matrix, int rows, int cols) {
     printf("]\n");
 }
 
-void printfMatrix(float** matrix, int rows, int cols, int precision) {
+void printfMatrix(double** matrix, int rows, int cols, int precision) {
 
     /*
-    Print a matrix of floats
+    Print a matrix of doubles
 
     :param matrix: The matrix to be printed
-    :type matrix: array of floats (float **)
+    :type matrix: array of doubles (double **)
 
     :param rows: The number of rows in the matrix
     :type rows: int
@@ -473,7 +479,7 @@ void printfMatrix(float** matrix, int rows, int cols, int precision) {
     printf("]\n");
 }
 
-void sigmoid(float* x, float* result, int size){
+void sigmoid(double* x, double* result, int size){
     /*
     Calculate the sigmoid of x
 
@@ -486,7 +492,7 @@ void sigmoid(float* x, float* result, int size){
     }
 }
 
-void sigmoid_derivative(float* x, float* result, int size){
+void sigmoid_derivative(double* x, double* result, int size){
     /*
     Calculate the derivative of the sigmoid of x
 
@@ -499,7 +505,7 @@ void sigmoid_derivative(float* x, float* result, int size){
     }
 }
 
-void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,float* result, int size){
+void sigmoid2(double* x, double a, double b, double c, double d, double Q, double nu ,double* result, int size){
 
     /*
     Calculate the sigmoid of x
@@ -513,7 +519,7 @@ void sigmoid2(float* x, float a, float b, float c, float d, float Q, float nu ,f
     }
 }
 
-void uniform_random(int m, int n,int lower, int upper,int** result){
+void uniform_random(int m, int n,int lower, int upper, int** result){
     /*
     Create a matrix filled with uniformly distributed integers.
 
@@ -557,7 +563,7 @@ void uniform_random(int m, int n,int lower, int upper,int** result){
 
 }
 
-float gaussian(float x, float mu, float sigma){
+double gaussian(double x, double mu, double sigma){
     /*
     Calculate the gaussian of x
 
@@ -566,12 +572,12 @@ float gaussian(float x, float mu, float sigma){
     sigma is the standard deviation
     */
 
-    float result = (1 / (sigma * sqrtf(2 * PI))) * expf(-powf(x - mu, 2) / (2 * powf(sigma, 2)));
+    double result = (1 / (sigma * sqrtf(2 * PI))) * expf(-powf(x - mu, 2) / (2 * powf(sigma, 2)));
 
     return result;
 }
 
-float cauchy(float x, float mu, float sigma){
+double cauchy(double x, double mu, double sigma){
     /*
     Calculate the cauchy of x
 
@@ -580,7 +586,7 @@ float cauchy(float x, float mu, float sigma){
     sigma is the standard deviation
     */
 
-    float result = (1 / PI) * (sigma / (powf(x - mu, 2) + powf(sigma, 2)));
+    double result = (1 / PI) * (sigma / (powf(x - mu, 2) + powf(sigma, 2)));
     
     return result;
 }
@@ -591,7 +597,7 @@ void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
     Roulette wheel selection of an index based on probabilities
 
     :param probabilities: The probabilities of the indices
-    :type probabilities: array of floats (float *)
+    :type probabilities: array of doubles (double *)
 
     :param size: The size of the probabilities array
     :type size: int
@@ -617,7 +623,7 @@ void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
     for (int i = 0; i < size; i++){ // expensive sorting algorithm
         for (int j = i + 1; j > size; j++){
             if (copy[i] < copy[j]){
-                float temp = copy[i];
+                double temp = copy[i];
                 copy[i] = copy[j];
                 copy[j] = temp;
 
@@ -662,7 +668,7 @@ int random_int32(){
 
 int random_intXOR32(){
     int a  = state;
-    state = xorshift32(a);
+    state = intXORshift32(a);
     return a;
 }
 
@@ -672,7 +678,7 @@ void seed_intXOR32(){
     }
 }
 
-int xorshift32(int a){
+int intXORshift32(int a){
     a ^= a << 13;
     a ^= a >> 17;
     a ^= a << 5;
@@ -680,13 +686,13 @@ int xorshift32(int a){
 }
 
 void convert_int32_to_binary(int** valarr, int genes, int individuals,
-                             float factor, float bias){
+                             double factor, double bias){
     
 
-    float** temp = (float**)malloc(individuals * sizeof(float*));
+    double** temp = (double**)malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        temp[i] = (float*)malloc(genes * sizeof(float) * 8*sizeof(int));
+        temp[i] = (double*)malloc(genes * sizeof(double) * 8*sizeof(int));
     }
 
     ndbit2int32(valarr, genes, individuals, factor, bias, temp);
@@ -700,12 +706,12 @@ void convert_int32_to_binary(int** valarr, int genes, int individuals,
 }
 
 void convert_binary_to_int32(int** valarr, int genes, int individuals,
-                             float factor, float bias){
+                             double factor, double bias){
     
-    float** temp = (float**)malloc(individuals * sizeof(float*));
+    double** temp = (double**)malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        temp[i] = (float*)malloc(genes * sizeof(float) * 8 * sizeof(int));
+        temp[i] = (double*)malloc(genes * sizeof(double) * 8 * sizeof(int));
     }
 
 

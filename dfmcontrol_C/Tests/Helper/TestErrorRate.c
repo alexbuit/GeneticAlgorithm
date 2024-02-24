@@ -6,12 +6,12 @@
 #include "../../Helper/Helper.c"
 #include "TestErrorRate.h"
 
-float** valmat;
+double** valmat;
 int** result;
-float** copyvalmat;
+double** copyvalmat;
 
-float factor = 15;
-float bias = 5;
+double factor = 15;
+double bias = 5;
 int normalised = 1;
 
 int main(){
@@ -28,7 +28,7 @@ int main(){
     // printf("Error rate: %f\n", ErrorRate(64, genes, individuals));
 
     int* bitarray;
-    float* error_rate;
+    double* error_rate;
 
     bitarray = malloc((int) (roundf((bitrange * sizeof(int))/ bitstepsize)) - bitstart);
     error_rate = malloc((int) (roundf((bitrange * sizeof(int))/ bitstepsize)) - bitstart);
@@ -55,16 +55,16 @@ int main(){
 
 }
 
-float ErrorRate(int bitsize, int genes, int individuals){
+double ErrorRate(int bitsize, int genes, int individuals){
 
     valmat = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of integers
     result = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of bitarrays
     copyvalmat = malloc(individuals * sizeof(int*)); // copy of valmat
 
     for(int i=0; i<individuals; i++){
-        valmat[i] = malloc(genes * sizeof(float));
+        valmat[i] = malloc(genes * sizeof(double));
         result[i] = malloc(genes * bitsize * sizeof(int));
-        copyvalmat[i] = malloc(genes * sizeof(float));
+        copyvalmat[i] = malloc(genes * sizeof(double));
     }
 
     // fill valmat with random integers
@@ -77,10 +77,10 @@ float ErrorRate(int bitsize, int genes, int individuals){
         }
     }
 
-    // cast the values to floats
+    // cast the values to doubles
     for (int i = 0; i < individuals; i++){
         for (int j = 0; j < genes; j++){
-            valmat[i][j] = (float) valmat[i][j];
+            valmat[i][j] = (double) valmat[i][j];
         }
     }
 
@@ -118,6 +118,6 @@ float ErrorRate(int bitsize, int genes, int individuals){
     free(copyvalmat);
     free(same);
 
-    float error_rate = (float) ((individuals * genes) - same_count) / (individuals * genes);
+    double error_rate = (double) ((individuals * genes) - same_count) / (individuals * genes);
     return error_rate;
 }

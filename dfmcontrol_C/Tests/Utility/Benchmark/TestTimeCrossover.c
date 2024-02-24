@@ -2,22 +2,22 @@
 #include <stdio.h> 
 #include <time.h> 
 
-#include "../../../Utility/crossover.c"
-#include "../../../Utility/pop.c"
+#include "../../../Utility/crossover.h"
+#include "../../../Utility/pop.h"
 
 
 void crossoverbench(int bitsize, int genes, int individuals, int i);
 
-float* runtime_single;
-float* runtime_double;
-float* runtime_equal;
+double* runtime_single;
+double* runtime_double;
+double* runtime_equal;
 
 int main(){
 
 
-    runtime_single = malloc(40 * sizeof(float));
-    runtime_double = malloc(40 * sizeof(float));
-    runtime_equal = malloc(40 * sizeof(float));
+    runtime_single = malloc(40 * sizeof(double));
+    runtime_double = malloc(40 * sizeof(double));
+    runtime_equal = malloc(40 * sizeof(double));
 
     printf("start\n");
     for (int i = 1; i < 39; i++){
@@ -66,7 +66,7 @@ void crossoverbench(int bitsize, int genes, int individuals, int i){
     
 
     //print the matrices
-
+    
 
     // crossover
     clock_t start, end;

@@ -1,19 +1,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "../../Utility/pop.h"
-#include "../../Utility/pop.c"
 
 #include "TestPop.h"
 
 int main(){
     // Testbitpop(32, 16, 16, 1);
     // Testuniformpop(32, 16, 16, 10.0f, 1.0f, 1, 1);
-    float loc = 0.0f;
-    float scale = 2.0f;
-    float factor = 10.0f;
-    float bias = 1.0f;
+    double loc = 0.0f;
+    double scale = 2.0f;
+    double factor = 10.0f;
+    double bias = 1.0f;
     Testnormalpop(32, 16, 16, loc, scale, factor, bias, 1);
     Testcauchypop(32, 16, 16, loc, scale, factor, bias, 1);
     // TestnormalpopBM(32, 64, 16, 5.0f, 1.0f, 10.0f, 0.0f, 1, 1);
@@ -26,10 +26,10 @@ void Testbitpop(int bitsize, int genes, int individuals, int writeresult){
         result[i] = (int*)malloc(genes * bitsize * sizeof(int));
     }
 
-    float** numresult = malloc(individuals * sizeof(float*));
+    double** numresult = malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        numresult[i] = malloc(genes * sizeof(float));
+        numresult[i] = malloc(genes * sizeof(double));
     }
 
     bitpop(bitsize, genes, individuals, result);
@@ -39,8 +39,8 @@ void Testbitpop(int bitsize, int genes, int individuals, int writeresult){
     printMatrix(result, individuals, genes * bitsize);
     printfMatrix(numresult, individuals, genes, 4);
 
-    float factor = 0;
-    float bias = 0;
+    double factor = 0;
+    double bias = 0;
     int normalised = 1;
 
     if (writeresult == 1){
@@ -63,17 +63,17 @@ void Testbitpop(int bitsize, int genes, int individuals, int writeresult){
 }
 
 void Testuniformpop(int bitsize, int genes, int individuals,
-                     float factor, float bias, int writeresult){
+                     double factor, double bias, int writeresult){
 
         int** result = (int**)malloc(individuals * sizeof(int*));
     for (int i = 0; i < individuals; i++){
         result[i] = (int*)malloc(genes * bitsize * sizeof(int));
     }
 
-    float** numresult = malloc(individuals * sizeof(float*));
+    double** numresult = malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        numresult[i] = malloc(genes * sizeof(float));
+        numresult[i] = malloc(genes * sizeof(double));
     }
 
     bitpop(bitsize, genes, individuals, result);
@@ -101,8 +101,8 @@ void Testuniformpop(int bitsize, int genes, int individuals,
 
 }
 
-void TestnormalpopBM(int bitsize, int genes, int individuals, float loc, float scale,
-                     float factor, float bias, int writeresult){
+void TestnormalpopBM(int bitsize, int genes, int individuals, double loc, double scale,
+                     double factor, double bias, int writeresult){
 
     /*
 
@@ -112,10 +112,10 @@ void TestnormalpopBM(int bitsize, int genes, int individuals, float loc, float s
         result[i] = (int*)malloc(genes * bitsize * sizeof(int));
     }
 
-    float** numresult = malloc(individuals * sizeof(float*));
+    double** numresult = malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        numresult[i] = malloc(genes * sizeof(float));
+        numresult[i] = malloc(genes * sizeof(double));
     }
 
     normal_bit_pop_boxmuller(bitsize, genes, individuals, factor, bias, loc, scale, result);
@@ -141,8 +141,8 @@ void TestnormalpopBM(int bitsize, int genes, int individuals, float loc, float s
 
 }
 
-void Testnormalpop(int bitsize, int genes, int individuals, float loc, float scale,
-                     float factor, float bias, int writeresult){
+void Testnormalpop(int bitsize, int genes, int individuals, double loc, double scale,
+                     double factor, double bias, int writeresult){
 
     /*
 
@@ -152,10 +152,10 @@ void Testnormalpop(int bitsize, int genes, int individuals, float loc, float sca
         result[i] = (int*)malloc(genes * bitsize * sizeof(int));
     }
 
-    float** numresult = malloc(individuals * sizeof(float*));
+    double** numresult = malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        numresult[i] = malloc(genes * sizeof(float));
+        numresult[i] = malloc(genes * sizeof(double));
     }
 
     normal_bit_pop(bitsize, genes, individuals, factor, bias, loc, scale,result);
@@ -181,8 +181,8 @@ void Testnormalpop(int bitsize, int genes, int individuals, float loc, float sca
 
 }
 
-void Testcauchypop(int bitsize, int genes, int individuals, float loc, float scale,
-                     float factor, float bias, int writeresult){
+void Testcauchypop(int bitsize, int genes, int individuals, double loc, double scale,
+                     double factor, double bias, int writeresult){
 
     /*
 
@@ -192,10 +192,10 @@ void Testcauchypop(int bitsize, int genes, int individuals, float loc, float sca
         result[i] = (int*)malloc(genes * bitsize * sizeof(int));
     }
 
-    float** numresult = malloc(individuals * sizeof(float*));
+    double** numresult = malloc(individuals * sizeof(double*));
 
     for (int i = 0; i < individuals; i++){
-        numresult[i] = malloc(genes * sizeof(float));
+        numresult[i] = malloc(genes * sizeof(double));
     }
 
     cauchy_bit_pop(bitsize, genes, individuals, factor, bias, loc, scale,result);
@@ -221,7 +221,7 @@ void Testcauchypop(int bitsize, int genes, int individuals, float loc, float sca
 
 }
 
-void write2file(int bitsize, int genes, int individuals, float factor, float bias, char* filename, int** result, float** numresult){
+void write2file(int bitsize, int genes, int individuals, double factor, double bias, char* filename, int** result, double** numresult){
 
     /*
 

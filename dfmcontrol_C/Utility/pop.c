@@ -4,6 +4,8 @@
 #define PI   3.14159265358979323846264338327950288419716939937510f
 
 #include "pop.h"
+#include "../Helper/Helper.h"
+
 
 
 void bitpop(int bitsize, int genes, int individuals, int** result){
@@ -34,7 +36,7 @@ void bitpop(int bitsize, int genes, int individuals, int** result){
 
 }
 void uniform_bit_pop(int bitsize, int genes, int individuals,
-                     float factor, float bias, int** result){
+                     double factor, double bias, int** result){
     /*
     Fill a matrix with bits according to a uniform distribution.
 
@@ -48,10 +50,10 @@ void uniform_bit_pop(int bitsize, int genes, int individuals,
     :type individuals: int
 
     :param factor: The factor by which the uniform distribution is scaled.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the uniform distribution.
-    :type bias: float
+    :type bias: double
 
     The factor and bias are used to calculate the upper and lower bounds of the uniform distribution 
     according to the following formula: [1]
@@ -121,8 +123,8 @@ void uniform_bit_pop(int bitsize, int genes, int individuals,
     free(temp);
 }
 void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
-                    float factor, float bias,
-                    float loc, float scale, int** result){
+                    double factor, double bias,
+                    double loc, double scale, int** result){
     /* 
     Fill a matrix with bits according to a normal distribution.
     using the following probability density function:
@@ -150,24 +152,24 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
     :type individuals: int
 
     :param factor: The factor by which the normal distribution is scaled.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the normal distribution.
-    :type bias: float
+    :type bias: double
 
     The factor and bias are used for the conversion to the integer domain according to the following formula:
 
     .. math::
-        float = (int - bias) / factor
+        double = (int - bias) / factor
 
     :param normalised: Whether the normal distribution is normalised.
     :type normalised: int
 
     :param loc: The mean of the normal distribution.
-    :type loc: float
+    :type loc: double
 
     :param scale: The standard deviation of the normal distribution.
-    :type scale: float
+    :type scale: double
 
     :param result: The matrix to be filled with bits according to a normal distribution.
                    shape = (individuals, genes * bitsize)
@@ -195,13 +197,13 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
 
     uniform_random(individuals, numbers_inuni, lower_uniform, upper_uniform, temp);
 
-    // convert to floats between 0 and 1
+    // convert to doubles between 0 and 1
 
-    float** normal_dist = malloc(sizeof(float*) * numbers_inuni );
+    double** normal_dist = malloc(sizeof(double*) * numbers_inuni );
     for(int i=0; i<individuals; i++){
-        normal_dist[i] = malloc(sizeof(float) * numbers_inuni);
+        normal_dist[i] = malloc(sizeof(double) * numbers_inuni);
         for(int j =0; j< numbers_inuni; j++){
-            normal_dist[i][j] = (float) (temp[i][j] / pow(2, bitsize));
+            normal_dist[i][j] = (double) (temp[i][j] / pow(2, bitsize));
         }
     }
 
@@ -211,8 +213,8 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
 
     free(temp);
 
-    float Z0;
-    float Z1;
+    double Z0;
+    double Z1;
 
     for(int i = 0; i<individuals; i++){
         for(int j = 0; j<(int) roundf(numbers_inuni/2); j+=2){
@@ -239,8 +241,8 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
 }
 
 void normal_bit_pop(int bitsize, int genes, int individuals,
-                    float factor, float bias,
-                    float loc, float scale, int** result){
+                    double factor, double bias,
+                    double loc, double scale, int** result){
     /*
 
     Produce a normal distributed set of values using the Gaussian distribution:
@@ -260,24 +262,24 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
     :type individuals: int
 
     :param factor: The factor by which the normal distribution is scaled.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the normal distribution.
-    :type bias: float
+    :type bias: double
 
     The factor and bias are used for the conversion to the integer domain according to the following formula:
 
     .. math::
-        float = (int - bias) / factor
+        double = (int - bias) / factor
 
     :param normalised: Whether the normal distribution is normalised.
     :type normalised: int
 
     :param loc: The mean of the normal distribution.
-    :type loc: float
+    :type loc: double
 
-    :param scale: The standard deviation of the normal distribution. Due to the use of floats the scale should be > 2.
-    :type scale: float
+    :param scale: The standard deviation of the normal distribution. Due to the use of doubles the scale should be > 2.
+    :type scale: double
 
     :param result: The matrix to be filled with bits according to a normal distribution.
                    shape = (individuals, genes * bitsize)
@@ -285,11 +287,11 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
     */
 
    // Determine the steps between the values in the normal distribution
-    float step = (2 * factor) / (genes *individuals);
+    double step = (2 * factor) / (genes *individuals);
 
     // Determine the lower and upper bounds of the normal distribution
-    float lower = scale * (-factor) + loc;
-    float upper = scale * factor + loc;
+    double lower = scale * (-factor) + loc;
+    double upper = scale * factor + loc;
 
     // Determine the number of values in the normal distribution
     int numvalues = genes * individuals;
@@ -302,7 +304,7 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
         range[i] = -factor + (i * step);
     }
 
-    float sum = 0;
+    double sum = 0;
     for(int i = 0; i < numvalues; i++){
         normal_dist[i] = gaussian(range[i], loc, scale);
         sum += normal_dist[i];
@@ -325,7 +327,7 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
 
     // printf("\n");
 
-    float** normal_distmat = malloc(sizeof(float*) * numvalues);
+    double** normal_distmat = malloc(sizeof(double*) * numvalues);
     int* indices = malloc(sizeof(int) * numvalues);
     roulette_wheel(normal_dist, numvalues, numvalues, indices);
 
@@ -335,7 +337,7 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
     // }
 
     for(int i = 0; i < individuals; i++){  
-        normal_distmat[i] = malloc(sizeof(float) * genes);    
+        normal_distmat[i] = malloc(sizeof(double) * genes);    
         for(int j = 0; j < genes; j++){
             normal_distmat[i][j] = range[indices[(i * genes) + j]];
         }
@@ -359,8 +361,8 @@ void normal_bit_pop(int bitsize, int genes, int individuals,
 
 
 void cauchy_bit_pop(int bitsize, int genes, int individuals,
-                    float factor, float bias,
-                    float loc, float scale, int** result){
+                    double factor, double bias,
+                    double loc, double scale, int** result){
     /*
     
     Produce a normal distributed set of values using the Cauchy distribution:
@@ -380,19 +382,19 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
     :type individuals: int
 
     :param factor: The factor by which the normal distribution is scaled.
-    :type factor: float
+    :type factor: double
 
     :param bias: The bias of the normal distribution.
-    :type bias: float
+    :type bias: double
 
     :param normalised: Whether the normal distribution is normalised.
     :type normalised: int
 
     :param loc: The location of the peak of the distribution.
-    :type loc: float
+    :type loc: double
 
     :param scale: The width of the distribution.
-    :type scale: float   
+    :type scale: double   
 
     :param result: The matrix to be filled with bits according to a normal distribution.
                    shape = (individuals, genes * bitsize)
@@ -400,11 +402,11 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
 
     */
 // Determine the steps between the values in the normal distribution
-    float step = (2 * factor) / (genes *individuals);
+    double step = (2 * factor) / (genes *individuals);
 
     // Determine the lower and upper bounds of the normal distribution
-    float lower = scale * (-factor) + loc;
-    float upper = scale * factor + loc;
+    double lower = scale * (-factor) + loc;
+    double upper = scale * factor + loc;
 
     // print when bias is not in the range of the normal distribution
     if(bias < lower || bias > upper){
@@ -422,7 +424,7 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
         range[i] = -factor + (i * step);
     }
 
-    float sum = 0;
+    double sum = 0;
     for(int i = 0; i < numvalues; i++){
         normal_dist[i] = cauchy(range[i], loc, scale);
         sum += normal_dist[i];
@@ -445,7 +447,7 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
 
     // printf("\n");
 
-    float** normal_distmat = malloc(sizeof(float*) * numvalues);
+    double** normal_distmat = malloc(sizeof(double*) * numvalues);
     int* indices = malloc(sizeof(int) * numvalues);
     roulette_wheel(normal_dist, numvalues, numvalues, indices);
 
@@ -455,7 +457,7 @@ void cauchy_bit_pop(int bitsize, int genes, int individuals,
     // }
 
     for(int i = 0; i < individuals; i++){  
-        normal_distmat[i] = malloc(sizeof(float) * genes);    
+        normal_distmat[i] = malloc(sizeof(double) * genes);    
         for(int j = 0; j < genes; j++){
             normal_distmat[i][j] = range[indices[(i * genes) + j]];
         }

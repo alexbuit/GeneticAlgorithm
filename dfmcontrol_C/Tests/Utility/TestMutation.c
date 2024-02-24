@@ -3,8 +3,8 @@
 #include "stdlib.h"
 #include "math.h"
 
-#include "../../Utility/mutation.c"
-#include "../../Helper/Helper.c"
+#include "../../Utility/mutation.h"
+#include "../../Helper/Helper.h"
 
 int main(){
 

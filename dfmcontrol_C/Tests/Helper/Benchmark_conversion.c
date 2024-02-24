@@ -4,19 +4,17 @@
 #include <math.h>
 #include <time.h>
 
-#include "../../Utility/pop.c"
-#include "../../Helper/Helper.c"
-#include "Benchmark_conversion.h"
 
+#include "benchmark_conversion.h"
 
-float* runtime_int2bit;
-float* runtime_bit2int;
+double* runtime_int2bit;
+double* runtime_bit2int;
 
 
 int main(){
 
-    runtime_int2bit = malloc(40 * sizeof(float));
-    runtime_bit2int = malloc(40 * sizeof(float));
+    runtime_int2bit = malloc(40 * sizeof(double));
+    runtime_bit2int = malloc(40 * sizeof(double));
 
     printf("start\n");
     for (int i = 1; i < 40; i++){
@@ -42,9 +40,9 @@ int main(){
 void matrix_conversion_benchmark(int individual, int genes, int bitsize){
 
     // initialise valmat
-    float** valmat = (float**) malloc(individual * sizeof(float*));
+    double** valmat = (double**) malloc(individual * sizeof(double*));
     for (int i = 0; i < individual; i++){
-        valmat[i] = (float*) malloc(genes  * sizeof(float));
+        valmat[i] = (double*) malloc(genes  * sizeof(double));
     }
 
     // initialise result matrix

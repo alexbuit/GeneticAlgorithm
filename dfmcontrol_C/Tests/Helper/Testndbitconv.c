@@ -17,14 +17,14 @@ int main(){
     int normalised = 1;
 
 
-    float** valmat = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of integers
+    double** valmat = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of integers
     int** result = malloc(individuals * sizeof(int*)); // matrix of individuals amount of genes amount of bitarrays
-    float** copyvalmat = malloc(individuals * sizeof(int*)); // copy of valmat
+    double** copyvalmat = malloc(individuals * sizeof(int*)); // copy of valmat
 
     for(int i=0; i<individuals; i++){
-        valmat[i] = malloc(genes * sizeof(float));
+        valmat[i] = malloc(genes * sizeof(double));
         result[i] = malloc(genes * bitsize * sizeof(int));
-        copyvalmat[i] = malloc(genes * sizeof(float));
+        copyvalmat[i] = malloc(genes * sizeof(double));
     }
 
     // fill valmat with random integers
@@ -32,15 +32,15 @@ int main(){
     for(int i=0; i<individuals; i++){
         for(int j=0; j<genes; j++){
             sign = (rand() % 2 == 0) ? 1 : -1;
-            valmat[i][j] = (float) (rand() % 9 * sign); // random integer between -2^bitsize-1 and 2^bitsize - 1
+            valmat[i][j] = (double) (rand() % 9 * sign); // random integer between -2^bitsize-1 and 2^bitsize - 1
             copyvalmat[i][j] = valmat[i][j];
         }
     }
 
-    // cast the values to floats
+    // cast the values to doubles
     for (int i = 0; i < individuals; i++){
         for (int j = 0; j < genes; j++){
-            valmat[i][j] = (float) valmat[i][j];
+            valmat[i][j] = (double) valmat[i][j];
         }
     }
 
