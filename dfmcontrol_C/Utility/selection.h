@@ -10,14 +10,14 @@ static const int sel_boltzmann = 4;
 
 // gen purpose
 
-void process_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected);
+void process_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
 
 
 
 // Selection functions
-void roulette_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected);
-void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected);
-void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected);
-void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected);
-void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected);
+void roulette_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
+void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
+void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
+void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
+void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
 

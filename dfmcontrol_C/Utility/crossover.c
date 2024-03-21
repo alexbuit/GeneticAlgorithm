@@ -9,12 +9,20 @@
 void process_crossover(struct gene_pool_s gene_pool, struct crossover_param_s crossover_param){
     //double** pop_parameter_bin, int individuals, int genes, int* selected, int skipped_pairs){
     int nearest_even = (gene_pool.individuals-gene_pool.elitism) - ((gene_pool.individuals-gene_pool.elitism) % 2);
+
     for(int i = 0; i< nearest_even; i+=2){
-            crossover(gene_pool.pop_param_bin[gene_pool.selected_indexes[i]],
+            crossover(gene_pool.pop_param_bin[gene_pool.selected_indexes[i]], 
                       gene_pool.pop_param_bin[gene_pool.selected_indexes[i+1]],
                       gene_pool.genes,
-                      gene_pool.pop_param_bin[i],
-                      gene_pool.pop_param_bin[i+1]);
+                      gene_pool.pop_param_bin_cross_buffer[i],
+                      gene_pool.pop_param_bin_cross_buffer[i+1]);
+    }
+
+    // copy the crossed over values back to the population
+    for(int i = 0; i< nearest_even; i++){
+        for(int j = 0; j< gene_pool.genes; j++){
+            gene_pool.pop_param_bin[gene_pool.selected_indexes[i]][j] = gene_pool.pop_param_bin_cross_buffer[i][j];
+        }
     }
 }
 

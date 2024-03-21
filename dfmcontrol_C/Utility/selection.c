@@ -65,22 +65,22 @@
 // }
 
 
-void process_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected){
+void process_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
 
         if(selection_param.selection_method ==sel_roulette){
-        roulette_selection(gene_pool, selection_param, selected);
+        roulette_selection(gene_pool, selection_param);
         }
         else if(selection_param.selection_method==sel_rank_tournament){
-        rank_tournament_selection(gene_pool, selection_param, selected);
+        rank_tournament_selection(gene_pool, selection_param);
         }
         else if(selection_param.selection_method==sel_rank){
-        rank_selection(gene_pool, selection_param, selected);
+        rank_selection(gene_pool, selection_param);
         }
         else if(selection_param.selection_method==sel_rank_space){
-        rank_space_selection(gene_pool, selection_param, selected);
+        rank_space_selection(gene_pool, selection_param);
         }
         else if(selection_param.selection_method==sel_boltzmann){
-        boltzmann_selection(gene_pool, selection_param, selected);
+        boltzmann_selection(gene_pool, selection_param);
         }
         else{
         printf("Error: selection_method is not 0, 1, 2, 3 or 4\n");
@@ -105,7 +105,7 @@ void roulette_selection(struct gene_pool_s gene_pool, struct selection_param_s s
 
 }
 
-void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected){
+void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
         /*
 
         :param pop: matrix of individuals as double (individuals x genes)
@@ -121,7 +121,7 @@ void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_pa
         */
 
 }
-void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected){
+void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
         /*
 
         :param pop: matrix of individuals as double (individuals x genes)
@@ -137,7 +137,7 @@ void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selec
         */
 
 }
-void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected){
+void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
         /*
 
         :param pop: matrix of individuals as double (individuals x genes)
@@ -153,7 +153,7 @@ void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s
         */
 
 }
-void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param, int* selected){
+void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
             /*
 
         :param pop: matrix of individuals as double (individuals x genes)

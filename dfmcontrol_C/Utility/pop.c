@@ -7,7 +7,17 @@
 #include "../Helper/Helper.h"
 
 void init_gene_pool(struct gene_pool_s gene_pool){
-        gene_pool.pop_param_bin = (int**)malloc(gene_pool.individuals * sizeof(int*));
+    //struct gene_pool_s {
+    // int** pop_param_bin;
+    // double** pop_param_double;
+    // double* pop_result_set;
+    // int* selected_indexes;
+    // int genes;
+    // int individuals;
+    // int elitism;
+
+    
+    gene_pool.pop_param_bin = (int**)malloc(gene_pool.individuals * sizeof(int*));
   
     for (int i = 0; i < gene_pool.individuals; i++){
         gene_pool.pop_param_bin[i] = (int*)malloc(gene_pool.genes * sizeof(int));
@@ -20,6 +30,11 @@ void init_gene_pool(struct gene_pool_s gene_pool){
     }
 
     gene_pool.pop_result_set = malloc(gene_pool.individuals * sizeof(double));
+
+    gene_pool.selected_indexes = malloc(gene_pool.individuals * sizeof(int));
+    
+    gene_pool.sorted_indexes = malloc(gene_pool.individuals * sizeof(int));
+
 }
 
 void free_gene_pool(struct gene_pool_s gene_pool){
@@ -34,6 +49,10 @@ void free_gene_pool(struct gene_pool_s gene_pool){
     free(gene_pool.pop_param_double);
 
     free(gene_pool.pop_result_set);
+
+    free(gene_pool.selected_indexes);
+
+    free(gene_pool.sorted_indexes);
 }
 
 void bitpop(int bitsize, int genes, int individuals, int** result){

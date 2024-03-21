@@ -1,4 +1,6 @@
 
+void init_gene_pool(struct gene_pool_s gene_pool);
+
 void bitpop(int bitsize, int genes, int individuals, int** result);
 void bitpop32(int genes, int individuals, int** result);
 

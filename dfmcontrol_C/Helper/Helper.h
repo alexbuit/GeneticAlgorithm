@@ -4,12 +4,15 @@ int intXOR32_seed;
 
 struct gene_pool_s {
     int** pop_param_bin;
+    int** pop_param_bin_cross_buffer;
     double** pop_param_double;
     double* pop_result_set;
     int* selected_indexes;
+    int* sorted_indexes;
     int genes;
     int individuals;
     int elitism;
+    int iteration_number;
 };
 
 struct selection_param_s {

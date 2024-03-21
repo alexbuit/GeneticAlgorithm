@@ -44,7 +44,7 @@ void mutate32(struct gene_pool_s gene_pool, struct mutation_param_s mutation_par
 
     int mutation;
     int mutation_bit = 0;
-    for (int i = mutation_param.mutation_elitism; i < gene_pool.individuals; i++){
+    for (int i = 0; i < gene_pool.individuals-gene_pool.elitism; i++){
         for (int j = 0; j < mutation_param.mutation_rate; j++){ // check if works
             mutation = random_intXOR32() % gene_pool.genes;
             mutation_bit = 1 << (random_intXOR32() % sizeof(int)*8);
@@ -59,7 +59,7 @@ void mutate32(struct gene_pool_s gene_pool, struct mutation_param_s mutation_par
 
         for (int j = 0; j < gene_pool.genes; j++){
             if(mutations[i] != 0){
-                gene_pool.pop_param_bin[gene_pool.sorted_pop_index[i]][j] = gene_pool.pop_param_bin[gene_pool.sorted_pop_index[i]][j] ^ mutations[j];
+                gene_pool.pop_param_bin[gene_pool.selected_indexes[i]][j] = gene_pool.pop_param_bin[gene_pool.selected_indexes[i]][j] ^ mutations[j];
             }
         }
     }

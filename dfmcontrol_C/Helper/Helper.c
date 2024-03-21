@@ -686,33 +686,28 @@ if (size > 1){
         int mid = size / 2;
         int* L_indices = (int*)malloc(mid * sizeof(int));
         int* R_indices = (int*)malloc((size - mid) * sizeof(int));
-        double* L = (double*)malloc(mid * sizeof(double));
-        double* R = (double*)malloc((size - mid) * sizeof(double));
+
 
         for (int i = 0; i < mid; i++){
-            L[i] = arr[i];
             L_indices[i] = indices[i];
         }
         for (int i = mid; i < size; i++){
-            R[i - mid] = arr[i];
             R_indices[i - mid] = indices[i];
         }
 
-        indexed_inv_merge_sort(L, L_indices, mid);
-        indexed_inv_merge_sort(R, R_indices, size - mid);
+        indexed_inv_merge_sort(arr, L_indices, mid);
+        indexed_inv_merge_sort(arr, R_indices, size - mid);
 
         int i = 0;
         int j = 0;
         int k = 0;
 
         while (i < mid && j < size - mid){
-            if (L[i] < R[j]){
-                arr[k] = L[i];
+            if (arr[indices[i]] < arr[indices[j]]){
                 indices[k] = L_indices[i];
                 i++;
             }
             else {
-                arr[k] = R[j];
                 indices[k] = R_indices[j];
                 j++;
             }
@@ -720,21 +715,18 @@ if (size > 1){
         }
 
         while (i < mid){
-            arr[k] = L[i];
             indices[k] = L_indices[i];
             i++;
             k++;
         }
 
         while (j < size - mid){
-            arr[k] = R[j];
             indices[k] = R_indices[j];
             j++;
             k++;
         }
 
-        free(L);
-        free(R);
+
         free(L_indices);
         free(R_indices);
     }
