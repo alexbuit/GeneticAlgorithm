@@ -6,7 +6,35 @@
 #include "pop.h"
 #include "../Helper/Helper.h"
 
+void init_gene_pool(struct gene_pool_s gene_pool){
+        gene_pool.pop_param_bin = (int**)malloc(gene_pool.individuals * sizeof(int*));
+  
+    for (int i = 0; i < gene_pool.individuals; i++){
+        gene_pool.pop_param_bin[i] = (int*)malloc(gene_pool.genes * sizeof(int));
+    }
 
+    gene_pool.pop_param_double = malloc(gene_pool.individuals * sizeof(double*));
+
+    for (int i = 0; i < gene_pool.individuals; i++){
+        gene_pool.pop_param_double[i] = malloc(gene_pool.genes * sizeof(double));
+    }
+
+    gene_pool.pop_result_set = malloc(gene_pool.individuals * sizeof(double));
+}
+
+void free_gene_pool(struct gene_pool_s gene_pool){
+    for (int i = 0; i < gene_pool.individuals; i++){
+        free(gene_pool.pop_param_bin[i]);
+    }
+    free(gene_pool.pop_param_bin);
+
+    for (int i = 0; i < gene_pool.individuals; i++){
+        free(gene_pool.pop_param_double[i]);
+    }
+    free(gene_pool.pop_param_double);
+
+    free(gene_pool.pop_result_set);
+}
 
 void bitpop(int bitsize, int genes, int individuals, int** result){
 
@@ -35,6 +63,35 @@ void bitpop(int bitsize, int genes, int individuals, int** result){
    }
 
 }
+
+void bitpop32(int genes, int individuals, int** result){
+
+    /*
+    Fill a matrix with random bits.
+
+    :param bitsize: The size of the integer in binary.
+    :type bitsize: int
+
+    :param genes: The number of genes in an individual.
+    :type genes: int
+
+    :param individuals: The number of individuals in the population.
+    :type individuals: int
+
+    :param result: The matrix to be filled with random bits.
+                   shape = (individuals, genes * bitsize)
+    :type result: int**
+
+    */
+
+   for(int i=0; i<individuals; i++){
+       for(int j=0; j<genes; j++){
+           result[i][j] = random_int32;
+       }
+   }
+
+}
+
 void uniform_bit_pop(int bitsize, int genes, int individuals,
                      double factor, double bias, int** result){
     /*

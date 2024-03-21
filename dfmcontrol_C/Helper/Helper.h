@@ -1,6 +1,55 @@
 
 
-int state;
+int intXOR32_seed;
+
+struct gene_pool_s {
+    int** pop_param_bin;
+    double** pop_param_double;
+    double* pop_result_set;
+    int* selected_indexes;
+    int genes;
+    int individuals;
+    int elitism;
+};
+
+struct selection_param_s {
+    int selection_method;
+    double selection_div_param;
+    double selection_prob_param;
+    double selection_temp_param;
+    int selection_tournament_size;
+};
+
+struct flatten_param_s {
+    int flatten_method;
+    double flatten_factor;
+    double flatten_bias;
+    int flatten_optim_mode;
+};
+
+struct crossover_param_s {
+    int crossover_method;
+    double crossover_prob;
+};
+
+struct mutation_param_s {
+    int mutation_method;
+    double mutation_prob;
+    double mutation_rate;
+};
+
+struct fx_param_s {
+    int fx_method;
+    int fx_optim_mode;
+};
+
+struct config_ga_s{
+    struct selection_param_s selection_param;
+    struct flatten_param_s flatten_param;
+    struct crossover_param_s crossover_param;
+    struct mutation_param_s mutation_param;
+    struct fx_param_s fx_param;
+};
 
 // Convesrion functions
 void ndbit2int32(int** valarr, int genes, int individuals,
@@ -34,6 +83,11 @@ double gaussian(double x, double mu, double sigma);
 
 // Roulette wheel selection
 void roulette_wheel(double* probabilities, int size, int ressize, int* result);
+
+// sorting functions
+void indexed_inv_bubble_sort(double* arr, int* indices, int size);
+void indexed_merge_sort(double* arr, int* indices, int size);
+void indexed_inv_merge_sort(double* arr, int* indices, int size);
 
 // random 32 bit integer in binary
 int random_int32();

@@ -610,55 +610,29 @@ void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
 
     */
 
-    // create a copy of the probabilities array
-    double* copy = (double*)malloc(size * sizeof(double));
-    int* indices = (int*)malloc(size * sizeof(int));
-
-    for (int i = 0; i < size; i++){
-        copy[i] = probabilities[i];
-        indices[i] = i;
-    }
-
-    // sort the copy array in ascending order and keep track of the indices
-    for (int i = 0; i < size; i++){ // expensive sorting algorithm
-        for (int j = i + 1; j > size; j++){
-            if (copy[i] < copy[j]){
-                double temp = copy[i];
-                copy[i] = copy[j];
-                copy[j] = temp;
-
-                int temp2 = indices[i];
-                indices[i] = indices[j];
-                indices[j] = temp2;
-            }
-        }
-    }
-
-
     // calculate the cumulative sum of the probabilities
     double* cumsum = (double*)malloc(size * sizeof(double));
-    cumsum[0] = copy[0];
+    cumsum[0] = probabilities[0];
 
     for (int i = 1; i < size; i++){
-        cumsum[i] = cumsum[i - 1] + copy[i];
+        cumsum[i] = cumsum[i - 1] + probabilities[i];
     }
 
+    double normaliser = cumsum[size - 1] / (double) 0xffffffff;
+    
     // generate random numbers and select the indices
-
     for (int i = 0; i < ressize; i++){
-        double randnum = (double)rand() / RAND_MAX;
+        double randnum = ((double) random_intXOR32() ) * normaliser;
 
         for (int j = 0; j < size; j++){
             if (randnum < cumsum[j]){
-                result[i] = indices[j];
+                result[i] = j;
                 break;
             }
         }
     }
 
     // free the arrays
-    free(copy);
-    free(indices);
     free(cumsum);
 }
 
@@ -667,14 +641,14 @@ int random_int32(){
 }
 
 int random_intXOR32(){
-    int a  = state;
-    state = intXORshift32(a);
+    int a  = intXOR32_seed;
+    intXOR32_seed = intXORshift32(a);
     return a;
 }
 
 void seed_intXOR32(){
-    if(state == 0){
-        state = random_int32();
+    if(intXOR32_seed == 0){
+        intXOR32_seed = random_int32();
     }
 }
 
@@ -684,6 +658,148 @@ int intXORshift32(int a){
     a ^= a << 5;
     return a;
 }
+
+void indexed_inv_bubble_sort(double* arr, int* indices, int size){
+    int swapped = 1;
+    int temp_idx;
+    double temp;
+
+    for (int i = 0; i < size && swapped; i++){
+        swapped = 0;
+        for (int j = 0; j < size - i - 1; j++){
+            if (arr[j] < arr[j + 1]){
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+
+                temp_idx = indices[j];
+                indices[j] = indices[j + 1];
+                indices[j + 1] = temp_idx;
+                swapped = 1;
+            }
+        }
+    }
+}
+
+void indexed_merge_sort(double* arr, int* indices, int size){
+if (size > 1){
+        int mid = size / 2;
+        int* L_indices = (int*)malloc(mid * sizeof(int));
+        int* R_indices = (int*)malloc((size - mid) * sizeof(int));
+        double* L = (double*)malloc(mid * sizeof(double));
+        double* R = (double*)malloc((size - mid) * sizeof(double));
+
+        for (int i = 0; i < mid; i++){
+            L[i] = arr[i];
+            L_indices[i] = indices[i];
+        }
+        for (int i = mid; i < size; i++){
+            R[i - mid] = arr[i];
+            R_indices[i - mid] = indices[i];
+        }
+
+        indexed_inv_merge_sort(L, L_indices, mid);
+        indexed_inv_merge_sort(R, R_indices, size - mid);
+
+        int i = 0;
+        int j = 0;
+        int k = 0;
+
+        while (i < mid && j < size - mid){
+            if (L[i] < R[j]){
+                arr[k] = L[i];
+                indices[k] = L_indices[i];
+                i++;
+            }
+            else {
+                arr[k] = R[j];
+                indices[k] = R_indices[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < mid){
+            arr[k] = L[i];
+            indices[k] = L_indices[i];
+            i++;
+            k++;
+        }
+
+        while (j < size - mid){
+            arr[k] = R[j];
+            indices[k] = R_indices[j];
+            j++;
+            k++;
+        }
+
+        free(L);
+        free(R);
+        free(L_indices);
+        free(R_indices);
+    }
+
+}
+
+void indexed_inv_merge_sort(double* arr, int* indices, int size){
+    if (size > 1){
+        int mid = size / 2;
+        int* L_indices = (int*)malloc(mid * sizeof(int));
+        int* R_indices = (int*)malloc((size - mid) * sizeof(int));
+        double* L = (double*)malloc(mid * sizeof(double));
+        double* R = (double*)malloc((size - mid) * sizeof(double));
+
+        for (int i = 0; i < mid; i++){
+            L[i] = arr[i];
+            L_indices[i] = indices[i];
+        }
+        for (int i = mid; i < size; i++){
+            R[i - mid] = arr[i];
+            R_indices[i - mid] = indices[i];
+        }
+
+        indexed_inv_merge_sort(L, L_indices, mid);
+        indexed_inv_merge_sort(R, R_indices, size - mid);
+
+        int i = 0;
+        int j = 0;
+        int k = 0;
+
+        while (i < mid && j < size - mid){
+            if (L[i] > R[j]){
+                arr[k] = L[i];
+                indices[k] = L_indices[i];
+                i++;
+            }
+            else {
+                arr[k] = R[j];
+                indices[k] = R_indices[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < mid){
+            arr[k] = L[i];
+            indices[k] = L_indices[i];
+            i++;
+            k++;
+        }
+
+        while (j < size - mid){
+            arr[k] = R[j];
+            indices[k] = R_indices[j];
+            j++;
+            k++;
+        }
+
+        free(L);
+        free(R);
+        free(L_indices);
+        free(R_indices);
+    }
+}
+
 
 void convert_int32_to_binary(int** valarr, int genes, int individuals,
                              double factor, double bias){

@@ -6,6 +6,18 @@
 #include "../Helper/Helper.h"
 
 
+void process_crossover(struct gene_pool_s gene_pool, struct crossover_param_s crossover_param){
+    //double** pop_parameter_bin, int individuals, int genes, int* selected, int skipped_pairs){
+    int nearest_even = (gene_pool.individuals-gene_pool.elitism) - ((gene_pool.individuals-gene_pool.elitism) % 2);
+    for(int i = 0; i< nearest_even; i+=2){
+            crossover(gene_pool.pop_param_bin[gene_pool.selected_indexes[i]],
+                      gene_pool.pop_param_bin[gene_pool.selected_indexes[i+1]],
+                      gene_pool.genes,
+                      gene_pool.pop_param_bin[i],
+                      gene_pool.pop_param_bin[i+1]);
+    }
+}
+
 // Path: Utility/crossover.c
 
 void single_point_crossover32(int *parent1, int *parent2, int *child1, int *child2, int genes){
@@ -97,8 +109,6 @@ void uniform_crossover32(int* parent1, int* parent2, int* child1, int* child2, i
     // int mask = pow(2, point) - 1;
 
     int mask ;
-
-    seed_intXOR32();
 
     for(int i=0; i < genes; i++){
         

@@ -2,9 +2,10 @@
 #include "stdlib.h"
 #include "math.h"
 
+#include "../Helper/Helper.h"
 #include "mutation.h"
 
-void mutate32(int* individual, int genes, int mutate_coeff_rate){
+void mutate32(struct gene_pool_s gene_pool, struct mutation_param_s mutation_param){
 
     /*
     
@@ -30,34 +31,36 @@ void mutate32(int* individual, int genes, int mutate_coeff_rate){
     // mutate_coeff_rate is the amount of mutations over the bit;
     // check if mutate_coeff_rate is < size
 
-    if (mutate_coeff_rate > genes ){
+    if (mutation_param.mutation_rate > gene_pool.genes ){
         printf("Error: mutate_coeff_rate is bigger than possible flips\n");
         exit(1);
     }
 
-    int* mutations = malloc(genes * sizeof(int));
+    int* mutations = malloc(gene_pool.genes * sizeof(int));
     // generate random mutations, that are not at the same position
-    for (int i = 0; i < genes; i++){
+    for (int i = 0; i < gene_pool.genes; i++){
         mutations[i] = 0;
     }
 
     int mutation;
     int mutation_bit = 0;
-    for (int i = 0; i < mutate_coeff_rate; i++){
-        mutation = rand() % genes;
-        mutation_bit = 1 << (rand() % sizeof(int)*8);
+    for (int i = mutation_param.mutation_elitism; i < gene_pool.individuals; i++){
+        for (int j = 0; j < mutation_param.mutation_rate; j++){ // check if works
+            mutation = random_intXOR32() % gene_pool.genes;
+            mutation_bit = 1 << (random_intXOR32() % sizeof(int)*8);
 
-        if(mutations[mutation] & mutation_bit){
-            i--;
-            continue;
+            if(mutations[mutation] & mutation_bit){
+                j--;
+                continue;
+            }
+
+            mutations[mutation] = mutations[mutation]  | mutation_bit;
         }
 
-        mutations[mutation] = mutations[mutation]  | mutation_bit;
-    }
-
-    for (int i = 0; i < genes; i++){
-        if(mutations[i] != 0){
-            individual[i] = individual[i] ^ mutations[i];
+        for (int j = 0; j < gene_pool.genes; j++){
+            if(mutations[i] != 0){
+                gene_pool.pop_param_bin[gene_pool.sorted_pop_index[i]][j] = gene_pool.pop_param_bin[gene_pool.sorted_pop_index[i]][j] ^ mutations[j];
+            }
         }
     }
 
@@ -65,7 +68,7 @@ void mutate32(int* individual, int genes, int mutate_coeff_rate){
 
 }
 
-void mutate(int* individual, int genes, int mutate_coeff_rate){
+void mutate(struct gene_pool_s gene_pool, struct mutation_param_s mutation_param){
 
     /*
     
@@ -84,28 +87,28 @@ void mutate(int* individual, int genes, int mutate_coeff_rate){
     // mutate_coeff_rate is the amount of mutations over the bit;
     // check if mutate_coeff_rate is < size
 
-    if (mutate_coeff_rate > genes){
-        printf("Error: mutate_coeff_rate is bigger than size\n");
-        exit(1);
-    }
+    // if (mutate_coeff_rate > genes){
+    //     printf("Error: mutate_coeff_rate is bigger than size\n");
+    //     exit(1);
+    // }
 
-    int *mutations = malloc(genes * sizeof(int));
-    // generate random mutations, that are not at the same position
-    for (int i = 0; i < genes; i++){
-        mutations[i] = rand() % genes;
-        for (int j = 0; j < i; j++){
-            if (mutations[i] == mutations[j]){
-                i--;
-                break;
-            }
-        }
-    }
+    // int *mutations = malloc(genes * sizeof(int));
+    // // generate random mutations, that are not at the same position
+    // for (int i = 0; i < genes; i++){
+    //     mutations[i] = rand() % genes;
+    //     for (int j = 0; j < i; j++){
+    //         if (mutations[i] == mutations[j]){
+    //             i--;
+    //             break;
+    //         }
+    //     }
+    // }
     
-    // mutate the bit
-    for (int i = 0; i < mutate_coeff_rate; i++){
-        individual[mutations[i]] = !individual[mutations[i]];
-    }
+    // // mutate the bit
+    // for (int i = 0; i < mutate_coeff_rate; i++){
+    //     individual[mutations[i]] = !individual[mutations[i]];
+    // }
 
-    free(mutations);
+    // free(mutations);
 
 }
