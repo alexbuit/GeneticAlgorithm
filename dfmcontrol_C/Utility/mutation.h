@@ -1,3 +1,10 @@
 
-void mutate32(struct gene_pool_s gene_pool, struct mutation_param_s mutation_param);
-void mutate(struct gene_pool_s gene_pool, struct mutation_param_s mutation_param);
+#ifndef MUTATION_H
+#define MUTATION_H
+
+#include "../Helper/Struct.h"
+
+void mutate32(gene_pool_t *gene_pool, mutation_param_t *mutation_param);
+void mutate(gene_pool_t *gene_pool, mutation_param_t *mutation_param);
+
+#endif

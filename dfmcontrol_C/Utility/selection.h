@@ -1,4 +1,9 @@
 
+#ifndef SELECTION_H
+#define SELECTION_H
+
+#include "../Helper/Struct.h"
+
 
 // Selection functions
 static const int sel_roulette = 0;
@@ -10,14 +15,14 @@ static const int sel_boltzmann = 4;
 
 // gen purpose
 
-void process_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
+void process_selection(gene_pool_t *gene_pool, selection_param_t *selection_param);
 
-
+#endif
 
 // Selection functions
-void roulette_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
-void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
-void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
-void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
-void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param);
+// void roulette_selection(gene_pool_t *gene_pool, selection_param_t *selection_param);
+// void rank_tournament_selection(gene_pool_t *gene_pool, selection_param_t *selection_param);
+// void rank_selection(gene_pool_t *gene_pool, selection_param_t *selection_param);
+// void rank_space_selection(gene_pool_t *gene_pool, selection_param_t *selection_param);
+// void boltzmann_selection(gene_pool_t *gene_pool, selection_param_t *selection_param);
 

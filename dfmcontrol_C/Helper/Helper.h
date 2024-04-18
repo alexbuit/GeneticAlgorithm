@@ -1,58 +1,9 @@
 
 
-int intXOR32_seed;
+#ifndef _HELPER_H
+#define _HELPER_H
 
-struct gene_pool_s {
-    int** pop_param_bin;
-    int** pop_param_bin_cross_buffer;
-    double** pop_param_double;
-    double* pop_result_set;
-    int* selected_indexes;
-    int* sorted_indexes;
-    int genes;
-    int individuals;
-    int elitism;
-    int iteration_number;
-};
 
-struct selection_param_s {
-    int selection_method;
-    double selection_div_param;
-    double selection_prob_param;
-    double selection_temp_param;
-    int selection_tournament_size;
-};
-
-struct flatten_param_s {
-    int flatten_method;
-    double flatten_factor;
-    double flatten_bias;
-    int flatten_optim_mode;
-};
-
-struct crossover_param_s {
-    int crossover_method;
-    double crossover_prob;
-};
-
-struct mutation_param_s {
-    int mutation_method;
-    double mutation_prob;
-    double mutation_rate;
-};
-
-struct fx_param_s {
-    int fx_method;
-    int fx_optim_mode;
-};
-
-struct config_ga_s{
-    struct selection_param_s selection_param;
-    struct flatten_param_s flatten_param;
-    struct crossover_param_s crossover_param;
-    struct mutation_param_s mutation_param;
-    struct fx_param_s fx_param;
-};
 
 // Convesrion functions
 void ndbit2int32(int** valarr, int genes, int individuals,
@@ -82,13 +33,13 @@ void sigmoid_derivative(double* x, double* result, int size);
 void sigmoid2(double* x, double a, double b, double c, double d, double Q, double nu ,double* result, int size);
 void uniform_random(int m, int n,int lower, int upper, int** result);
 double gaussian(double x, double mu, double sigma);
-
+double cauchy(double x, double mu, double sigma);
 
 // Roulette wheel selection
 void roulette_wheel(double* probabilities, int size, int ressize, int* result);
 
 // sorting functions
-void indexed_inv_bubble_sort(double* arr, int* indices, int size);
+void indexed_bubble_sort(double* arr, int* indices, int size);
 void indexed_merge_sort(double* arr, int* indices, int size);
 void indexed_inv_merge_sort(double* arr, int* indices, int size);
 
@@ -103,3 +54,5 @@ void convert_int32_to_binary(int** valarr, int genes, int individuals,
                              double factor, double bias);
 void convert_binary_to_int32(int** valarr, int genes, int individuals,
                              double factor, double bias);
+
+#endif

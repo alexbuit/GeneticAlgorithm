@@ -3,9 +3,11 @@
 #include "math.h"
 
 #include "../Helper/Helper.h"
+#include "../Helper/Struct.h"
+
 #include "mutation.h"
 
-void mutate32(struct gene_pool_s gene_pool, struct mutation_param_s mutation_param){
+void mutate32(gene_pool_t *gene_pool, mutation_param_t *mutation_param){
 
     /*
     
@@ -28,47 +30,27 @@ void mutate32(struct gene_pool_s gene_pool, struct mutation_param_s mutation_par
 
     */
 
-    // mutate_coeff_rate is the amount of mutations over the bit;
-    // check if mutate_coeff_rate is < size
+    // int* mutations = malloc(gene_pool->genes * sizeof(int));
+    // // generate random mutations, that are not at the same position
+    // for (int i = 0; i < gene_pool->genes; i++){
+    //     mutations[i] = 0;
+    // }
 
-    if (mutation_param.mutation_rate > gene_pool.genes ){
-        printf("Error: mutate_coeff_rate is bigger than possible flips\n");
-        exit(1);
-    }
-
-    int* mutations = malloc(gene_pool.genes * sizeof(int));
-    // generate random mutations, that are not at the same position
-    for (int i = 0; i < gene_pool.genes; i++){
-        mutations[i] = 0;
-    }
-
-    int mutation;
+    int mutation_gene;
     int mutation_bit = 0;
-    for (int i = 0; i < gene_pool.individuals-gene_pool.elitism; i++){
-        for (int j = 0; j < mutation_param.mutation_rate; j++){ // check if works
-            mutation = random_intXOR32() % gene_pool.genes;
-            mutation_bit = 1 << (random_intXOR32() % sizeof(int)*8);
-
-            if(mutations[mutation] & mutation_bit){
-                j--;
-                continue;
-            }
-
-            mutations[mutation] = mutations[mutation]  | mutation_bit;
+    for (int i = 0; i < gene_pool->individuals-gene_pool->elitism; i++){
+        for (int j = 0; j < mutation_param->mutation_rate; j++){ // check if works
+            // ensure that the selected gene is positive
+            mutation_gene = (random_intXOR32() & 0x7fffffff) % gene_pool->genes;
+            mutation_bit = (int) 1 << (random_intXOR32() % sizeof(int)*8);
+            gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]][mutation_gene] ^= mutation_bit;
         }
 
-        for (int j = 0; j < gene_pool.genes; j++){
-            if(mutations[i] != 0){
-                gene_pool.pop_param_bin[gene_pool.selected_indexes[i]][j] = gene_pool.pop_param_bin[gene_pool.selected_indexes[i]][j] ^ mutations[j];
-            }
-        }
     }
-
-    free(mutations);
 
 }
 
-void mutate(struct gene_pool_s gene_pool, struct mutation_param_s mutation_param){
+void mutate(gene_pool_t *gene_pool, mutation_param_t *mutation_param){
 
     /*
     

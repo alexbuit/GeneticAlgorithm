@@ -4,27 +4,8 @@
 
 #include "crossover.h"
 #include "../Helper/Helper.h"
+#include "../Helper/Struct.h"
 
-
-void process_crossover(struct gene_pool_s gene_pool, struct crossover_param_s crossover_param){
-    //double** pop_parameter_bin, int individuals, int genes, int* selected, int skipped_pairs){
-    int nearest_even = (gene_pool.individuals-gene_pool.elitism) - ((gene_pool.individuals-gene_pool.elitism) % 2);
-
-    for(int i = 0; i< nearest_even; i+=2){
-            crossover(gene_pool.pop_param_bin[gene_pool.selected_indexes[i]], 
-                      gene_pool.pop_param_bin[gene_pool.selected_indexes[i+1]],
-                      gene_pool.genes,
-                      gene_pool.pop_param_bin_cross_buffer[i],
-                      gene_pool.pop_param_bin_cross_buffer[i+1]);
-    }
-
-    // copy the crossed over values back to the population
-    for(int i = 0; i< nearest_even; i++){
-        for(int j = 0; j< gene_pool.genes; j++){
-            gene_pool.pop_param_bin[gene_pool.selected_indexes[i]][j] = gene_pool.pop_param_bin_cross_buffer[i][j];
-        }
-    }
-}
 
 // Path: Utility/crossover.c
 
@@ -109,7 +90,7 @@ void two_point_crossover32(int *parent1, int *parent2, int *child1, int *child2,
     }
 }
 
-void uniform_crossover32(int* parent1, int* parent2, int* child1, int* child2, int genes){
+void uniform_crossover32(int *parent1, int *parent2, int *child1, int *child2, int genes){
     // parent1 and parent2 are the parents to be crossed over and child1 and child2 are the children to be created all of size size
     // prob is the probability of a value being copied from the first parent
     // The function should fill child1 and child2 with the crossed over values
@@ -127,7 +108,7 @@ void uniform_crossover32(int* parent1, int* parent2, int* child1, int* child2, i
     }
 }
 
-void complete_crossover32(int* parent1, int* parent2, int* child1, int* child2, int genes){
+void complete_crossover32(int *parent1, int *parent2, int *child1, int *child2, int genes){
     // parent1 and parent2 are the parents to be crossed over and child1 and child2 are the children to be created all of size size
     // The function should fill child1 and child2 with the crossed over values
 
@@ -163,7 +144,7 @@ void single_point_crossover(int *parent1, int *parent2, int *child1, int *child2
         child2[i] = parent2[i];
     }
     // for the other half, copy the values from the other parent
-    for(int i; i<size; i++){
+    for(int i; point<size; i++){
         child1[i] = parent2[i];
         child2[i] = parent1[i];
     }
@@ -244,3 +225,71 @@ void complete_crossover(int *parent1, int *parent2, int *child1, int *child2, in
     }
 }
 }
+
+void crossover(int *parent1, int *parent2, int *child1, int *child2, int genes, crossover_param_t *crossover_param){
+
+    if (crossover_param->crossover_method == cross_single_point){
+        single_point_crossover(parent1, parent2, child1, child2, genes, 32); // TODO: bitsize
+    }
+    else if (crossover_param->crossover_method == cross_two_point){
+        two_point_crossover(parent1, parent2, child1, child2, genes, 32);
+    }
+    else if (crossover_param->crossover_method == cross_uniform){
+        uniform_crossover(parent1, parent2, child1, child2, genes, 32);
+    }
+    else if (crossover_param->crossover_method == cross_complete){
+        complete_crossover(parent1, parent2, child1, child2, genes, 32);
+    }
+    else if (crossover_param->crossover_method == cross_single_point32){
+        single_point_crossover32(parent1, parent2, child1, child2, genes);
+    }
+    else if (crossover_param->crossover_method == cross_two_point32){
+        two_point_crossover32(parent1, parent2, child1, child2, genes);
+    }
+    else if (crossover_param->crossover_method == cross_uniform32){
+        uniform_crossover32(parent1, parent2, child1, child2, genes);
+    }
+    else if (crossover_param->crossover_method == cross_complete32){
+        complete_crossover32(parent1, parent2, child1, child2, genes);
+    }
+    else{
+        printf("Invalid crossover method\n");
+    }
+
+}
+
+void process_crossover(gene_pool_t *gene_pool, crossover_param_t *crossover_param){
+    //double** pop_parameter_bin, int individuals, int genes, int* selected, int skipped_pairs){
+    int nearest_even = (gene_pool->individuals-gene_pool->elitism) - ((gene_pool->individuals-gene_pool->elitism) % 2);
+
+    for(int i = 0; i < nearest_even; i+=2){
+        crossover(gene_pool->pop_param_bin[gene_pool->selected_indexes[i]], 
+                    gene_pool->pop_param_bin[gene_pool->selected_indexes[i+1]],
+                    gene_pool->pop_param_bin_cross_buffer[i],
+                    gene_pool->pop_param_bin_cross_buffer[i+1],
+                    gene_pool->genes,
+                    crossover_param);
+    }
+
+    int skip_index = 0;
+
+    // copy the crossed over values back to the population
+    for(int i = 0; i< nearest_even; i++){
+
+        skip_index = 0;
+        for (int k = nearest_even; k < gene_pool->individuals-1; k++){
+            if (gene_pool->selected_indexes[k] == i){
+                // continue outer loop;
+                skip_index=1;
+                break;
+            }
+        }
+        if (skip_index){
+            for(int j = 0; j< gene_pool->genes; j++){
+                gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]][j] = gene_pool->pop_param_bin_cross_buffer[i][j];
+            }
+        }
+    }
+}
+
+

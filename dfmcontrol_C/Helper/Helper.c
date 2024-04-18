@@ -11,7 +11,7 @@
 
 
 void ndbit2int32(int** valarr, int genes, int individuals,
-                double factor, double bias, double** result){
+                 double factor, double bias, double** result){
     /*
     Convert an array of bitarrays to an array of doubles
 
@@ -636,19 +636,29 @@ void roulette_wheel(double* probabilities, int size, int ressize ,int* result){
     free(cumsum);
 }
 
+int intXOR32_seed = 0;
+int intXOR32_generated = 0;
+
 int random_int32(){
-    return (rand() << 30) & (rand() << 15) & (rand());
+    srand(time(0));
+    return (rand() << 30) | (rand() << 15) | (rand());
 }
 
 int random_intXOR32(){
+    if(intXOR32_generated > 100 | intXOR32_seed == 0){
+        seed_intXOR32();
+        intXOR32_generated = 0;
+    }
     int a  = intXOR32_seed;
     intXOR32_seed = intXORshift32(a);
+    intXOR32_generated++;
     return a;
 }
 
 void seed_intXOR32(){
     if(intXOR32_seed == 0){
         intXOR32_seed = random_int32();
+        printf("seed: %d\n", intXOR32_seed);
     }
 }
 
@@ -659,19 +669,14 @@ int intXORshift32(int a){
     return a;
 }
 
-void indexed_inv_bubble_sort(double* arr, int* indices, int size){
+void indexed_bubble_sort(double* arr, int* indices, int size){
     int swapped = 1;
     int temp_idx;
-    double temp;
 
     for (int i = 0; i < size && swapped; i++){
         swapped = 0;
         for (int j = 0; j < size - i - 1; j++){
-            if (arr[j] < arr[j + 1]){
-                temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-
+            if (arr[indices[j]] > arr[indices[j+1]]){
                 temp_idx = indices[j];
                 indices[j] = indices[j + 1];
                 indices[j + 1] = temp_idx;

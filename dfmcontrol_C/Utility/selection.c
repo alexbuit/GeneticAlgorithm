@@ -3,6 +3,8 @@
 #include "math.h"
 
 #include "../Helper/Helper.h"
+#include "../Helper/Struct.h"
+
 #include "selection.h"
 
 
@@ -65,31 +67,8 @@
 // }
 
 
-void process_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
-
-        if(selection_param.selection_method ==sel_roulette){
-        roulette_selection(gene_pool, selection_param);
-        }
-        else if(selection_param.selection_method==sel_rank_tournament){
-        rank_tournament_selection(gene_pool, selection_param);
-        }
-        else if(selection_param.selection_method==sel_rank){
-        rank_selection(gene_pool, selection_param);
-        }
-        else if(selection_param.selection_method==sel_rank_space){
-        rank_space_selection(gene_pool, selection_param);
-        }
-        else if(selection_param.selection_method==sel_boltzmann){
-        boltzmann_selection(gene_pool, selection_param);
-        }
-        else{
-        printf("Error: selection_method is not 0, 1, 2, 3 or 4\n");
-        }
-
-}
-
 // Selection functions
-void roulette_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
+void roulette_selection(gene_pool_t *gene_pool, selection_param_t *selection_param){
         /*
 
         :param pop: matrix of normalised fitness values for the population (individuals x 1)
@@ -100,12 +79,10 @@ void roulette_selection(struct gene_pool_s gene_pool, struct selection_param_s s
         */
 
         // select individuals
-        roulette_wheel(gene_pool.pop_result_set, gene_pool.individuals, gene_pool.individuals-gene_pool.elitism, gene_pool.selected_indexes);
-        
-
+        roulette_wheel(gene_pool->flatten_result_set, gene_pool->individuals, gene_pool->individuals-gene_pool->elitism, gene_pool->selected_indexes);
 }
 
-void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
+void rank_tournament_selection(gene_pool_t *gene_pool, selection_param_t *selection_param){
         /*
 
         :param pop: matrix of individuals as double (individuals x genes)
@@ -121,7 +98,23 @@ void rank_tournament_selection(struct gene_pool_s gene_pool, struct selection_pa
         */
 
 }
-void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
+void rank_selection(gene_pool_t *gene_pool, selection_param_t *selection_param){
+        /*
+
+        :param pop: matrix of individuals as double (individuals x genes)
+        :param individuals: number of individuals
+        :param genes: number of genes
+        :param fx: fitness function (double array x0 x1 ... xn)
+        :param flatten: flattening function (double array, int, double, double, double array)
+        :param a: parameter for flattening function
+        :param b: parameter for flattening function
+        :param mode: 0 for minimisation, 1 for maximisation
+        :param result: matrix of the indices of selected individuals (individuals x 2)
+
+        */
+       
+}
+void rank_space_selection(gene_pool_t *gene_pool, selection_param_t *selection_param){
         /*
 
         :param pop: matrix of individuals as double (individuals x genes)
@@ -137,23 +130,7 @@ void rank_selection(struct gene_pool_s gene_pool, struct selection_param_s selec
         */
 
 }
-void rank_space_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
-        /*
-
-        :param pop: matrix of individuals as double (individuals x genes)
-        :param individuals: number of individuals
-        :param genes: number of genes
-        :param fx: fitness function (double array x0 x1 ... xn)
-        :param flatten: flattening function (double array, int, double, double, double array)
-        :param a: parameter for flattening function
-        :param b: parameter for flattening function
-        :param mode: 0 for minimisation, 1 for maximisation
-        :param result: matrix of the indices of selected individuals (individuals x 2)
-
-        */
-
-}
-void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s selection_param){
+void boltzmann_selection(gene_pool_t *gene_pool, selection_param_t *selection_param){
             /*
 
         :param pop: matrix of individuals as double (individuals x genes)
@@ -168,4 +145,27 @@ void boltzmann_selection(struct gene_pool_s gene_pool, struct selection_param_s 
 
         */
 
+}
+
+
+
+void process_selection(gene_pool_t *gene_pool, selection_param_t *selection_param){
+        if(selection_param->selection_method ==sel_roulette){
+        roulette_selection(gene_pool, selection_param);
+        }
+        else if(selection_param->selection_method==sel_rank_tournament){
+        rank_tournament_selection(gene_pool, selection_param);
+        }
+        else if(selection_param->selection_method==sel_rank){
+        rank_selection(gene_pool, selection_param);
+        }
+        else if(selection_param->selection_method==sel_rank_space){
+        rank_space_selection(gene_pool, selection_param);
+        }
+        else if(selection_param->selection_method==sel_boltzmann){
+        boltzmann_selection(gene_pool, selection_param);
+        }
+        else{
+        printf("Error: selection_method is not 0, 1, 2, 3 or 4\n");
+        }
 }
