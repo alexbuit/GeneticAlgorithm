@@ -61,6 +61,9 @@ struct runtime_param_s {
 	int max_iterations;
 	double convergence_threshold;
 	int convergence_window;
+	int genes;
+	int individuals;
+	int elitism;
 };	
 
 typedef struct gene_pool_s gene_pool_t;

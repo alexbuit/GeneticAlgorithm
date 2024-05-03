@@ -1,105 +1,12 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Logging\\logging.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|solutionrelative:Logging\\logging.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Logging\\logging.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|solutionrelative:Logging\\logging.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Genetic_Algorithm.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|solutionrelative:Genetic_Algorithm.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Utility\\process.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|solutionrelative:Utility\\process.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Helper\\Struct.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{479A36C1-0B5E-4FDF-B221-CE6C531EB2FE}|Genetic Algrotihm.vcxproj|solutionrelative:Helper\\Struct.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    }
-  ],
+  "WorkspaceRootPath": "C:\\Users\\vanei\\source\\repos\\Genetic Algorithm - C Branch\\src\\",
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 1,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "logging.c",
-              "DocumentMoniker": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Logging\\logging.c",
-              "RelativeDocumentMoniker": "Logging\\logging.c",
-              "ToolTip": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Logging\\logging.c",
-              "RelativeToolTip": "Logging\\logging.c",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAAAA4AAAACAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2024-04-18T19:53:56.268Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "logging.h",
-              "DocumentMoniker": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Logging\\logging.h",
-              "RelativeDocumentMoniker": "Logging\\logging.h",
-              "ToolTip": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Logging\\logging.h",
-              "RelativeToolTip": "Logging\\logging.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-04-18T19:53:43.809Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "process.c",
-              "DocumentMoniker": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Utility\\process.c",
-              "RelativeDocumentMoniker": "Utility\\process.c",
-              "ToolTip": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Utility\\process.c",
-              "RelativeToolTip": "Utility\\process.c",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2024-04-18T19:19:04.239Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Struct.h",
-              "DocumentMoniker": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Helper\\Struct.h",
-              "RelativeDocumentMoniker": "Helper\\Struct.h",
-              "ToolTip": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Helper\\Struct.h",
-              "RelativeToolTip": "Helper\\Struct.h",
-              "ViewState": "AQIAADMAAAAAAAAAAAAAAEgAAAAvAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-04-18T19:14:47.134Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Genetic_Algorithm.c",
-              "DocumentMoniker": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Genetic_Algorithm.c",
-              "RelativeDocumentMoniker": "Genetic_Algorithm.c",
-              "ToolTip": "C:\\Users\\vanei\\source\\repos\\Genetic Algrotihm\\Genetic_Algorithm.c",
-              "RelativeToolTip": "Genetic_Algorithm.c",
-              "ViewState": "AQIAAGkAAAAAAAAAAAAAAJIAAAAOAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2024-04-18T19:14:11.603Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }
