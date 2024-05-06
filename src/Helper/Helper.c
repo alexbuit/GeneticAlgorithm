@@ -91,7 +91,7 @@ void int2ndbit32(double** valarr, int genes, int individuals,
 	int temp;
 	for (int i = 0; i < individuals; i++) {
 		for (int j = 0; j < genes; j++) {
-			temp = (int)roundf((valarr[i][j] - bias) * pow(2, 8 * sizeof(int) - 1) / factor);
+			temp = (int)round((valarr[i][j] - bias) * pow(2, 8 * sizeof(int) - 1) / factor);
 			if (temp < 0) {
 				result[i][j] = ~(temp - 1) | 0x80000000; // bitflip and subtract 1
 			}
@@ -135,9 +135,17 @@ void ndbit2int(int** valarr, int bitsize, int genes, int individuals,
 
 	// temp int array to store the values
 	int** temp = (int**)malloc(individuals * sizeof(int*));
+	if (temp == NULL) {
+		printf("Memory allocation failed");
+		exit(255);
+	}
 
 	for (int i = 0; i < individuals; i++) {
 		temp[i] = (int*)malloc(genes * sizeof(int));
+		if (temp[i] == NULL) {
+			printf("Memory allocation failed");
+			exit(255);
+		}
 	}
 
 
@@ -194,16 +202,23 @@ void int2ndbit(double** valarr, int bitsize, int genes, int individuals,
 
 	// create a copy of valarr for integer conversion
 	int** copyvalarr = (int**)malloc(individuals * sizeof(int*));
+	if (copyvalarr == NULL) {
+		printf("Memory allocation failed");
+		exit(255);
+	}
 
 	for (int i = 0; i < individuals; i++) {
 		copyvalarr[i] = (int*)malloc(genes * sizeof(int));
+		if (copyvalarr[i] == NULL) {
+			printf("Memory allocation failed");
+			exit(255);
+		}
 	}
 
 	// normalise the values and apply the factor and bias and cast to integers
 	for (int i = 0; i < individuals; i++) {
 		for (int j = 0; j < genes; j++) {
 			copyvalarr[i][j] = (int)round((valarr[i][j] - bias) / factor * pow(2, bitsize - 1));
-
 		}
 	}
 
@@ -336,7 +351,7 @@ int bin2int(int* value, int bitsize) {
 	}
 
 	for (int i = 1; i < bitsize; i++) {
-		res += value[i] * pow(2, i - 1);
+		res += value[i] * (int)pow(2, i - 1);
 	}
 	res = res * sign;
 
@@ -552,7 +567,7 @@ void uniform_random(int m, int n, int lower, int upper, int** result) {
 		for (int j = 0; j < n; j++) {
 			do {
 				nRand = 0;
-				for (int k = 0; k < nRangeBits; k++) {
+				for (unsigned int k = 0; k < nRangeBits; k++) {
 					nRand = (nRand << 1) | (rand() & 1); // lshift and rand or 1
 				}
 			} while (nRand >= nRange);
@@ -572,7 +587,7 @@ double gaussian(double x, double mu, double sigma) {
 	sigma is the standard deviation
 	*/
 
-	double result = (1 / (sigma * sqrtf(2 * PI))) * expf(-powf(x - mu, 2) / (2 * powf(sigma, 2)));
+	double result = (1 / (sigma * sqrt(2 * PI))) * exp(-pow(x - mu, 2) / (2 * pow(sigma, 2)));
 
 	return result;
 }
@@ -586,7 +601,7 @@ double cauchy(double x, double mu, double sigma) {
 	sigma is the standard deviation
 	*/
 
-	double result = (1 / PI) * (sigma / (powf(x - mu, 2) + powf(sigma, 2)));
+	double result = (1 / PI) * (sigma / (pow(x - mu, 2) + pow(sigma, 2)));
 
 	return result;
 }
@@ -612,6 +627,10 @@ void roulette_wheel(double* probabilities, int size, int ressize, int* result) {
 
 	// calculate the cumulative sum of the probabilities
 	double* cumsum = (double*)malloc(size * sizeof(double));
+	if (cumsum == NULL) {
+		printf("Memory allocation failed");
+		exit(255);
+	}
 	cumsum[0] = probabilities[0];
 
 	for (int i = 1; i < size; i++) {
@@ -640,12 +659,12 @@ int intXOR32_seed = 0;
 int intXOR32_generated = 0;
 
 int random_int32() {
-	srand(time(0));
+	srand((unsigned int)time(0));
 	return (rand() << 30) | (rand() << 15) | (rand());
 }
 
 int random_intXOR32() {
-	if (intXOR32_generated > 100 | intXOR32_seed == 0) {
+	if (intXOR32_generated > 100 || intXOR32_seed == 0) {
 		seed_intXOR32();
 		intXOR32_generated = 0;
 	}
@@ -686,6 +705,7 @@ void indexed_bubble_sort(double* arr, int* indices, int size) {
 	}
 }
 
+#pragma warning(disable:6011 6385)
 void indexed_merge_sort(double* arr, int* indices, int size) {
 	if (size > 1) {
 		int mid = size / 2;
@@ -735,9 +755,10 @@ void indexed_merge_sort(double* arr, int* indices, int size) {
 		free(L_indices);
 		free(R_indices);
 	}
-
+	#pragma warning(default:6011 6385)
 }
 
+#pragma warning(disable:6385)
 void indexed_inv_merge_sort(double* arr, int* indices, int size) {
 	if (size > 1) {
 		int mid = size / 2;
@@ -745,6 +766,10 @@ void indexed_inv_merge_sort(double* arr, int* indices, int size) {
 		int* R_indices = (int*)malloc((size - mid) * sizeof(int));
 		double* L = (double*)malloc(mid * sizeof(double));
 		double* R = (double*)malloc((size - mid) * sizeof(double));
+		if (L_indices == NULL || R_indices == NULL || L == NULL || R == NULL) {
+			printf("Memory allocation failed");
+			exit(255);
+		}
 
 		for (int i = 0; i < mid; i++) {
 			L[i] = arr[i];
@@ -795,6 +820,7 @@ void indexed_inv_merge_sort(double* arr, int* indices, int size) {
 		free(L_indices);
 		free(R_indices);
 	}
+	#pragma warning(default:6385)
 }
 
 
@@ -803,9 +829,17 @@ void convert_int32_to_binary(int** valarr, int genes, int individuals,
 
 
 	double** temp = (double**)malloc(individuals * sizeof(double*));
+	if (temp == NULL) {
+		printf("Memory allocation failed");
+		exit(255);
+	}
 
 	for (int i = 0; i < individuals; i++) {
 		temp[i] = (double*)malloc(genes * sizeof(double) * 8 * sizeof(int));
+		if (temp[i] == NULL) {
+			printf("Memory allocation failed");
+			exit(255);
+		}
 	}
 
 	ndbit2int32(valarr, genes, individuals, factor, bias, temp);
@@ -822,9 +856,17 @@ void convert_binary_to_int32(int** valarr, int genes, int individuals,
 	double factor, double bias) {
 
 	double** temp = (double**)malloc(individuals * sizeof(double*));
+	if (temp == NULL) {
+		printf("Memory allocation failed");
+		exit(255);
+	}
 
 	for (int i = 0; i < individuals; i++) {
 		temp[i] = (double*)malloc(genes * sizeof(double) * 8 * sizeof(int));
+		if (temp[i] == NULL) {
+			printf("Memory allocation failed");
+			exit(255);
+		}
 	}
 
 
