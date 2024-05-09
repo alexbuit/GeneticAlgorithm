@@ -6,11 +6,11 @@
 
 
 // Selection functions
-static const int sel_roulette = 0;
-static const int sel_rank_tournament = 1;
-static const int sel_rank = 2;
-static const int sel_rank_space = 3;
-static const int sel_boltzmann = 4;
+static const int selection_method_roulette = 0;
+static const int selection_method_rank_tournament = 1;
+static const int selection_method_rank = 2;
+static const int selection_method_rank_space = 3;
+static const int selection_method_boltzmann = 4;
 
 
 // gen purpose

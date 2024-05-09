@@ -92,19 +92,19 @@ void boltzmann_selection(gene_pool_t* gene_pool, selection_param_t* selection_pa
 
 
 void process_selection(gene_pool_t* gene_pool, selection_param_t* selection_param) {
-	if (selection_param->selection_method == sel_roulette) {
+	if (selection_param->selection_method == selection_method_roulette) {
 		roulette_selection(gene_pool, selection_param);
 	}
-	else if (selection_param->selection_method == sel_rank_tournament) {
+	else if (selection_param->selection_method == selection_method_rank_tournament) {
 		rank_tournament_selection(gene_pool, selection_param);
 	}
-	else if (selection_param->selection_method == sel_rank) {
+	else if (selection_param->selection_method == selection_method_rank) {
 		rank_selection(gene_pool, selection_param);
 	}
-	else if (selection_param->selection_method == sel_rank_space) {
+	else if (selection_param->selection_method == selection_method_rank_space) {
 		rank_space_selection(gene_pool, selection_param);
 	}
-	else if (selection_param->selection_method == sel_boltzmann) {
+	else if (selection_param->selection_method == selection_method_boltzmann) {
 		boltzmann_selection(gene_pool, selection_param);
 	}
 	else {

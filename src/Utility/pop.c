@@ -210,6 +210,10 @@ void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals,
 
 	for (int i = 0; i < individuals; i++) {
 		temp[i] = malloc(sizeof(int) * numbers_inuni);
+		if (temp[i] == NULL) {
+			printf("Memory allocation failed");
+			exit(255);
+		}
 	}
 
 

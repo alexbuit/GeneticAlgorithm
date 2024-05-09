@@ -55,7 +55,6 @@
     <None Include="build\StructGenerator.py" />
     <None Include="Genetic_Algorithm.py" />
     <None Include="Logging\Logging.py" />
-    <None Include="Structs.py" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

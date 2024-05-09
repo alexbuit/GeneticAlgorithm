@@ -57,12 +57,12 @@ void process_fx(gene_pool_t* gene_pool, fx_param_t* fx_param) {
 	ndbit2int32(gene_pool->pop_param_bin, gene_pool->genes, gene_pool->individuals, fx_param->bin2double_factor, fx_param->bin2double_bias, gene_pool->pop_param_double);
 
 
-	if (fx_param->fx_method == fx_Styblinski_Tang) {
+	if (fx_param->fx_method == fx_method_Styblinski_Tang) {
 		for (int i = 0; i < gene_pool->individuals; i++) {
 			gene_pool->pop_result_set[i] = -1 * Styblinski_Tang_fx(gene_pool->pop_param_double[i], gene_pool->genes);
 		}
 	}
-	else if (fx_param->fx_method == fx_Wheelers_Ridge) {
+	else if (fx_param->fx_method == fx_method_Wheelers_Ridge) {
 		for (int i = 0; i < gene_pool->individuals; i++) {
 			gene_pool->pop_result_set[i] = -1 * wheelers_ridge_fx(gene_pool->pop_param_double[i], gene_pool->genes);
 		}

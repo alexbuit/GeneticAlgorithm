@@ -31,23 +31,3 @@ if __name__ == "__main__":
         result = geneticalgorithm(cfg.cType(), rtime_param.cType())
 
     print(result)
-          
-    class __geneticalg:
-    
-        def __init__(self):
-            self.cfg = config_ga_s()
-            self.rtime_param = runtime_param_s()
-            self.dll = ctypes.CDLL(r"C:\Users\vanei\source\repos\Genetic Algorithm - C Branch\src\x64\DLL Build\Genetic Algrotihm.dll")
-            self.geneticalgorithm = self.dll.Genetic_Algorithm
-            self.geneticalgorithm.argtypes = [zz_config_ga_s, zz_runtime_param_s]
-          
-        def __call__(self):
-            return self.geneticalgorithm(self.cfg.cType(), self.rtime_param.cType()))
-        
-        def run():
-            return self.__call__()    
-        
-
-geneticalgorihm = __geneticalgorithm()
-
-geneticalgorihm.cfg.selection_param.selection_method = 1

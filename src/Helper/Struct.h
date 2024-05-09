@@ -17,36 +17,36 @@ struct gene_pool_s {
 };
 
 struct selection_param_s {
-	int selection_method;
-	double selection_div_param;
-	double selection_prob_param;
-	double selection_temp_param;
-	int selection_tournament_size;
+	int selection_method; // DEFAULT = 0
+	double selection_div_param; // DEFAULT = 0.5
+	double selection_prob_param; // DEFAULT = 0.5
+	double selection_temp_param; // DEFAULT = 10
+	int selection_tournament_size; // DEFAULT = 2
 };
 
 struct flatten_param_s {
-	int flatten_method;
-	double flatten_factor;
-	double flatten_bias;
-	int flatten_optim_mode;
+	int flatten_method; // DEFAULT = 0
+	double flatten_factor; // DEFAULT = 1
+	double flatten_bias; // DEFAULT = 0
+	int flatten_optim_mode; // DEFAULT = 0
 };
 
 struct crossover_param_s {
-	int crossover_method;
-	double crossover_prob;
+	int crossover_method; // DEFAULT = 0
+	double crossover_prob; // DEFAULT = 0.5
 };
 
 struct mutation_param_s {
-	int mutation_method;
-	double mutation_prob;
-	int mutation_rate;
+	int mutation_method; // DEFAULT = 0
+	double mutation_prob; // DEFAULT = 0.5
+	int mutation_rate; // DEFAULT = 6
 };
 
 struct fx_param_s {
-	int fx_method;
-	int fx_optim_mode;
-	double bin2double_factor;
-	double bin2double_bias;
+	int fx_method; // DEFAULT = 0
+	int fx_optim_mode; // DEFAULT = 0
+	double bin2double_factor; // DEFAULT = 5
+	double bin2double_bias; // DEFAULT = 0
 };
 
 struct config_ga_s {
@@ -58,12 +58,12 @@ struct config_ga_s {
 };
 
 struct runtime_param_s {
-	int max_iterations;
-	double convergence_threshold;
-	int convergence_window;
-	int genes;
-	int individuals;
-	int elitism;
+	int max_iterations; // DEFAULT = 1000
+	double convergence_threshold; // DEFAULT = 1e-8
+	int convergence_window; // DEFAULT = 100
+	int genes; // DEFAULT = 2
+	int individuals; // DEFAULT = 32
+	int elitism; // DEFAULT = 2
 };	
 
 typedef struct gene_pool_s gene_pool_t;

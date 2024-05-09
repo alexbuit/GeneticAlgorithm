@@ -1,6 +1,7 @@
 
 import re
 import os
+import shutil
 
 def parse_c_structures(file_path):
     """
@@ -145,6 +146,11 @@ def generate_advanced_python_structs(struct_dict):
         struct_definitions.append(struct_definition)
     return "\n".join(struct_definitions)
 
+def generate_genetic_algorithm_object():
+    
+    
+    pass
+
 def generate_py_file(file_path, targetpath):
     """
     Generates a Python file containing ctypes structure definitions based on the C header file.
@@ -165,6 +171,7 @@ def generate_py_file(file_path, targetpath):
 
 if __name__ == "__main__":
     current_folder = os.getcwd()
-    structheaderPath = f"{current_folder}\\Helper\Struct.h"
+    structheaderPath = f"{current_folder}\\Helper\\Struct.h"
     pythonstructpath = f"{current_folder}\\x64\\DLL Build\\Structs.py"
     generate_py_file(structheaderPath, pythonstructpath)
+    shutil.copy(f"{current_folder}\\Genetic_Algorithm.py", f"{current_folder}\\x64\\DLL Build\\Genetic_Algorithm.py" )

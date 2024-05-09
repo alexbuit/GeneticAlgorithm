@@ -105,22 +105,22 @@ void process_flatten(gene_pool_t* gene_pool, flatten_param_t* flatten_param) {
 	// }
 
 
-	if (flatten_param->flatten_method == flat_linear) {
+	if (flatten_param->flatten_method == flatten_method_linear) {
 		lin_flattening(gene_pool, flatten_param);
 	}
-	else if (flatten_param->flatten_method == flat_exponential) {
+	else if (flatten_param->flatten_method == flatten_method_exponential) {
 		exp_flattening(gene_pool, flatten_param);
 	}
-	else if (flatten_param->flatten_method == flat_logarithmic) {
+	else if (flatten_param->flatten_method == flatten_method_logarithmic) {
 		log_flattening(gene_pool, flatten_param);
 	}
-	else if (flatten_param->flatten_method == flat_normalized) {
+	else if (flatten_param->flatten_method == flatten_method_normalized) {
 		norm_flattening(gene_pool, flatten_param);
 	}
-	else if (flatten_param->flatten_method == flat_sigmoid) {
+	else if (flatten_param->flatten_method == flatten_method_sigmoid) {
 		sig_flattening(gene_pool, flatten_param);
 	}
-	else if (flatten_param->flatten_method == flat_none) {
+	else if (flatten_param->flatten_method == flatten_method_none) {
 		no_flattening(gene_pool, flatten_param);
 	}
 	else {

@@ -89,10 +89,10 @@ int main() {
 		flatten_param.flatten_method = 0;
 		flatten_param.flatten_factor = 1.0f;
 		flatten_param.flatten_bias = 0.0f;
-		flatten_param.flatten_optim_mode = flat_none;
+		flatten_param.flatten_optim_mode = flatten_method_none;
 
 		crossover_param_t crossover_param;
-		crossover_param.crossover_method = cross_uniform32;
+		crossover_param.crossover_method = crossover_method_uniform32;
 		crossover_param.crossover_prob = 0.5f;
 
 		mutation_param_t mutation_param;
@@ -101,7 +101,7 @@ int main() {
 		mutation_param.mutation_rate = 6;
 
 		fx_param_t fx_param;
-		fx_param.fx_method = fx_Wheelers_Ridge;
+		fx_param.fx_method = fx_method_Wheelers_Ridge;
 		fx_param.fx_optim_mode = 0;
 		fx_param.bin2double_factor = 5.0f;
 		fx_param.bin2double_bias = 0.0f;

@@ -228,28 +228,28 @@ void complete_crossover(int* parent1, int* parent2, int* child1, int* child2, in
 
 void crossover(int* parent1, int* parent2, int* child1, int* child2, int genes, crossover_param_t* crossover_param) {
 
-	if (crossover_param->crossover_method == cross_single_point) {
+	if (crossover_param->crossover_method == crossover_method_single_point) {
 		single_point_crossover(parent1, parent2, child1, child2, genes, 32); // TODO: bitsize
 	}
-	else if (crossover_param->crossover_method == cross_two_point) {
+	else if (crossover_param->crossover_method == crossover_method_two_point) {
 		two_point_crossover(parent1, parent2, child1, child2, genes, 32);
 	}
-	else if (crossover_param->crossover_method == cross_uniform) {
+	else if (crossover_param->crossover_method == crossover_method_uniform) {
 		uniform_crossover(parent1, parent2, child1, child2, genes, 32);
 	}
-	else if (crossover_param->crossover_method == cross_complete) {
+	else if (crossover_param->crossover_method == crossover_method_complete) {
 		complete_crossover(parent1, parent2, child1, child2, genes, 32);
 	}
-	else if (crossover_param->crossover_method == cross_single_point32) {
+	else if (crossover_param->crossover_method == crossover_method_single_point32) {
 		single_point_crossover32(parent1, parent2, child1, child2, genes);
 	}
-	else if (crossover_param->crossover_method == cross_two_point32) {
+	else if (crossover_param->crossover_method == crossover_method_two_point32) {
 		two_point_crossover32(parent1, parent2, child1, child2, genes);
 	}
-	else if (crossover_param->crossover_method == cross_uniform32) {
+	else if (crossover_param->crossover_method == crossover_method_uniform32) {
 		uniform_crossover32(parent1, parent2, child1, child2, genes);
 	}
-	else if (crossover_param->crossover_method == cross_complete32) {
+	else if (crossover_param->crossover_method == crossover_method_complete32) {
 		complete_crossover32(parent1, parent2, child1, child2, genes);
 	}
 	else {
@@ -265,8 +265,8 @@ void process_crossover(gene_pool_t* gene_pool, crossover_param_t* crossover_para
 	for (int i = 0; i < nearest_even; i += 2) {
 		crossover(gene_pool->pop_param_bin[gene_pool->selected_indexes[i]],
 			gene_pool->pop_param_bin[gene_pool->selected_indexes[i + 1]],
-			gene_pool->pop_param_bin_cross_buffer[i],
-			gene_pool->pop_param_bin_cross_buffer[i + 1],
+			gene_pool->pop_param_bin_crossover_method_buffer[i],
+			gene_pool->pop_param_bin_crossover_method_buffer[i + 1],
 			gene_pool->genes,
 			crossover_param);
 	}
@@ -286,7 +286,7 @@ void process_crossover(gene_pool_t* gene_pool, crossover_param_t* crossover_para
 		}
 		if (skip_index) {
 			for (int j = 0; j < gene_pool->genes; j++) {
-				gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]][j] = gene_pool->pop_param_bin_cross_buffer[i][j];
+				gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]][j] = gene_pool->pop_param_bin_crossover_method_buffer[i][j];
 			}
 		}
 	}
