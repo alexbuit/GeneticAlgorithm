@@ -285,10 +285,10 @@ int main() {
 	int repeats = 1;
 	runtime_param_t runtime_param = default_runtime_param();
 	runtime_param.zone_enable = 0;
-	runtime_param.task_count = 8;
-	runtime_param.individuals = 32;
-	runtime_param.genes = 15;
-	runtime_param.thread_count = 4;
+	runtime_param.task_count = 64;
+	runtime_param.individuals = 128;
+	runtime_param.genes = 30;
+	runtime_param.thread_count = 8;
 	config_ga_t config_ga = default_config(runtime_param);
 	config_ga.selection_param.selection_method = selection_method_rank_space;
 

@@ -42,12 +42,10 @@ void ndbit2int32(unsigned int** valarr, int genes, int individuals,
 	:rtype: void
 	*/
 
-	double max_int;
-	max_int = pow(2, 8 * sizeof(int));
 
 	for (int i = 0; i < individuals; i++) {
 		for (int j = 0; j < genes; j++) {			
-			result[i][j] = (double)(valarr[i][j] * (upper[j] - lower[j])) / max_int + lower[j];
+			result[i][j] = (double) (valarr[i][j] * (upper[j] - lower[j])) / UINT32_MAX + lower[j];
 		}
 	}
 }

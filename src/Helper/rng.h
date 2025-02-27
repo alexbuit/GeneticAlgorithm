@@ -9,11 +9,11 @@
 
 
 
-int rdrand();
+//int rdrand();
 
 void seedRandThread(uint32_t seed);
 uint32_t gen_mt_rand();
-int rdrand32_retry(unsigned int retries, uint32_t* rand);
+//int rdrand32_retry(unsigned int retries, uint32_t* rand);
 
 //unsigned int random_int32();
 

@@ -1,15 +1,32 @@
 # compiled code
-"src/Genetic .479a36c1"
+"Genetic .479a36c1/"
 src/x64
 
 # zipped folders
 .zip
+*.csv
+*.bin
+*.pdb
+*.exe
+.vs/
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
 
 # vscode
 .vs
-.vcxproj
-.vcxproj.filters
-.vcxproj.user
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 .idea
 
 # python

@@ -98,7 +98,7 @@ inline void compute_distances(gene_pool_t* gene_pool) {
     for (int i = 0; i < gene_pool->genes; i++) {
         central_point[i] = 0;
         for (int j = 0; j < gene_pool->individuals; j++) {
-            central_point[i] += gene_pool->pop_param_double[gene_pool->selected_indexes[j]][i];
+            central_point[i] += gene_pool->pop_param_bin[gene_pool->selected_indexes[j]][i];
         }
         central_point[i] /= gene_pool->individuals;
     }
@@ -107,9 +107,9 @@ inline void compute_distances(gene_pool_t* gene_pool) {
     for (int i = 0; i < gene_pool->individuals; i++) {
         distances[i] = 0;
         for (int j = 0; j < gene_pool->genes; j++) {
-            distances[i] += pow(gene_pool->pop_param_double[gene_pool->selected_indexes[i]][j] - central_point[j], 2);
+            int diff = gene_pool->pop_param_bin[gene_pool->selected_indexes[i]][j] - central_point[j];
+            distances[i] += diff * diff; // No sqrt for performance
         }
-        distances[i] = sqrt(distances[i]);
     }
 
 }

@@ -8,6 +8,7 @@
 #include "immintrin.h"
 #include "intrin.h"
 
+#include "../helper/rng/SFMT.h"
 #include "rng.h"
 
 #define UPPER_MASK		0x80000000
@@ -24,6 +25,7 @@ typedef struct mt_rand_s mt_rand_t;
 
 // Thread local rng generator
 __declspec(thread) mt_rand_t mt_thread;
+__declspec(thread) sfmt_t sfmt_thread;
 
 int rdrand_supported = -1;
 
@@ -138,14 +140,14 @@ mt_rand_t seedRand(uint32_t seed) {
 }
 
 
-void seedRandThread(uint32_t seed) {
+static inline void seedRandThread_internal(uint32_t seed) {
 	mt_thread = seedRand(seed);
 }
 
 /**
  * Generates a pseudo-randomly generated long.
  */
-uint32_t gen_mt_rand() {
+static inline uint32_t gen_mt_rand_internal() {
 
 	uint32_t y;
 	static uint32_t mag[2] = { 0x0, 0x9908b0df }; /* mag[x] = x * 0x9908b0df for x = 0,1 */
@@ -173,4 +175,15 @@ uint32_t gen_mt_rand() {
 	y ^= (y << 15) & TEMPERING_MASK_C;
 	y ^= (y >> 18);
 	return y;
+}
+
+//shared functions
+uint32_t gen_mt_rand() {
+    //return gen_mt_rand_internal();
+    return sfmt_genrand_uint32(&sfmt_thread);
+}
+
+void seedRandThread(uint32_t seed) {
+    //seedRandThread_internal(seed);
+    sfmt_init_gen_rand(&sfmt_thread, seed);
 }

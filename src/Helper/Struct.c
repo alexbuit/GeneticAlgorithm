@@ -107,11 +107,11 @@ void verify_input_parameters(config_ga_t config_ga, runtime_param_t runtime_para
 		perror("Elitism cannot be greater than the number of individuals");
 		exit(250);
 	}
-	if (runtime_param.individuals > 2) {
+	if (runtime_param.individuals < 2) {
 		perror("The number of individuals must be greater than two");
 		exit(250);
 	}
-	if (runtime_param.genes != 0) {
+	if (runtime_param.genes == 0) {
 		perror("The number of genes must be greater than zero");
 		exit(250);
 	}
