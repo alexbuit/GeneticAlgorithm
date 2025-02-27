@@ -11,21 +11,18 @@
 
 #include "../Helper/Struct.h"
 #include "../Helper/rng.h"
+#include "../Helper/error_handling.h"
 
 
 console_queue_t init_console_queue() {
     console_queue_t console_queue;
     console_queue.queue_size = 1000;
     console_queue.str_list = (print_str_t*)malloc(sizeof(print_str_t) * console_queue.queue_size);
-    if (console_queue.str_list == NULL) {
-        printf("Memory allocation failed: init_console_queue");
-        exit(255);
-    }
+    if (console_queue.str_list == NULL) EXIT_MEM_ERROR();
+
     console_queue.lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-    if (console_queue.lock == NULL) {
-        printf("Memory allocation failed: init_console_queue");
-        exit(255);
-    }
+    if (console_queue.lock == NULL) EXIT_MEM_ERROR();
+
     pthread_mutex_init(console_queue.lock, NULL);
     console_queue.current_task_id = 0;
     console_queue.first_task_id = 0;
@@ -34,6 +31,8 @@ console_queue_t init_console_queue() {
     console_queue.progress.best_result = -INFINITY;
     console_queue.progress.tasks_completed = 0;
     console_queue.progress.optim_mode = 0;
+    console_queue.progress.average_result = 0;
+    console_queue.progress.result_standard_deviation = 0;
     return console_queue;
 }
 
@@ -104,4 +103,6 @@ void con_printf(console_queue_t* console_queue, const char* format, ...) {
 
 void con_kill(console_queue_t* console_queue) {
     add_print_str(console_queue, "", 0, 255);
+
+    pthread_join(console_queue->thread_id, NULL);
 }

@@ -12,15 +12,18 @@
 #include "Helper/Helper.h"
 #include "Helper/Struct.h"
 #include "Helper/rng.h"
+#include "Helper/error_handling.h"
 
 #include "Multiprocessing/mp_logger.h"
 #include "Multiprocessing/mp_solver_th.h"
 #include "Multiprocessing/mp_task_gen.h"
 #include "Multiprocessing/mp_progress_disp.h"
 #include "Multiprocessing/mp_consts.h"
+#include "Multiprocessing/mp_thread_locals.h"
 
 #include "Logger/logging.h"
 #include "Logger/progress_display.h"
+#include "Logger/dump_config.h"
 
 #include "Optimisation/Optimizer.h"
 
@@ -84,18 +87,25 @@ void* process_progress_display_thread(console_queue_t* console_queue) {
     while (1) {
         current = clock(); // Update every second
         double elapsed_time = (double)(current - start) / CLOCKS_PER_SEC;
-        display_progress(console_queue->progress.tasks_completed, total_tasks, console_queue->progress.best_result, elapsed_time);
+        		
+		display_progress(console_queue, total_tasks, elapsed_time);
 		
-		if (get_print_str(console_queue, &print_str)) {
+		Sleep(500);
+
+		while (get_print_str(console_queue, &print_str)) {
 			if (print_str.task_type == 255) {
-				break;
+				current = clock(); // Update every second
+				double elapsed_time = (double)(current - start) / CLOCKS_PER_SEC;
+
+                // update the progress one last time
+				display_progress(console_queue, total_tasks, elapsed_time);
+                goto end;
 			}
-			printf("%s", print_str.str);
+			//printf("%s", print_str.str);
             free(print_str.str);
 		}
-		
-		Sleep(1000);
 	}
+	end:;
 }
 
 
@@ -105,10 +115,7 @@ void* process_log_thread(task_result_queue_t* task_result_queue) {
 	char* log_file;
 	log_file = (char*)malloc(sizeof(char) * 255);
 
-    if (log_file == NULL) {
-        printf("Memory allocation failed: process_log_thread");
-        exit(255);
-    }
+    if(log_file == NULL) EXIT_MEM_ERROR();
 
 	if (task_result_queue->runtime_param.logging_param.fully_qualified_basename == NULL) {
 		strcpy_s(log_file, 255, "C:/temp/GA\0");
@@ -142,6 +149,14 @@ void* process_log_thread(task_result_queue_t* task_result_queue) {
 
 		if (task_result.task_type == BEST_RESULT_TASK) {
 			task_result_queue->console_queue->progress.tasks_completed++;
+			// add the results to be processed to an answer in the console
+            // to be divided by the number of tasks completed
+			task_result_queue->console_queue->progress.average_result += task_result.result;
+            // to be divided by the number of tasks completed - 1 and sqrt
+            task_result_queue->console_queue->progress.result_standard_deviation += pow(
+				(task_result.result - (task_result_queue->console_queue->progress.average_result) / task_result_queue->console_queue->progress.tasks_completed), 2
+			);
+			
 			if (task_result.result > current_best_res) {
 				current_best_res = task_result.result;
 				task_result_queue->console_queue->progress.best_result = current_best_res;
@@ -207,32 +222,20 @@ void start_threads(task_queue_t* task_queue, runtime_param_t runtime_param, conf
 
 		thread_param = (thread_param_t *) malloc(sizeof(thread_param_t) * NTHREADS);
 
-		if (thread_param == NULL) {
-            printf("Memory allocation failed: start_threads");
-            exit(255);
-        }
+		if (thread_param == NULL) EXIT_MEM_ERROR();
 
 		int retid = 0;
 		retid = pthread_create(&(task_queue->task_result_queue->thread_id), NULL, (void*)process_log_thread, (void*)task_queue->task_result_queue);
 
-        if (retid) {
-            printf("Error creating thread\n");
-            exit(1);
-        }
+        if (retid) EXIT_WITH_ERROR("Thread creation", 1);
 
         int retid_console = pthread_create(&(task_queue->task_result_queue->console_queue->thread_id), NULL, (void*)process_progress_display_thread, (void*)task_queue->task_result_queue->console_queue);
-        if (retid_console) {
-            printf("Error creating thread\n");
-            exit(1);
-        }
+        if (retid_console) EXIT_WITH_ERROR("Thread creation", 1);
 
 		for (i = 0; i < NTHREADS; i++)
 		{
             thread_param[i].task_queue = malloc(sizeof(task_queue_t));
-            if (thread_param[i].task_queue == NULL) {
-                printf("Memory allocation failed: start_threads");
-                exit(255);
-            }
+            if (thread_param[i].task_queue == NULL) EXIT_MEM_ERROR();
 
 			thread_param[i].task_queue = task_queue;
 			thread_param[i].runtime_param = runtime_param;
@@ -240,17 +243,16 @@ void start_threads(task_queue_t* task_queue, runtime_param_t runtime_param, conf
 			//thread_param[i].task_id = i;
 			retid = pthread_create(&(task_queue->thread_id[i]), NULL, (void *) process_task_thread, (void *) & thread_param[i]);
 
-			if(retid)
-            {
-                printf("Error creating thread %d\n", i);
-                exit(1);
-            }
+			if(retid) EXIT_WITH_ERROR("Thread creation", 1);
 		}
 	}
 }
 
 double Genetic_Algorithm(config_ga_t config_ga, runtime_param_t runtime_param) {
 	verify_input_parameters(config_ga, runtime_param);
+    if (runtime_param.logging_param.write_config == 1) {
+		write_config(runtime_param, config_ga);
+    }
 
 	double previous_best_res = -INFINITY;
 	double best_res = -INFINITY;
@@ -268,15 +270,17 @@ double Genetic_Algorithm(config_ga_t config_ga, runtime_param_t runtime_param) {
 	make_task_list(&runtime_param, config_ga, &task_queue);
 
 	stop_solver_threads(&task_queue, runtime_param.thread_count);
-    stop_result_logger(&task_result_queue, runtime_param.thread_count);
+    stop_result_logger(&task_result_queue, runtime_param.thread_count, &best_res);
     con_kill(&console_queue);
 
 	close_file(&task_result_queue);
 	free_task_queue(&task_queue);
 	free_console_queue(&console_queue);
+    return best_res;
 }
 
 void free_config_ga(config_ga_t* config_ga) {
+    free(config_ga->mutation_param.mutation_rate);
     free(config_ga->population_param.lower);
     free(config_ga->population_param.upper);
 }
@@ -291,6 +295,7 @@ int main() {
 	runtime_param.thread_count = 8;
 	config_ga_t config_ga = default_config(runtime_param);
 	config_ga.selection_param.selection_method = selection_method_rank_space;
+	config_ga.population_param.reseed_bottom_N = 1;
 
 	for (int i = 0; i < repeats; i++) {
 		printf("\n Run number: %d\n", i);

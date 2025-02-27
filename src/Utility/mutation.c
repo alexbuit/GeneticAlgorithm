@@ -3,26 +3,7 @@
 #include "math.h"
 
 #include "mutation.h"
-
-
-__declspec (thread) int* muation_boost_distr;
-__declspec (thread) double current_alpha;
-__declspec (thread) double current_beta;
-
-void compute_mutation_distr(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
-    /*
-    */
-    double sum = 0;
-    current_alpha = mutation_param->mutation_alpha;
-    current_beta = mutation_param->mutation_beta;
-    for (int i = 0; i < gene_pool->individuals; i++) {
-        muation_boost_distr[i] = 0;
-        sum += muation_boost_distr[i];
-    }
-    for (int i = 0; i < gene_pool->individuals; i++) {
-        muation_boost_distr[i] /= sum;
-    }
-}
+#include "../Multiprocessing/mp_thread_locals.h"
 
 void mutate32(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 
@@ -57,7 +38,7 @@ void mutate32(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 	int mutation_gene;
 	int mutation_bit = 0;
 	for (int i = 0; i < gene_pool->individuals - gene_pool->elitism; i++) {
-		for (int j = 0; j < mutation_param->mutation_rate; j++) { // check if works
+		for (int j = 0; j < mutation_param->mutation_rate[i]; j++) { // check if works
 			// ensure that the selected gene is positive
             mutation_rnd = gen_mt_rand();
 			mutation_bit = (int)1 << ((mutation_rnd && 0b11111)); // mask, 5 bits describe 32 positions
@@ -73,14 +54,5 @@ void process_mutation(gene_pool_t* gene_pool, mutation_param_t* mutation_param) 
     /*
     */
     // Check if the distributions are up to date
-
-	// to Optimizer.c?
-    if (current_alpha != mutation_param->mutation_alpha ||
-        current_beta != mutation_param->mutation_beta ||
-		muation_boost_distr[0] == -1) { // Change or not initialized
-        compute_mutation_distr(gene_pool, mutation_param);
-    }
-
-
-
+    mutate32(gene_pool, mutation_param);
 }

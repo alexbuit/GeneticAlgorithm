@@ -10,6 +10,7 @@
 
 #include "../helper/rng/SFMT.h"
 #include "rng.h"
+#include "../Multiprocessing/mp_thread_locals.h"
 
 #define UPPER_MASK		0x80000000
 #define LOWER_MASK		0x7fffffff

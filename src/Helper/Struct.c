@@ -1,7 +1,9 @@
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "Struct.h"
+#include "error_handling.h"
 #include "../Utility/process.h"
 #include "../Utility/pop.h"
 #include "../Utility/crossover.h"
@@ -24,6 +26,7 @@ logging_param_t default_logging_param() {
 	logging_param.config_int_count = 1;
 	logging_param.config_double_count = 2;
 	logging_param.queue_size = 128;
+    logging_param.write_config = 0;
 	return logging_param;
 }
 
@@ -56,22 +59,37 @@ config_ga_t default_config(runtime_param_t runtime_param) {
 	mutation_param_t mutation_param;
 	mutation_param.mutation_method = 0;
 	mutation_param.mutation_prob = 0.5;
-	mutation_param.mutation_rate = 6;
+	mutation_param.mutation_rate = malloc(sizeof(double) * runtime_param.individuals);
+    
+	if (mutation_param.mutation_rate == NULL) EXIT_MEM_ERROR();
+
+	for (int i = 0; i < runtime_param.individuals; i++) {
+        mutation_param.mutation_rate[i] = 6;
+	}
+
+    mutation_param.mutation_alpha = 1;
+    mutation_param.mutation_beta = 0;
 
 	fx_param_t fx_param;
 	fx_param.fx_method = fx_method_Styblinski_Tang;
 	fx_param.fx_optim_mode = 1;
-	fx_param.fx_function = NULL;
+    fx_param.fx_function = NULL;
+    fx_param.fx_data_type = fx_data_type_double;
 
 	population_param_t pop_param;
 	pop_param.sampling_type = pop_normal;
 	pop_param.sigma = 1;
 	pop_param.lower = malloc(sizeof(double) * runtime_param.genes);
 	pop_param.upper = malloc(sizeof(double) * runtime_param.genes);
-	for (int i = 0; i < runtime_param.genes; i++) {
-		pop_param.lower[i] = -5.0f;
-		pop_param.upper[i] = 5.0f;
-	}
+
+    if (pop_param.lower == NULL || pop_param.upper == NULL) EXIT_MEM_ERROR();
+
+    for (int i = 0; i < runtime_param.genes; i++) {
+        pop_param.lower[i] = -5.0;
+        pop_param.upper[i] = 5.0;
+    }
+
+	pop_param.reseed_bottom_N = 2;
 
 	selection_param_t selection_param;
 	selection_param.selection_method = selection_method_roulette;
@@ -103,16 +121,7 @@ config_ga_t default_config(runtime_param_t runtime_param) {
 }
 
 void verify_input_parameters(config_ga_t config_ga, runtime_param_t runtime_param) {
-	if (runtime_param.elitism > runtime_param.individuals) {
-		perror("Elitism cannot be greater than the number of individuals");
-		exit(250);
-	}
-	if (runtime_param.individuals < 2) {
-		perror("The number of individuals must be greater than two");
-		exit(250);
-	}
-	if (runtime_param.genes == 0) {
-		perror("The number of genes must be greater than zero");
-		exit(250);
-	}
+	if (runtime_param.elitism > runtime_param.individuals) EXIT_WITH_ERROR("Elitism cannot be greater than the number of individuals creation", 250);
+	if (runtime_param.individuals < 2) EXIT_WITH_ERROR("The number of individuals must be greater than two", 250);
+	if (runtime_param.genes < 1) EXIT_WITH_ERROR("The number of genes must be greater than zero", 250);
 }

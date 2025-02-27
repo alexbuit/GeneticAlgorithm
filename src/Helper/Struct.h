@@ -21,6 +21,7 @@ struct population_param_s {
 	int sigma; // DEFAULT = 1
 	double* lower; // DEFAULT = 5
 	double* upper; // DEFAULT = 0
+    int reseed_bottom_N; // DEFAULT = 2
 };
 
 struct selection_param_s {
@@ -47,16 +48,18 @@ struct crossover_param_s {
 struct mutation_param_s {
 	int mutation_method; // DEFAULT = 0
 	double mutation_prob; // DEFAULT = 0.5
-	int mutation_rate; // DEFAULT = 6
+	int* mutation_rate; // DEFAULT = 6
     double mutation_alpha; // DEFAULT = 1
     double mutation_beta; // DEFAULT = 0
 };
 
-typedef double (*fx_ptr)(double*, int);
+typedef double (*fx_ptr_generic)(void*, int);
+
 struct fx_param_s {
 	int fx_method; // DEFAULT = 0
 	int fx_optim_mode; // DEFAULT = 0
-    fx_ptr fx_function; // DEFAULT = NULL
+    int fx_data_type; // DEFAULT = 0
+	fx_ptr_generic fx_function;
 };
 
 struct optimizer_param_s {
@@ -88,6 +91,7 @@ struct logging_param_s {
     int config_int_count; // DEFAULT = 1
     int config_double_count; // DEFAULT = 2
     int queue_size; // DEFAULT = 128
+    int write_config; // DEFAULT = 0
 };
 
 struct runtime_param_s {
