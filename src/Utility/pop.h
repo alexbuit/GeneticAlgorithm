@@ -10,7 +10,7 @@
 #define pop_normal 1
 #define pop_cauchy 2
 
-void init_gene_pool(gene_pool_t* gene_pool);
+void init_gene_pool(gene_pool_t* gene_pool, runtime_param_t* runtime_param);
 void free_gene_pool(gene_pool_t* gene_pool);
 
 void fill_pop(gene_pool_t* gene_pool, population_param_t pop_param);

@@ -176,11 +176,7 @@ void* process_task_thread(thread_param_t* thread_param) {
 	//printf("cfgbin2int, %f", thread_param->config_ga.fx_param.lower[0]);
 	//printf("cfgtoursize, %d", thread_param->config_ga.selection_param.selection_tournament_size);
 
-	gene_pool.genes = thread_param->runtime_param.genes;
-	gene_pool.individuals = thread_param->runtime_param.individuals;
-	gene_pool.elitism = thread_param->runtime_param.elitism;
-
-	init_gene_pool(&gene_pool);
+	init_gene_pool(&gene_pool, &(thread_param->runtime_param));
     init_pre_compute(&gene_pool);
 
 	task_param_t task;
@@ -296,6 +292,7 @@ int main() {
 	config_ga_t config_ga = default_config(runtime_param);
 	config_ga.selection_param.selection_method = selection_method_rank_space;
 	config_ga.population_param.reseed_bottom_N = 1;
+    config_ga.crossover_param.crossover_method = crossover_method_uniform512;
 
 	for (int i = 0; i < repeats; i++) {
 		printf("\n Run number: %d\n", i);

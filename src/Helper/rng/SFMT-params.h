@@ -24,6 +24,10 @@
  * of 64-bit integers.*/
 #define SFMT_N64 (SFMT_N * 2)
 
+#define SFMT_N256 (SFMT_N / 2)
+#define SFMT_N512 (SFMT_N / 4)
+
+
 /*----------------------
   the parameters of SFMT
   following definitions are in paramsXXXX.h file.

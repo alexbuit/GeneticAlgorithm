@@ -7,6 +7,7 @@
 #include "../Helper/Helper.h"
 #include "../Helper/Struct.h"
 #include "../Helper/error_handling.h"
+#include "../Multiprocessing/mp_thread_locals.h"
 
 
 double Styblinski_Tang_fx(double* parameter_set, int genes) {

@@ -6,6 +6,7 @@ struct gene_pool_s {
 	char* gene_pool_memory_ptr;
 	unsigned int** pop_param_bin;
 	unsigned int** pop_param_bin_cross_buffer;
+	double** pop_param_double;
 	double* pop_result_set;
 	double* flatten_result_set;
 	int* selected_indexes;
@@ -14,6 +15,8 @@ struct gene_pool_s {
 	int individuals;
 	int elitism;
 	int iteration_number;
+	int gene_mem_size; // bits
+    int individual_mem_size; // bytes
 };
 
 struct population_param_s {
@@ -101,6 +104,7 @@ struct runtime_param_s {
 	int task_count; // DEFAULT = 32
 	int thread_count; // DEFAULT = 4
     int zone_enable; // DEFAULT = 1
+    int gene_mem_size; // DEFAULT = 32
     struct logging_param_s logging_param;
 };	
 

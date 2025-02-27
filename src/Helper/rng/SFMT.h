@@ -202,6 +202,34 @@ inline static uint64_t sfmt_genrand_uint64(sfmt_t * sfmt) {
 #endif
 }
 
+#if defined __AVX512VL__
+inline static __m512i sfmt_genrand_uint512(sfmt_t* sfmt) {
+    __m512i r;
+    __m512i* psfmt512 = &sfmt->state_zmm[0];
+
+    if (sfmt->idx >= SFMT_N512) {
+        sfmt_gen_rand_all(sfmt);
+        sfmt->idx = 0;
+    }
+    r = psfmt512[sfmt->idx++];
+    return r;
+}
+#endif
+
+#if defined(__AVX2__)
+inline static __m256i sfmt_genrand_uint256(sfmt_t* sfmt) {
+    __m256i r;
+    __m256i* psfmt256 = &sfmt->state_ymm[0];
+
+    if (sfmt->idx >= SFMT_N256) {
+        sfmt_gen_rand_all(sfmt);
+        sfmt->idx = 0;
+    }
+    r = psfmt256[sfmt->idx++];
+    return r;
+}
+#endif
+
 /* =================================================
    The following real versions are due to Isaku Wada
    ================================================= */

@@ -12,6 +12,7 @@
 #include "../Multiprocessing/mp_logger.h"
 #include "../Multiprocessing/mp_solver_th.h"
 #include "../Multiprocessing/mp_consts.h"
+#include "../Multiprocessing/mp_thread_locals.h"
 
 static inline void copy_to_bin_buffer(task_result_t* task_result, void* data, int size) {
 	if (task_result->bin_single_entry_length < size + task_result->bin_position) {

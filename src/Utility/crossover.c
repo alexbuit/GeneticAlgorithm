@@ -1,9 +1,11 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
+#include <immintrin.h>
 #include <string.h>
 
 #include "crossover.h"
+
 
 
 
@@ -99,6 +101,29 @@ static void uniform_crossover32(int* parent1, int* parent2, int* child1, int* ch
 	}
 }
 
+static void uniform_crossover512(int* parent1, int* parent2, int* child1, int* child2, int genes, int individual_mem_size) {
+	// parent1 and parent2 are the parents to be crossed over and child1 and child2 are the children to be created all of size size
+	// prob is the probability of a value being copied from the first parent
+	// The function should fill child1 and child2 with the crossed over values
+
+	// int mask = pow(2, point) - 1;
+
+	__m512i mask;
+    int memory_blocks = individual_mem_size / sizeof(__m512i);
+
+    __m512i* parent1_ptr = (__m512i*)parent1;
+    __m512i* parent2_ptr = (__m512i*)parent2;
+    __m512i* child1_ptr = (__m512i*)child1;
+    __m512i* child2_ptr = (__m512i*)child2;
+
+	for (int i = 0; i < memory_blocks; i++) {
+		mask = gen_mt_rand512();
+
+		child1_ptr[i] = _mm512_or_epi64((_mm512_andnot_epi64(parent1_ptr[i], mask)), (_mm512_and_epi64(parent2_ptr[i], mask)));
+		child2_ptr[i] = _mm512_or_epi64((_mm512_and_epi64(parent1_ptr[i], mask)), (_mm512_andnot_epi64(parent2_ptr[i], mask)));
+	}
+}
+
 static void complete_crossover32(int* parent1, int* parent2, int* child1, int* child2, int genes) {
 	// parent1 and parent2 are the parents to be crossed over and child1 and child2 are the children to be created all of size size
 	// The function should fill child1 and child2 with the crossed over values
@@ -117,7 +142,7 @@ static void complete_crossover32(int* parent1, int* parent2, int* child1, int* c
 	}
 }
 
-static void crossover(int* parent1, int* parent2, int* child1, int* child2, int genes, crossover_param_t* crossover_param) {
+static void crossover(int* parent1, int* parent2, int* child1, int* child2, int genes, int individual_mem_size, crossover_param_t* crossover_param) {
 
 	if (crossover_param->crossover_method == crossover_method_single_point32) {
 		single_point_crossover32(parent1, parent2, child1, child2, genes);
@@ -131,6 +156,9 @@ static void crossover(int* parent1, int* parent2, int* child1, int* child2, int 
 	else if (crossover_param->crossover_method == crossover_method_complete32) {
 		complete_crossover32(parent1, parent2, child1, child2, genes);
 	}
+    else if (crossover_param->crossover_method == crossover_method_uniform512) {
+        uniform_crossover512(parent1, parent2, child1, child2, genes, individual_mem_size);
+    }
 	else {
 		printf("Invalid crossover method\n");
 	}
@@ -147,6 +175,7 @@ void process_crossover(gene_pool_t* gene_pool, crossover_param_t* crossover_para
 			gene_pool->pop_param_bin_cross_buffer[i],
 			gene_pool->pop_param_bin_cross_buffer[i + 1],
 			gene_pool->genes,
+            gene_pool->individual_mem_size,
 			crossover_param
 		);
 	}
@@ -155,7 +184,7 @@ void process_crossover(gene_pool_t* gene_pool, crossover_param_t* crossover_para
 	for (int i = 0; i < gene_pool->individuals - gene_pool->elitism; i++) {
         memcpy(gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]],
 			gene_pool->pop_param_bin_cross_buffer[i],
-			gene_pool->genes * sizeof(int));
+			gene_pool->individual_mem_size);
 	}
 }
 

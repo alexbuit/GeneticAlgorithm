@@ -5,7 +5,6 @@
 #include "../Helper/Struct.h"
 #include "../Helper/error_handling.h"
 
-
 // Selection parameters
 thread_local double* prob_distr = NULL;
 thread_local double* boltzmann_distr = NULL;

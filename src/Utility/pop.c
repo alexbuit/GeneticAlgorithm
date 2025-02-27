@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include <immintrin.h>
 
 #define PI   3.14159265358979323846264338327950288419716939937510f
+#define __AVX512VL__
 
 #include "pop.h"
-
+#include "../Helper/error_handling.h"
 
 void bitpop32(int genes, int* result) {
 
@@ -142,7 +144,7 @@ static void cauchy_bit_pop(int** result, int individuals, int genes, population_
 	}
 }
 
-void init_gene_pool(gene_pool_t* gene_pool) {
+void init_gene_pool(gene_pool_t* gene_pool, runtime_param_t* runtime_param) {
 	//gene_pool_t {
 	// int** pop_param_bin;
 	// double** pop_param_double;
@@ -152,6 +154,10 @@ void init_gene_pool(gene_pool_t* gene_pool) {
 	// int individuals;
 	// int elitism;
 
+	gene_pool->genes = runtime_param->genes;
+	gene_pool->individuals = runtime_param->individuals;
+	gene_pool->elitism = runtime_param->elitism;
+	gene_pool->gene_mem_size = runtime_param->gene_mem_size;
 
 	uint64_t total_memsize = 0;
 	uint64_t current_mem_ptr = 0;
@@ -160,14 +166,20 @@ void init_gene_pool(gene_pool_t* gene_pool) {
     total_memsize += gene_pool->individuals * sizeof(double); // flatten result set
     total_memsize += gene_pool->individuals * sizeof(int*); // pop_param_bin
     total_memsize += gene_pool->individuals * sizeof(int*); // pop_param_bin_cross_buffer
-    total_memsize += gene_pool->individuals * sizeof(double*); // pop_param_double
+	total_memsize += gene_pool->individuals * sizeof(double*); // pop_param_double
     total_memsize += gene_pool->individuals * sizeof(double); // pop_result_set
     total_memsize += gene_pool->individuals * sizeof(int); // selected_indexes
     total_memsize += gene_pool->individuals * sizeof(int); // sorted_indexes
 
-    total_memsize += gene_pool->individuals * gene_pool->genes * sizeof(int); // pop_param_bin
-    total_memsize += gene_pool->individuals * gene_pool->genes * sizeof(int); // pop_param_bin_cross_buffer
-    total_memsize += gene_pool->individuals * gene_pool->genes * sizeof(double); // pop_param_double
+#if defined __AVX512VL__
+    gene_pool->individual_mem_size = ((gene_pool->genes * gene_pool->gene_mem_size + 511) / 512) * sizeof(__m512i);
+#else
+	gene_pool->individual_mem_size = ((gene_pool->genes * gene_pool->gene_mem_size + 255) / 256) * sizeof(__m256i);
+#endif
+
+	total_memsize += gene_pool->individuals * gene_pool->individual_mem_size; // pop_param_bin
+	total_memsize += gene_pool->individuals * gene_pool->individual_mem_size; // pop_param_bin_cross_buffer
+	total_memsize += gene_pool->individuals * gene_pool->genes * sizeof(double);
 
     // Allocate the memory
 	if ((gene_pool->gene_pool_memory_ptr = malloc(total_memsize)) == NULL) {
@@ -201,19 +213,19 @@ void init_gene_pool(gene_pool_t* gene_pool) {
     // pointers to data
     for (int i = 0; i < gene_pool->individuals; i++) {
         gene_pool->pop_param_bin[i] = (int*)current_mem_ptr;
-        current_mem_ptr += gene_pool->genes * sizeof(int);
+        current_mem_ptr += gene_pool->individual_mem_size;
 
         gene_pool->pop_param_bin_cross_buffer[i] = (int*)current_mem_ptr;
-        current_mem_ptr += gene_pool->genes * sizeof(int);
+        current_mem_ptr += gene_pool->individual_mem_size;
 
-        gene_pool->pop_param_double[i] = (double*)current_mem_ptr;
-        current_mem_ptr += gene_pool->genes * sizeof(double);
+		gene_pool->pop_param_double[i] = (double*)current_mem_ptr;
+		current_mem_ptr += gene_pool->genes * sizeof(double);
     }
 
-    if ((uint64_t) gene_pool->gene_pool_memory_ptr + total_memsize != current_mem_ptr) {
-        fprintf(stderr, "Memory allocation failed: init_gene_pool\n");
-        exit(EXIT_FAILURE);
-    }
+	if ((uint64_t)gene_pool->gene_pool_memory_ptr + total_memsize != current_mem_ptr) {
+		EXIT_WITH_ERROR("Expected memory allocated does not match up with memory allocated", 255);
+	}
+    
 
 
 
@@ -248,8 +260,13 @@ void free_gene_pool(gene_pool_t* gene_pool) {
     free(gene_pool->gene_pool_memory_ptr);
 }
 
-void fill_individual(gene_pool_t* gene_pool, int individual) {
-	bitpop32(gene_pool->genes, gene_pool->pop_param_bin[individual]);
+inline void fill_individual(gene_pool_t* gene_pool, int individual) {
+	//bitpop32(gene_pool->genes, gene_pool->pop_param_bin[individual]);
+	int memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
+    __m512i* ptr = (__m512i*)gene_pool->pop_param_bin[individual];
+	for (int i = 0; i < memory_blocks; i++) {
+		ptr[i] = gen_mt_rand512();
+	}
 }
 
 void fill_pop(gene_pool_t* gene_pool, population_param_t pop_param) {
