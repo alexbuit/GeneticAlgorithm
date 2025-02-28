@@ -1,20 +1,24 @@
-
-#ifndef POP_H
-#define POP_H
+#include "../Helper/Helper.h"
 #include "../Helper/Struct.h"
+#include "../Helper/rng.h"
 
-void init_gene_pool(gene_pool_t* gene_pool);
+#ifndef _POP_H
+#define _POP_H
+
+
+#define pop_uniform 0
+#define pop_normal 1
+#define pop_cauchy 2
+
+void init_gene_pool(gene_pool_t* gene_pool, runtime_param_t* runtime_param);
 void free_gene_pool(gene_pool_t* gene_pool);
 
-void fill_pop(gene_pool_t* gene_pool);
+void fill_pop(gene_pool_t* gene_pool, population_param_t pop_param);
 void fill_individual(gene_pool_t* gene_pool, int individual);
-
-// void bitpop(int bitsize, int genes, int individuals, int** result);
-// void bitpop32(int genes, int individuals, int** result);
 
 // void uniform_bit_pop(int bitsize, int genes, int individuals, double factor, double bias, int** result);
 // void normal_bit_pop(int bitsize, int genes, int individuals, double factor, double bias, double loc, double scale, int** result);
 // void normal_bit_pop_boxmuller(int bitsize, int genes, int individuals, double factor, double bias, double loc, double scale, int** result);
 // void cauchy_bit_pop(int bitsize, int genes, int individuals, double factor, double bias, double loc, double scale, int** result);
 
-#endif
+#endif // _POP_H

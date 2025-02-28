@@ -2,10 +2,8 @@
 #include "stdlib.h"
 #include "math.h"
 
-#include "../Helper/Helper.h"
-#include "../Helper/Struct.h"
-
 #include "mutation.h"
+#include "../Multiprocessing/mp_thread_locals.h"
 
 void mutate32(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 
@@ -36,21 +34,22 @@ void mutate32(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 	//     mutations[i] = 0;
 	// }
 
-	int mutation_gene;
+	uint32_t mutation_rnd;
+	int mutation_gene; 
 	int mutation_bit = 0;
 	for (int i = 0; i < gene_pool->individuals - gene_pool->elitism; i++) {
-		for (int j = 0; j < mutation_param->mutation_rate; j++) { // check if works
+		for (int j = 0; j < mutation_param->mutation_rate[i]; j++) { // check if works
 			// ensure that the selected gene is positive
-			mutation_gene = (random_intXOR32() & 0x7fffffff) % gene_pool->genes;
-			mutation_bit = (int)1 << (random_intXOR32() % sizeof(int) * 8);
+            mutation_rnd = gen_mt_rand();
+			int bit_pos = ((mutation_rnd & 0xf8000000) / 0x08000000u);
+			mutation_bit = (int)1 << bit_pos; // mask, 5 bits describe 32 positions
+			mutation_gene = (mutation_rnd & 0x7ffffff) % gene_pool->genes;
 			gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]][mutation_gene] ^= mutation_bit;
 		}
-
 	}
-
 }
 
-void mutate(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
+void mutate512(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 
 	/*
 
@@ -64,33 +63,41 @@ void mutate(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 
 	:param mutate_coeff_rate: amount of mutations over the bitarray
 	:type mutate_coeff_rate: int
+
+	:param chaos_coeff: the signifigance of the bits impacted by the mutation (1 to 32) (1 for least significant bit, 32 for most significant bit)
+	:type chaos_coeff: int
+
+	:param allow_sign_flip: whether or not to allow the sign to flip, 1 for yes, 0 for no
+	:type allow_sign_flip: int
+
 	*/
 
-	// mutate_coeff_rate is the amount of mutations over the bit;
-	// check if mutate_coeff_rate is < size
-
-	// if (mutate_coeff_rate > genes){
-	//     printf("Error: mutate_coeff_rate is bigger than size\n");
-	//     exit(1);
-	// }
-
-	// int *mutations = malloc(genes * sizeof(int));
+	// int* mutations = malloc(gene_pool->genes * sizeof(int));
 	// // generate random mutations, that are not at the same position
-	// for (int i = 0; i < genes; i++){
-	//     mutations[i] = rand() % genes;
-	//     for (int j = 0; j < i; j++){
-	//         if (mutations[i] == mutations[j]){
-	//             i--;
-	//             break;
-	//         }
-	//     }
+	// for (int i = 0; i < gene_pool->genes; i++){
+	//     mutations[i] = 0;
 	// }
 
-	// // mutate the bit
-	// for (int i = 0; i < mutate_coeff_rate; i++){
-	//     individual[mutations[i]] = !individual[mutations[i]];
-	// }
+	uint32_t mutation_rnd;
+	int mutation_gene;
+	int mutation_bit = 0;
+    int gene_bits_needed = (int) log2(gene_pool->genes) + 3;
 
-	// free(mutations);
+	for (int i = 0; i < gene_pool->individuals - gene_pool->elitism; i++) {
+		for (int j = 0; j < mutation_param->mutation_rate[i]; j++) { // check if works
+			// ensure that the selected gene is positive
+			mutation_rnd = gen_mt_rand();
+			mutation_bit = (int)1 << ((mutation_rnd & 0xf8000000) / 0x08000000u); // mask, 5 bits describe 32 positions
+			mutation_gene = (mutation_rnd & 0x7ffffff) % gene_pool->genes;
+			gene_pool->pop_param_bin[gene_pool->sorted_indexes[i]][mutation_gene] ^= mutation_bit;
+		}
+	}
+}
 
+
+void process_mutation(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
+    /*
+    */
+    // Check if the distributions are up to date
+    mutate32(gene_pool, mutation_param);
 }

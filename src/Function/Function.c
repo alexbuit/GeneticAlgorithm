@@ -6,12 +6,14 @@
 
 #include "../Helper/Helper.h"
 #include "../Helper/Struct.h"
+#include "../Helper/error_handling.h"
+#include "../Multiprocessing/mp_thread_locals.h"
 
 
 double Styblinski_Tang_fx(double* parameter_set, int genes) {
 	double result = 0;
 	for (int i = 0; i < genes; i++) {
-		result += pow(parameter_set[i], 4) - 16 * pow(parameter_set[i], 2) + 5 * parameter_set[i];
+		result += (pow(parameter_set[i], 4)) - (16 * pow(parameter_set[i], 2)) + (5 * parameter_set[i]);
 	}
 	return result / 2;
 }
@@ -32,17 +34,14 @@ double wheelers_ridge_fx(double* parameter_set, int genes) {
 	double a = 1.5;
 
 	// check if genes = 2
-	if (genes != 2) {
-		printf("Error: Wheelers Ridge function requires 2 genes\n");
-		return 0;
-	}
+    if (genes != 2) EXIT_WITH_ERROR("Genes must be 2 for Wheelers Ridge", 255);
 
 	double x1 = parameter_set[0];
 	double x2 = parameter_set[1];
 	return -1 * exp(-1 * pow(x1 * x2 - a, 2) - pow(x2 - a, 2));
 }
 
-void process_fx(gene_pool_t* gene_pool, fx_param_t* fx_param) {
+void process_fx(gene_pool_t* gene_pool, fx_param_t* fx_param, double* lower, double* upper) {
 	/*
 
 	:param pop: matrix of individuals as double (individuals x genes)
@@ -54,20 +53,45 @@ void process_fx(gene_pool_t* gene_pool, fx_param_t* fx_param) {
 	*/
 
 	// convert the gene pool bin to double
-	ndbit2int32(gene_pool->pop_param_bin, gene_pool->genes, gene_pool->individuals, fx_param->bin2double_factor, fx_param->bin2double_bias, gene_pool->pop_param_double);
-
+	if (fx_param->fx_data_type == fx_data_type_double) {
+		ndbit2int32(gene_pool->pop_param_bin, gene_pool->genes, gene_pool->individuals, lower, upper, gene_pool->pop_param_double);
+	}
 
 	if (fx_param->fx_method == fx_method_Styblinski_Tang) {
+		fx_param->fx_optim_mode = -1;
 		for (int i = 0; i < gene_pool->individuals; i++) {
-			gene_pool->pop_result_set[i] = -1 * Styblinski_Tang_fx(gene_pool->pop_param_double[i], gene_pool->genes);
+			gene_pool->pop_result_set[i] = fx_param->fx_optim_mode * Styblinski_Tang_fx(gene_pool->pop_param_double[i], gene_pool->genes);
 		}
 	}
 	else if (fx_param->fx_method == fx_method_Wheelers_Ridge) {
+		fx_param->fx_optim_mode = -1;
 		for (int i = 0; i < gene_pool->individuals; i++) {
-			gene_pool->pop_result_set[i] = -1 * wheelers_ridge_fx(gene_pool->pop_param_double[i], gene_pool->genes);
+			gene_pool->pop_result_set[i] = fx_param->fx_optim_mode * wheelers_ridge_fx(gene_pool->pop_param_double[i], gene_pool->genes);
+		}
+	}
+    else if (fx_param->fx_function != NULL) {
+		void** param_ptr_array = NULL;
+
+		if (fx_param->fx_data_type == fx_data_type_double) {
+			param_ptr_array = (void**)gene_pool->pop_param_double;
+		}
+		else if (fx_param->fx_data_type == fx_data_type_int) {
+			param_ptr_array = (void**)gene_pool->pop_param_bin;
+		}
+		else {
+            EXIT_WITH_ERROR("Unknown data type", 255);
+		}
+
+        if (param_ptr_array == NULL) {
+			EXIT_WITH_ERROR("Param ptr is NULL", 255);
+		}
+
+		for (int i = 0; i < gene_pool->individuals; i++) {
+			gene_pool->pop_result_set[i] = fx_param->fx_optim_mode *
+				fx_param->fx_function(param_ptr_array[i], gene_pool->genes);
 		}
 	}
 	else {
-		printf("Error: Unknown fitness function\n");
+		EXIT_WITH_ERROR("Unkown fitness function", 255);
 	}
 }
