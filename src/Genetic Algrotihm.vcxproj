@@ -52,6 +52,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\vcpkg\vcpkg\installed\x64-windows\include\pthread.h" />
     <ClInclude Include="Function\Function.h" />
+    <ClInclude Include="Helper\compile_flags.h" />
     <ClInclude Include="Helper\error_handling.h" />
     <ClInclude Include="Helper\Helper.h" />
     <ClInclude Include="Helper\rng.h" />

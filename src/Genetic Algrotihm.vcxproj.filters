@@ -203,6 +203,9 @@
     <ClInclude Include="Helper\rng\SFMT-sse2-msc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Helper\compile_flags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Logging\Logging.py" />

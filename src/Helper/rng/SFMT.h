@@ -35,9 +35,7 @@
 #ifndef SFMTST_H
 #define SFMTST_H
 
-#define HAVE_SSE2
-#define __AVX2__
-#define __AVX512VL__
+#include "../compile_flags.h"
 
 #if defined(__cplusplus)
 extern "C" {

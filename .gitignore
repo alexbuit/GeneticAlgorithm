@@ -41,3 +41,5 @@ dfmcontrol/.idea/
 .idea/jupyter-settings.xml
 .vscode/tasks.json
 src/notes.txt
+src/Intel*
+src/debug.log
