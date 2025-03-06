@@ -5,6 +5,7 @@
 #ifndef MUTATION_H
 #define MUTATION_H
 
-void mutate32(gene_pool_t* gene_pool, mutation_param_t* mutation_param);
+void process_mutation(gene_pool_t* gene_pool, mutation_param_t* mutation_param);
+void mutate512(gene_pool_t* gene_pool, mutation_param_t* mutation_param);
 
 #endif

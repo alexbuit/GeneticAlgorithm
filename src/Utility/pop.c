@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <immintrin.h>
 
-#define PI   3.14159265358979323846264338327950288419716939937510f
-#define __AVX512VL__
-
+#include "../Helper/compile_flags.h"
 #include "pop.h"
 #include "../Helper/error_handling.h"
+
+#define PI   3.14159265358979323846264338327950288419716939937510f
 
 void bitpop32(int genes, int* result) {
 

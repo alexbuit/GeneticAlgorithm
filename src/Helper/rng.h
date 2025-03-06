@@ -4,8 +4,7 @@
 
 #include <stdint.h>
 #include <immintrin.h>
-#define __AVX512VL__
-#define __AVX2__
+#include "compile_flags.h"
 
 #define STATE_VECTOR_LENGTH 624
 #define STATE_VECTOR_M      397
