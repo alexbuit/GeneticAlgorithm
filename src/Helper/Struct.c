@@ -37,6 +37,7 @@ runtime_param_t default_runtime_param() {
 	runtime_param.individuals = 128;
 	runtime_param.genes = 2;
 	runtime_param.elitism = 2;
+	runtime_param.gene_mem_size = 32;
 	runtime_param.task_count = 32;
 	runtime_param.thread_count = 4;
 	runtime_param.zone_enable = 1;
