@@ -188,7 +188,7 @@ void init_gene_pool(gene_pool_t* gene_pool, runtime_param_t* runtime_param) {
 	}
 
 	// pointers to blocks
-	current_mem_ptr = gene_pool->gene_pool_memory_ptr;
+	current_mem_ptr = (uint64_t) gene_pool->gene_pool_memory_ptr;
     gene_pool->flatten_result_set = (double*) current_mem_ptr;
 	current_mem_ptr += gene_pool->individuals * sizeof(double);
 

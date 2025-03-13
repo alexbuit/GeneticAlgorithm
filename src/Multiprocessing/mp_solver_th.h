@@ -43,6 +43,7 @@ typedef struct thread_param_s thread_param_t;
 void init_task_queue(task_queue_t* task_queue, int queue_size, task_result_queue_t* task_result_queue, int thread_count);
 void free_task_queue(task_queue_t* task_queue);
 void init_task(runtime_param_t runtime_param, config_ga_t config_ga, task_param_t* task);
+void free_task(task_param_t* task);
 void add_task(task_queue_t* task_queue, task_param_t* task);
 void get_task(task_queue_t* task_queue, task_param_t* task);
 void stop_solver_threads(task_queue_t* task_queue, int thread_count);

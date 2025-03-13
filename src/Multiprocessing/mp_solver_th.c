@@ -3,6 +3,7 @@
 #include "mp_progress_disp.h"
 #include "mp_consts.h"
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -30,8 +31,6 @@ void init_task_queue(task_queue_t* task_queue, int queue_size, task_result_queue
     task_queue->first_task_id = 0;
     task_queue->next_task_id = 0;
     pthread_mutex_init(task_queue->lock, NULL);
-
-    return task_queue;
 }
 
 void free_task_queue(task_queue_t* task_queue) {
@@ -48,7 +47,6 @@ void init_task(runtime_param_t runtime_param, config_ga_t config_ga, task_param_
     if (task->lower == NULL || task->upper == NULL) EXIT_MEM_ERROR();
 
     task->config_ga = config_ga;
-    return task;
 }
 
 void add_task(task_queue_t* task_queue, task_param_t* task) {

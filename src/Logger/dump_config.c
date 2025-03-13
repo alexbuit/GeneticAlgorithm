@@ -11,7 +11,7 @@ void write_config(
     config_ga_t config_ga
 )
 {
-    int fully_qualified_basename_size = strlen(runtime_param.logging_param.fully_qualified_basename) + 1;
+    uint64_t fully_qualified_basename_size = strlen(runtime_param.logging_param.fully_qualified_basename) + 1;
     char* filename_json = (char*)malloc(fully_qualified_basename_size + 5);
 
     if (filename_json == NULL) EXIT_MEM_ERROR();
@@ -67,7 +67,6 @@ void write_config(
     fprintf(fileptrconfig, "\"mutation_param\": {\n");
     fprintf(fileptrconfig, "    \"mutation_method\": %d,\n", config_ga.mutation_param.mutation_method);
     fprintf(fileptrconfig, "    \"mutation_prob\": %f,\n", config_ga.mutation_param.mutation_prob);
-    fprintf(fileptrconfig, "    \"mutation_rate\": %d\n", config_ga.mutation_param.mutation_rate);
     fprintf(fileptrconfig, "},\n");
 
     // Write fx parameters

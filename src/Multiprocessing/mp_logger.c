@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
 #include <pthread.h>
 
 #include "../Helper/Struct.h"
@@ -41,8 +42,6 @@ void init_task_result_queue(task_result_queue_t* task_result_queue, runtime_para
 
 	}
 	pthread_mutex_init(task_result_queue->lock, NULL);
-
-	return task_result_queue;
 }
 
 void free_task_result_queue(task_result_queue_t* task_result_queue) {

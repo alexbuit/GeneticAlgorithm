@@ -42,7 +42,7 @@ void copy_task_result(task_result_t* task_result, task_result_t* source) {
 
 void open_file(task_result_queue_t* task_result_queue)
 {
-	int fully_qualified_basename_size = strlen(task_result_queue->runtime_param.logging_param.fully_qualified_basename)+1;
+	uint64_t fully_qualified_basename_size = strlen(task_result_queue->runtime_param.logging_param.fully_qualified_basename)+1;
 	char* filename_csv = malloc(fully_qualified_basename_size + 4);
 	char* filename_bin = malloc(fully_qualified_basename_size + 4);
 
@@ -174,7 +174,7 @@ void report_task(task_queue_t* task_queue, task_param_t* task, adaptive_memory_t
 					task_result.csv_buffer + task_result.csv_position,
 					task_queue->task_result_queue->csv_single_entry_length - task_result.csv_position,
 					"%d;%e;%e;",
-                    task->config_ga.mutation_param.mutation_rate,
+                    *(task->config_ga.mutation_param.mutation_rate),
 					adaptive_memory->computed_mutation,
                     adaptive_memory->convergence_moving_window
 				);

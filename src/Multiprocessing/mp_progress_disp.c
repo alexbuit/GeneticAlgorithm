@@ -2,6 +2,7 @@
 #include "mp_progress_disp.h"
 #include "mp_consts.h"
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -42,7 +43,7 @@ void free_console_queue(console_queue_t* console_queue) {
     free(console_queue->lock);
 }
 
-void add_print_str(console_queue_t* console_queue, char* str, int len, int task_type) {
+void add_print_str(console_queue_t* console_queue, char* str, uint64_t len, int task_type) {
     int str_added = 0;
     while (!str_added) {
         pthread_mutex_lock(console_queue->lock);
@@ -74,7 +75,9 @@ int get_print_str(console_queue_t* console_queue, print_str_t* str) {
         str_retrieved = 1;
         return str_retrieved;
     }
+    return 0;
 }
+
 void con_printf(console_queue_t* console_queue, const char* format, ...) {
     va_list args;
     char* formatted_str;
@@ -87,10 +90,8 @@ void con_printf(console_queue_t* console_queue, const char* format, ...) {
 
     // Allocate memory for the formatted string
     formatted_str = malloc(required_length);
-    if (!formatted_str) {
-        perror("Failed to allocate memory for formatted string: con_printf");
-        return;
-    }
+    if (formatted_str == NULL) EXIT_MEM_ERROR();
+    
 
     // Format the string
     va_start(args, format);

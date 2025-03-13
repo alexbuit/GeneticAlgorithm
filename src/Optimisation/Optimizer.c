@@ -45,7 +45,6 @@ static void check_convergence(task_param_t* task, adaptive_memory_t* adaptive_me
 
 static void compute_mutation_rate(task_param_t* task, adaptive_memory_t* adaptive_memory, double best_result, int individuals) {
     int computed_mutation;
-    double beta_factor;
     for (int i = 0; i < individuals; i++) {
         if (adaptive_memory->convergence_moving_window == 0) {
             if (task->config_ga.mutation_param.mutation_rate[i] < task->config_ga.optimizer_param.max_mutations) {

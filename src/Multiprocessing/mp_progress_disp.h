@@ -6,7 +6,7 @@
 
 struct print_str_s {
     char* str;
-    int len;
+    uint64_t len;
     int task_type; // 0: log on cmd 255: kill
 };
 

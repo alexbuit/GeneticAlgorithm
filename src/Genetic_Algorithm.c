@@ -39,7 +39,7 @@
 
 void process_task(thread_param_t* thread_param, task_param_t* task, gene_pool_t* gene_pool) {
 	//printf("Thread %d, Task %d\n", thread_param->thread_id, thread_param->task_id);
-    clock_t start, end;
+    clock_t start;
     start = clock();
 
 	fill_pop(gene_pool, task->config_ga.population_param);
@@ -74,8 +74,8 @@ void process_task(thread_param_t* thread_param, task_param_t* task, gene_pool_t*
 	thread_param->status = 2; // Completed
 }
 
-void* process_progress_display_thread(console_queue_t* console_queue) {
-	clock_t start, last_update, current;
+void process_progress_display_thread(console_queue_t* console_queue) {
+	clock_t start, current;
 	start = clock();
 
 	int total_tasks = console_queue->task_count;
@@ -101,7 +101,7 @@ void* process_progress_display_thread(console_queue_t* console_queue) {
 				display_progress(console_queue, total_tasks, elapsed_time);
                 goto end;
 			}
-			//printf("%s", print_str.str);
+			printf("%s", print_str.str);
             free(print_str.str);
 		}
 	}
@@ -169,8 +169,8 @@ void* process_log_thread(task_result_queue_t* task_result_queue) {
     }
 }
 
-void* process_task_thread(thread_param_t* thread_param) {
-	seedRandThread(NULL); // todo fix thread local storage
+void process_task_thread(thread_param_t* thread_param) {
+	seedRandThread(0); // todo fix thread local storage
 
 	gene_pool_t gene_pool;
 	//printf("cfgbin2int, %f", thread_param->config_ga.fx_param.lower[0]);
@@ -190,7 +190,7 @@ void* process_task_thread(thread_param_t* thread_param) {
 
 	free_pre_compute();
 	free_gene_pool(&gene_pool);
-	return NULL;
+	return;
 }
 
 void start_threads(task_queue_t* task_queue, runtime_param_t runtime_param, config_ga_t config_ga, thread_param_t* thread_param) {
@@ -214,7 +214,7 @@ void start_threads(task_queue_t* task_queue, runtime_param_t runtime_param, conf
 	else {
 		int NTHREADS = runtime_param.thread_count;
 
-		int i, j;
+		int i;
 
 		thread_param = (thread_param_t *) malloc(sizeof(thread_param_t) * NTHREADS);
 
@@ -254,12 +254,12 @@ double Genetic_Algorithm(config_ga_t config_ga, runtime_param_t runtime_param) {
 	double best_res = -INFINITY;
 	int convergence_counter = 0;
     console_queue_t console_queue = init_console_queue();
-    console_queue.task_count = runtime_param.zone_enable ? compute_task_count(runtime_param) : runtime_param.task_count;
+    console_queue.task_count = runtime_param.zone_enable ? compute_task_count(&runtime_param) : runtime_param.task_count;
 	task_result_queue_t task_result_queue;
 	init_task_result_queue(&task_result_queue, runtime_param, &console_queue);
 	task_queue_t task_queue;
 	init_task_queue(&task_queue, runtime_param.thread_count * 4, &task_result_queue, runtime_param.thread_count);
-	thread_param_t* thread_param;
+	thread_param_t thread_param;
 
 	start_threads(&task_queue, runtime_param, config_ga, &thread_param);
 

@@ -240,7 +240,6 @@ void mutateAVX(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 
 	uint32_t mutation_rnd;
 	uint32_t mutation_gene_AVX;
-	uint32_t mutation_bit;
 
 #ifdef __AVX512VL__
 	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
