@@ -53,7 +53,7 @@ inline unsigned int set_single_bit_if(unsigned int position) {
 	return mask.i;
 }
 
-inline unsigned int set_single_bit_devide(unsigned int position) {
+inline unsigned int set_single_bit_divide(unsigned int position) {
 	union int_bytes {
 		int i;
 		char c[4];
@@ -65,7 +65,7 @@ inline unsigned int set_single_bit_devide(unsigned int position) {
 	return mask.i;
 }
 
-inline unsigned int set_single_bit_devide_true(unsigned int position) {
+inline unsigned int set_single_bit_divide_true(unsigned int position) {
 	union int_bytes {
 		int i;
 		char c[4];
@@ -73,12 +73,24 @@ inline unsigned int set_single_bit_devide_true(unsigned int position) {
 	union int_bytes mask;
 	mask.i = 0;
 	int b = 3 - (position & 0x1f8) / 8;
-	mask.c[b] = 1 << (position & 0x7); //it sets the wrong byte, but it does to consistently (it flips order of bytes)
+	mask.c[b] = 1 << (position & 0x7);
+	return mask.i;
+}
+
+inline unsigned int set_single_bit_shift_true(unsigned int position) {
+	union int_bytes {
+		int i;
+		char c[4];
+	};
+	union int_bytes mask;
+	mask.i = 0;
+	int b = 3 - ((position & 0x1f8) >> 3);
+	mask.c[b] = 1 << (position & 0x7);
 	return mask.i;
 }
 
 #ifdef __AVX2__
-inline __m256i set_single_bit_256_devide(unsigned int position) {
+inline __m256i set_single_bit_256_divide(unsigned int position) {
 	union int256_bytes {
 		__m256i i;
 		char c[32];
@@ -90,7 +102,7 @@ inline __m256i set_single_bit_256_devide(unsigned int position) {
 	return mask.i;
 }
 
-inline __m256i set_single_bit_256_devide_true(unsigned int position) {
+inline __m256i set_single_bit_256_divide_true(unsigned int position) {
 	union int256_bytes {
 		__m256i i;
 		char c[32];
@@ -101,29 +113,53 @@ inline __m256i set_single_bit_256_devide_true(unsigned int position) {
 	mask.c[b] = 1 << (position & 0x7); //it sets the wrong byte, but it does to consistently (it flips order of bytes)
 	return mask.i;
 }
-#endif
 
-#ifdef __AVX512VL__
-inline __m512i set_single_bit_512_devide(uint32_t position) {
-	union int512_bytes {
-		__m512i i;
-		char c[64];
+inline __m256i set_single_bit_256_shift(unsigned int position) {
+	union int256_bytes {
+		__m256i i;
+		char c[32];
 	};
-	union int512_bytes mask;
-	mask.i = _mm512_setzero_si512();
-	int b = (position & 0x1f8) / 8;
+	union int256_bytes mask;
+	mask.i = _mm256_setzero_si256();
+	int b = (position & 0x1f8) >> 3; // divide by 8 == shift right 3
 	mask.c[b] = 1 << (position & 0x7); //it sets the wrong byte, but it does to consistently (it flips order of bytes)
 	return mask.i;
 }
 
-inline __m512i set_single_bit_512_devide_true(uint32_t position) {
+inline __m256i set_single_bit_256_shift_true(unsigned int position) {
+	union int256_bytes {
+		__m256i i;
+		char c[32];
+	};
+	union int256_bytes mask;
+	mask.i = _mm256_setzero_si256();
+	int b = 31 - ((position & 0x1f8) >> 3); // divide by 8 == shift right 3
+	mask.c[b] = 1 << (position & 0x7); //it sets the wrong byte, but it does to consistently (it flips order of bytes)
+	return mask.i;
+}
+#endif
+
+#ifdef __AVX512VL__
+inline __m512i set_single_bit_512_shift(uint32_t position) {
 	union int512_bytes {
 		__m512i i;
 		char c[64];
 	};
 	union int512_bytes mask;
 	mask.i = _mm512_setzero_si512();
-	int b = 63 - (position & 0x1f8) / 8;
+	int b = (position & 0x1f8) >> 3; // divide by 8 == shift right 3
+	mask.c[b] = 1 << (position & 0x7); //it sets the wrong byte, but it does to consistently (it flips order of bytes)
+	return mask.i;
+}
+
+inline __m512i set_single_bit_512_shift_true(uint32_t position) {
+	union int512_bytes {
+		__m512i i;
+		char c[64];
+	};
+	union int512_bytes mask;
+	mask.i = _mm512_setzero_si512();
+	int b = 63 - ((position & 0x1f8) >> 3); // divide by 8 == shift right 3
 	mask.c[b] = 1 << (position & 0x7); //it sets the wrong byte, but it does to consistently (it flips order of bytes)
 	return mask.i;
 }
@@ -173,7 +209,7 @@ void mutate32(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 	}
 }
 
-void mutate512(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
+void mutateAVX(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 
 	/*
 
@@ -203,23 +239,73 @@ void mutate512(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 	// }
 
 	uint32_t mutation_rnd;
-	int mutation_gene_512;
-	__m512i mutation_bit_mask = _mm512_setzero_si512();
-	int memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
+	uint32_t mutation_gene_AVX;
+	uint32_t mutation_bit;
 
+#ifdef __AVX512VL__
+	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
 	__m512i** pop_param_bin_ptr = (__m512i**)gene_pool->pop_param_bin;
+	union int512_bytes {
+		__m512i i;
+		char c[64];
+	};
+	union int512_bytes mask;
+#else 
+	#ifdef __AVX2__
+	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m256i);
+	__m256i** pop_param_bin_ptr = (__m256i**)gene_pool->pop_param_bin;
+	union int256_bytes {
+		__m256i i;
+		char c[32];
+	};
+	union int256_bytes mask;
+#else
+	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(uint32_t);
+	uint32_t** pop_param_bin_ptr = (uint32_t**)gene_pool->pop_param_bin;
+	union int_bytes {
+		int i;
+		char c[4];
+	};
+	union int_bytes mask;
+#endif
+#endif
 
 
 	for (int i = 0; i < gene_pool->individuals - gene_pool->elitism; i++) {
 		for (int j = 0; j < mutation_param->mutation_rate[i]; j++) { // check if works
 			// ensure that the selected gene is positive
 			mutation_rnd = gen_mt_rand();
-			mutation_bit_mask = set_single_bit_512_devide_true((mutation_rnd & 0xff800000u) / 0x00800000u); //choose bits for location, 9 bits describe 512 positions
-			mutation_gene_512 = (mutation_rnd & 0x007fffff) % memory_blocks;
-			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_512] = _mm512_xor_si512(
-				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_512],
-				mutation_bit_mask
+			//mutation_bit_mask = set_single_bit_512_devide_true((mutation_rnd & 0xff800000u) / 0x00800000u); //choose bits for location, 9 bits describe 512 positions
+#ifdef __AVX512VL__
+			mutation_gene_AVX = (mutation_rnd >> 9) % memory_blocks;
+			mask.i = _mm512_setzero_si512();
+			int b = (mutation_rnd & 0x1f8) >> 3; // divide by 8 == shift right 3, it sets the wrong byte, but it does to consistently (it flips order of bytes)
+			mask.c[b] = 1 << (mutation_rnd & 0x7);
+			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] = _mm512_xor_si512(
+				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX],
+				mask.i
 			);
+#else 
+#ifdef __AVX2__
+			mutation_gene_AVX = (mutation_rnd >> 8) % memory_blocks;
+			mask.i = _mm256_setzero_si256();
+			int b = (mutation_rnd & 0xf8) >> 3; // divide by 8 == shift right 3, it sets the wrong byte, but it does to consistently (it flips order of bytes)
+			mask.c[b] = 1 << (mutation_rnd & 0x7);
+			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] = _mm256_xor_si256(
+				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX],
+				mask.i
+			);
+#else
+			mutation_gene_AVX = (mutation_rnd >> 5) % memory_blocks;
+			mask.i = 0;
+			int b = (mutation_rnd & 0x18) >> 3;
+			mask.c[b] = 1 << (mutation_rnd & 0x7);
+			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] =
+				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] ^
+				mask.i
+			;
+#endif
+#endif
 		}
 	}
 }
@@ -228,5 +314,5 @@ void process_mutation(gene_pool_t* gene_pool, mutation_param_t* mutation_param) 
     /*
     */
     // Check if the distributions are up to date
-    mutate512(gene_pool, mutation_param);
+	mutateAVX(gene_pool, mutation_param);
 }

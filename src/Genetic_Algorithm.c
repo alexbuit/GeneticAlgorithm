@@ -292,7 +292,7 @@ int main() {
 	config_ga_t config_ga = default_config(runtime_param);
 	config_ga.selection_param.selection_method = selection_method_rank_space;
 	config_ga.population_param.reseed_bottom_N = 1;
-    config_ga.crossover_param.crossover_method = crossover_method_uniform512;
+    config_ga.crossover_param.crossover_method = crossover_method_uniformAVX;
 
 	for (int i = 0; i < repeats; i++) {
 		printf("\n Run number: %d\n", i);

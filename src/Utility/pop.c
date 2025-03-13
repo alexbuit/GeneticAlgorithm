@@ -136,7 +136,7 @@ static void cauchy_bit_pop(int** result, int individuals, int genes, population_
 			scale = 1 / pop_param.sigma * (pop_param.upper[i] - pop_param.lower[i]) / 2;
 			loc = (pop_param.upper[i] + pop_param.lower[i]) / 2;
 			
-			cauchydouble = cauchy((gen_mt_rand() << 32) | gen_mt_rand(), 0, 1);
+			cauchydouble = cauchy(gen_mt_rand64(), 0, 1); //TODO: casting int to double produces undesirable results
             scaledcauchy = (cauchydouble * scale) + loc;
 			
 			result[i][j] = double2bin(scaledcauchy, pop_param.lower[i], pop_param.upper[i]);
@@ -262,11 +262,27 @@ void free_gene_pool(gene_pool_t* gene_pool) {
 
 inline void fill_individual(gene_pool_t* gene_pool, int individual) {
 	//bitpop32(gene_pool->genes, gene_pool->pop_param_bin[individual]);
-	int memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
-    __m512i* ptr = (__m512i*)gene_pool->pop_param_bin[individual];
-	for (int i = 0; i < memory_blocks; i++) {
+#ifdef __AVX512VL__
+	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
+	__m512i* ptr = (__m512i*)gene_pool->pop_param_bin[individual];
+	for (uint32_t i = 0; i < memory_blocks; i++) {
 		ptr[i] = gen_mt_rand512();
 	}
+#else 
+#ifdef __AVX2__
+	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m256i);
+	__m256i* ptr = (__m256i*)gene_pool->pop_param_bin[individual];
+	for (uint32_t i = 0; i < memory_blocks; i++) {
+		ptr[i] = gen_mt_rand256();
+	}
+#else
+	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(uint32_t);
+	uint32_t* ptr = (uint32_t*)gene_pool->pop_param_bin[individual];
+	for (uint32_t i = 0; i < memory_blocks; i++) {
+		ptr[i] = gen_mt_rand();
+	}
+#endif
+#endif
 }
 
 void fill_pop(gene_pool_t* gene_pool, population_param_t pop_param) {

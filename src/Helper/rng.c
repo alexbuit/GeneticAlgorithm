@@ -184,6 +184,11 @@ uint32_t gen_mt_rand() {
     return sfmt_genrand_uint32(&sfmt_thread);
 }
 
+uint64_t gen_mt_rand64() {
+	//return gen_mt_rand_internal();
+	return sfmt_genrand_uint64(&sfmt_thread);
+}
+
 #if defined __AVX512VL__
 __m512i gen_mt_rand512() {
 	return sfmt_genrand_uint512(&sfmt_thread);
