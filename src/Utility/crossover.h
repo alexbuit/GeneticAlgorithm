@@ -6,7 +6,7 @@
 #define CROSSOVER_H
 
 
-static const int crossover_method_single_point32 = 0;
+static const int crossover_method_single_pointAVX = 0;
 static const int crossover_method_two_point32 = 1;
 static const int crossover_method_uniform32 = 2;
 static const int crossover_method_complete32 = 3;
