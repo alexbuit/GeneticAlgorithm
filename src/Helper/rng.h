@@ -15,6 +15,7 @@
 
 void seedRandThread(uint32_t seed);
 uint32_t gen_mt_rand();
+uint64_t gen_mt_rand64();
 
 #ifdef __AVX512VL__
 __m512i gen_mt_rand512();

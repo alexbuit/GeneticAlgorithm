@@ -136,7 +136,7 @@ static void cauchy_bit_pop(int** result, int individuals, int genes, population_
 			scale = 1 / pop_param.sigma * (pop_param.upper[i] - pop_param.lower[i]) / 2;
 			loc = (pop_param.upper[i] + pop_param.lower[i]) / 2;
 			
-			cauchydouble = cauchy((gen_mt_rand() << 32) | gen_mt_rand(), 0, 1);
+			cauchydouble = cauchy(gen_mt_rand64(), 0, 1); //TODO: casting int to double produces undesirable results
             scaledcauchy = (cauchydouble * scale) + loc;
 			
 			result[i][j] = double2bin(scaledcauchy, pop_param.lower[i], pop_param.upper[i]);

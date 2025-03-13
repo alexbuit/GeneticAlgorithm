@@ -245,13 +245,28 @@ void mutateAVX(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 #ifdef __AVX512VL__
 	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m512i);
 	__m512i** pop_param_bin_ptr = (__m512i**)gene_pool->pop_param_bin;
+	union int512_bytes {
+		__m512i i;
+		char c[64];
+	};
+	union int512_bytes mask;
 #else 
 	#ifdef __AVX2__
 	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(__m256i);
-	__m256i** pop_param_bin_ptr = (__m512i**)gene_pool->pop_param_bin;
+	__m256i** pop_param_bin_ptr = (__m256i**)gene_pool->pop_param_bin;
+	union int256_bytes {
+		__m256i i;
+		char c[32];
+	};
+	union int256_bytes mask;
 #else
 	uint32_t memory_blocks = gene_pool->individual_mem_size / sizeof(uint32_t);
 	uint32_t** pop_param_bin_ptr = (uint32_t**)gene_pool->pop_param_bin;
+	union int_bytes {
+		int i;
+		char c[4];
+	};
+	union int_bytes mask;
 #endif
 #endif
 
@@ -262,26 +277,32 @@ void mutateAVX(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 			mutation_rnd = gen_mt_rand();
 			//mutation_bit_mask = set_single_bit_512_devide_true((mutation_rnd & 0xff800000u) / 0x00800000u); //choose bits for location, 9 bits describe 512 positions
 #ifdef __AVX512VL__
-			mutation_gene_AVX = (mutation_rnd & 0x007fffff) % memory_blocks;
-			mutation_bit = (mutation_rnd & 0xff800000u) / 0x00800000u;
+			mutation_gene_AVX = (mutation_rnd >> 9) % memory_blocks;
+			mask.i = _mm512_setzero_si512();
+			int b = (mutation_rnd & 0x1f8) >> 3; // divide by 8 == shift right 3, it sets the wrong byte, but it does to consistently (it flips order of bytes)
+			mask.c[b] = 1 << (mutation_rnd & 0x7);
 			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] = _mm512_xor_si512(
 				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX],
-				set_single_bit_512_shift_true(mutation_bit)
+				mask.i
 			);
 #else 
 #ifdef __AVX2__
-			mutation_gene_AVX = (mutation_rnd & 0x00ffffff) % memory_blocks;
-			mutation_bit = (mutation_rnd & 0xff000000u) / 0x01000000u;
+			mutation_gene_AVX = (mutation_rnd >> 8) % memory_blocks;
+			mask.i = _mm256_setzero_si256();
+			int b = (mutation_rnd & 0xf8) >> 3; // divide by 8 == shift right 3, it sets the wrong byte, but it does to consistently (it flips order of bytes)
+			mask.c[b] = 1 << (mutation_rnd & 0x7);
 			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] = _mm256_xor_si256(
 				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX],
-				set_single_bit_256_shift_true(mutation_bit)
+				mask.i
 			);
 #else
-			mutation_gene_AVX = (mutation_rnd & 0x08ffffff) % memory_blocks;
-			mutation_bit = (mutation_rnd & 0xf8000000u) / 0x08000000u;
-			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] = 
+			mutation_gene_AVX = (mutation_rnd >> 5) % memory_blocks;
+			mask.i = 0;
+			int b = (mutation_rnd & 0x18) >> 3;
+			mask.c[b] = 1 << (mutation_rnd & 0x7);
+			pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] =
 				pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] ^
-				set_single_bit_shift_true(mutation_bit)
+				mask.i
 			;
 #endif
 #endif
