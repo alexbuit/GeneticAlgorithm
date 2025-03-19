@@ -78,6 +78,9 @@
     <ClCompile Include="Helper\rng\SFMT.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helper\AVX_helper.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Function\Function.h">

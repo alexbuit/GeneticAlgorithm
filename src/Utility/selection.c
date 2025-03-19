@@ -66,7 +66,7 @@ inline void compute_distances(gene_pool_t* gene_pool) {
     for (int i = 0; i < gene_pool->individuals; i++) {
         distances[i] = 0;
         for (int j = 0; j < gene_pool->genes; j++) {
-            int diff = gene_pool->pop_param_bin[gene_pool->selected_indexes[i]][j] - central_point[j];
+            int diff = gene_pool->pop_param_bin[gene_pool->selected_indexes[i]][j] - (int)central_point[j];
             distances[i] += diff * diff; // No sqrt for performance
         }
     }

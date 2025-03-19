@@ -68,7 +68,7 @@ void process_pop(gene_pool_t* gene_pool, task_param_t* task) {
 	process_crossover(gene_pool, &(task->config_ga.crossover_param));
 
 	// mutation
-	mutateAVX(gene_pool, &(task->config_ga.mutation_param));
+	mutateAVXFast(gene_pool, &(task->config_ga.mutation_param));
 
     // Eliminate duplicates and reseed bottom N
 	post_process_population(gene_pool, &(task->config_ga.population_param));

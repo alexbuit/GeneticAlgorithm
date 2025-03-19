@@ -41,7 +41,7 @@ inline uint32_t double2bin(double val, double lower, double upper) {
     :return: The double.
     :rtype: int
     */	
-	return ((val - lower) / (upper - lower)) * UINT32_MAX;
+	return (uint32_t)(((val - lower) / (upper - lower)) * UINT32_MAX);
 }
 
 static void normal_bit_pop_boxmuller(int** result, int individuals, int genes) {
