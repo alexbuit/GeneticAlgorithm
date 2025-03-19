@@ -109,7 +109,7 @@ void process_progress_display_thread(console_queue_t* console_queue) {
 }
 
 
-void* process_log_thread(task_result_queue_t* task_result_queue) {
+void process_log_thread(task_result_queue_t* task_result_queue) {
 	task_result_t task_result;
 
 	char* log_file;

@@ -33,7 +33,7 @@ static void single_point_crossoverAVX(int* parent1, int* parent2, int* child1, i
 	uint32_t crosspoint_rnd = gen_mt_rand();
 	uint32_t crosspoint_gene_AVX = (crosspoint_rnd >> 9) % memory_blocks;
 	mask.i = AVX_setzero();
-	int b = ((crosspoint_rnd >> 3) & AVX_bytepointer_mask);
+	uint32_t b = ((crosspoint_rnd >> 3) & AVX_bytepointer_mask);
 #ifdef __AVX512VL__
 	uint64_t set_mask = 0xffffffffffffffffu << (AVX_bytes - b);
 	_mm512_mask_set1_epi8(mask.i, set_mask, 0xff);
