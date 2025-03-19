@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Function\Function.c" />
+    <ClCompile Include="Helper\AVX_helper.h" />
     <ClCompile Include="Helper\Helper.c" />
     <ClCompile Include="Genetic_Algorithm.c" />
     <ClCompile Include="Helper\rng.c" />
