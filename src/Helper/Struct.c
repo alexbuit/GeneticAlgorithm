@@ -65,7 +65,7 @@ config_ga_t default_config(runtime_param_t runtime_param) {
 	if (mutation_param.mutation_rate == NULL) EXIT_MEM_ERROR();
 
 	for (int i = 0; i < runtime_param.individuals; i++) {
-        mutation_param.mutation_rate[i] = 6;
+        mutation_param.mutation_rate[i] = 6.0;
 	}
 
     mutation_param.mutation_alpha = 1;

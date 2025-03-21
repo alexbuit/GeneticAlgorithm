@@ -355,14 +355,14 @@ void mutateAVXFast(gene_pool_t* gene_pool, mutation_param_t* mutation_param) {
 	double mutation_per_memoryblock;
 	mutation_rnd = gen_mt_rand();
 	uint32_t memblock_rng_bits_left = 32;
-	double mutation_factor = 1 / (double)memory_blocks / 2.0 / (double)INT32_MAX;
+	double mutation_factor = (2.0 / (double)memory_blocks) / (double)INT32_MAX;
 
 	for (int i = 0; i < gene_pool->individuals - gene_pool->elitism; i++) {
 		//for (int j = 0; j < mutation_param->mutation_rate[i]; j++) {
 		//	mutation_per_memoryblock[gen_mt_rand() % memory_blocks]++;
 		//}
 		for (uint32_t memory_block = 0; memory_block < memory_blocks; memory_block++) {
-			mutation_per_memoryblock = (double)mutation_param->mutation_rate[i] * (double)gen_mt_rand() * mutation_factor;
+			mutation_per_memoryblock = mutation_param->mutation_rate[i] * (double)gen_mt_rand() * mutation_factor;
 			if (mutation_per_memoryblock > 1) {
 				mask.i = AVX_setzero();
 				for (double k = 0.0; k < mutation_per_memoryblock; k++) {

@@ -51,7 +51,7 @@ struct crossover_param_s {
 struct mutation_param_s {
 	int mutation_method; // DEFAULT = 0
 	double mutation_prob; // DEFAULT = 0.5
-	int* mutation_rate; // DEFAULT = 6
+	double* mutation_rate; // DEFAULT = 6
     double mutation_alpha; // DEFAULT = 1
     double mutation_beta; // DEFAULT = 0
 };
@@ -67,8 +67,8 @@ struct fx_param_s {
 
 struct optimizer_param_s {
 	int convergence_moving_window_size; // DEFAULT = 10
-	int min_mutations; // DEFAULT = 1
-	int max_mutations; // DEFAULT = 10
+	double min_mutations; // DEFAULT = 1
+	double max_mutations; // DEFAULT = 10
 	double mutation_factor; // DEFAULT = 0.1
 	int max_iterations; // DEFAULT = 1000
 	double convergence_threshold; // DEFAULT = 1e-8

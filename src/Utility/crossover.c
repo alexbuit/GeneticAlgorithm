@@ -63,90 +63,25 @@ static void single_point_crossoverAVX(int* parent1, int* parent2, int* child1, i
 				AVX_and(
 					parent1_ptr[i],
 					mask.i),
-				AVX_andnot(
-					parent2_ptr[i],
-					mask.i)
-			);
-			child2_ptr[i] = AVX_or(
-				AVX_andnot(
-					parent1_ptr[i],
-					mask.i),
 				AVX_and(
 					parent2_ptr[i],
-					mask.i)
+					AVX_xor(mask.i, AVX_setone())
+				)
+			);
+			child2_ptr[i] = AVX_or(
+				AVX_and(
+					parent1_ptr[i],
+					AVX_xor(mask.i, AVX_setone())
+				),
+				AVX_and(
+					parent2_ptr[i],
+					mask.i
+				)
 			);
 		}
 	}
 }
-//#else 
-//#ifdef __AVX2__
-//	uint32_t memory_blocks = individual_mem_size / sizeof(__m256i);
-//
-//	__m256i* parent1_ptr = (__m256i*)parent1;
-//	__m256i* parent2_ptr = (__m256i*)parent2;
-//	__m256i* child1_ptr = (__m256i*)child1;
-//	__m256i* child2_ptr = (__m256i*)child2;
-//
-//	union int256_bytes {
-//		__m256i i;
-//		char c[32];
-//	};
-//	union int256_bytes mask;
-//
-//	mutation_gene_AVX = (mutation_rnd >> 8) % memory_blocks;
-//	mask.i = _mm256_setzero_si256();
-//	int b = (mutation_rnd & 0xf8) >> 3; // divide by 8 == shift right 3, it sets the wrong byte, but it does to consistently (it flips order of bytes)
-//	mask.c[b] = 1 << (mutation_rnd & 0x7);
-//	pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] = _mm256_xor_si256(
-//		pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX],
-//		mask.i
-//	);
-//#else
-//	uint32_t memory_blocks = individual_mem_size / sizeof(uint32_t);
-//	uint32_t** pop_param_bin_ptr = (uint32_t**)gene_pool->pop_param_bin;
-//	union int_bytes {
-//		int i;
-//		char c[4];
-//	};
-//	union int_bytes mask;
-//
-//	mutation_gene_AVX = (mutation_rnd >> 5) % memory_blocks;
-//	mask.i = 0;
-//	int b = (mutation_rnd & 0x18) >> 3;
-//	mask.c[b] = 1 << (mutation_rnd & 0x7);
-//	pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] =
-//		pop_param_bin_ptr[gene_pool->sorted_indexes[i]][mutation_gene_AVX] ^
-//		mask.i
-//		;
-//#endif
-//#endif
-//
-//	//// find a random point to cross over
-//	//int point = gen_mt_rand() % (genes * individual_mem_size - 1);
-//	//
-//	//// int mask = pow(2, point) - 1;
-//
-//	//int mask = 0;
-//	//int bit_i = 0;
-//	//for (int i = 0; i < genes; i++) {
-//	//	bit_i = i * sizeof(int) * 8;
-//
-//	//	if (bit_i < point - sizeof(int) * 8) {
-//	//		mask = 0x0;
-//	//	}
-//	//	else if (bit_i < point) {
-//	//		mask = (1 << (bit_i - point)) - 1;
-//	//	}
-//	//	else {
-//	//		mask = 0xffffffff;
-//	//	}
-//
-//	//	child1[i] = (parent1[i] & ~mask) | (parent2[i] & mask);
-//	//	child2[i] = (parent1[i] & mask) | (parent2[i] & ~mask);
-//
-//	//}
-//
-//}
+
 
 // Actually PMX crossover
 static void two_point_crossover32(int* parent1, int* parent2, int* child1, int* child2, int genes) {
@@ -157,7 +92,7 @@ static void two_point_crossover32(int* parent1, int* parent2, int* child1, int* 
 	// find two random points to cross over
 
 	int point1 = gen_mt_rand() % genes * sizeof(int) * 8 - 3;
-	int point2 = gen_mt_rand() % (genes * sizeof(int) * 8 - 2 - point1) + point1 + 1;
+	int point2 = (gen_mt_rand() % (genes * sizeof(int) * 8 - 2 - point1)) + point1 + 1;
 
 	// make sure point1 is less than point2 and less than size
 
@@ -186,6 +121,165 @@ static void two_point_crossover32(int* parent1, int* parent2, int* child1, int* 
 
 		child1[i] = (parent1[i] & ~mask) | (parent2[i] & mask);
 		child2[i] = (parent1[i] & mask) | (parent2[i] & ~mask);
+	}
+}
+
+static void two_point_crossoverAVX(int* parent1, int* parent2, int* child1, int* child2, int genes, int individual_mem_size) {
+	// parent1 and parent2 are the parents to be crossed over and child1 and child2 are the children to be created all of size size
+	// The function should fill child1 and child2 with the crossed over values
+
+
+//#ifdef __AVX512VL__
+	uint32_t memory_blocks = individual_mem_size / sizeof(__mAVXi);
+
+	__mAVXi* parent1_ptr = (__mAVXi*)parent1;
+	__mAVXi* parent2_ptr = (__mAVXi*)parent2;
+	__mAVXi* child1_ptr = (__mAVXi*)child1;
+	__mAVXi* child2_ptr = (__mAVXi*)child2;
+
+	uint32_t crosspoint_rnd_a = gen_mt_rand() % (individual_mem_size * 8);
+	uint32_t crosspoint_rnd_b = gen_mt_rand() % (individual_mem_size * 8);
+
+	while (crosspoint_rnd_a == crosspoint_rnd_b) {
+        crosspoint_rnd_b = gen_mt_rand() % (individual_mem_size * 8);
+	}
+	
+	//if (crosspoint_rnd_a == crosspoint_rnd_b) crosspoint_rnd_b++;
+
+    if (crosspoint_rnd_b < crosspoint_rnd_a) {
+        uint32_t temp = crosspoint_rnd_a;
+        crosspoint_rnd_a = crosspoint_rnd_b;
+        crosspoint_rnd_b = temp;
+    }
+
+	union AVX_union_bytes {
+		__mAVXi i;
+		char c[AVX_bytes];
+	};
+	union AVX_union_bytes mask_a;
+
+	uint32_t crosspoint_memblock_a_AVX = (crosspoint_rnd_a >> AVX_bitpointer_bits);
+	mask_a.i = AVX_setzero();
+	uint32_t crossbyte_a = (crosspoint_rnd_a >> 3) & AVX_bytepointer_mask;
+
+	union AVX_union_bytes mask_b;
+	uint32_t crosspoint_memblock_b_AVX = (crosspoint_rnd_b >> AVX_bitpointer_bits);
+	mask_b.i = AVX_setzero();
+	uint32_t crossbyte_b = (crosspoint_rnd_b >> 3) & AVX_bytepointer_mask;
+#ifdef __AVX512VL__
+	uint64_t set_mask_a = 0xffffffffffffffffu >> (AVX_bytes - crossbyte_a);
+	mask_a.i = _mm512_mask_set1_epi8(mask_a.i, set_mask_a, 0xff);
+	uint64_t set_mask_b = 0xffffffffffffffffu << (crossbyte_b);
+	mask_b.i = _mm512_mask_set1_epi8(mask_b.i, set_mask_b, 0xff);
+#else 
+#ifdef __AVX2__
+	uint32_t set_mask_a = 0xffffffffu << crossbyte_a;
+	mask_a.i = _mm256_mask_set1_epi8(mask_a.i, set_mask_a, 0xff);
+
+	uint32_t set_mask_b = 0xffffffffu >> crossbyte_b;
+	mask_b.i = _mm256_mask_set1_epi8(mask_b.i, set_mask_b, 0xff);
+#else
+	for (uint32_t j = 0; j < crossbyte_a; j++) {
+		mask_a.c[j] = 0xff;
+	}
+
+	for (uint32_t j = crossbyte_b + 1; j < 3; j++) {
+		mask_b.c[j] = 0xff;
+	}
+#endif
+#endif
+	mask_a.c[crossbyte_a] = 0xff << (8 - (crosspoint_rnd_a & 0x7));
+	mask_b.c[crossbyte_b] = 0xff >> (crosspoint_rnd_b & 0x7);
+
+	for (uint32_t i = 0; i < memory_blocks; i++) {
+		if (i < crosspoint_memblock_a_AVX || i > crosspoint_memblock_b_AVX) {
+			child1_ptr[i] = parent1_ptr[i];
+			child2_ptr[i] = parent2_ptr[i];
+		}
+		else if (i > crosspoint_memblock_a_AVX || i < crosspoint_memblock_b_AVX) {
+			child1_ptr[i] = parent2_ptr[i];
+			child2_ptr[i] = parent1_ptr[i];
+		}
+		else if (i == crosspoint_memblock_a_AVX && i == crosspoint_memblock_b_AVX){
+			child1_ptr[i] = AVX_or(
+				AVX_and(
+					parent1_ptr[i],
+					AVX_or(
+						mask_a.i,
+						mask_b.i
+					)
+				),
+				AVX_and(
+					parent2_ptr[i],
+					AVX_xor(AVX_or(
+						mask_a.i,
+						mask_b.i
+					), AVX_setone()
+					)
+				)
+			);
+			child2_ptr[i] = AVX_or(
+				AVX_and(
+					parent1_ptr[i],
+					AVX_xor(AVX_or(
+						mask_a.i,
+						mask_b.i
+					), AVX_setone()
+					)
+                ),
+				AVX_and(
+					parent2_ptr[i],
+					AVX_or(
+						mask_a.i,
+						mask_b.i
+					)
+				)
+			);
+		}
+		else if (i == crosspoint_memblock_a_AVX) {
+			child1_ptr[i] = AVX_or(
+				AVX_and(
+					parent1_ptr[i],
+					mask_a.i	
+				),
+				AVX_and(
+					parent2_ptr[i],
+                    AVX_xor(mask_a.i, AVX_setone())
+				)
+			);
+			child2_ptr[i] = AVX_or(
+				AVX_and(
+					parent1_ptr[i],
+					AVX_xor(mask_a.i, AVX_setone())
+				),
+				AVX_and(
+					parent2_ptr[i],
+					mask_a.i
+				)
+			);
+		}
+        else { // i == crosspoint_memblock_b_AVX
+            child1_ptr[i] = AVX_or(
+                AVX_and(
+                    parent1_ptr[i],
+                    mask_b.i
+                ),
+                AVX_and(
+                    parent2_ptr[i],
+					AVX_xor(mask_b.i, AVX_setone())
+                )
+            );
+            child2_ptr[i] = AVX_or(
+                AVX_and(
+                    parent1_ptr[i],
+					AVX_xor(mask_b.i, AVX_setone())
+				),
+                AVX_and(
+                    parent2_ptr[i],
+                    mask_b.i
+                )
+            );
+		}
 	}
 }
 
@@ -283,7 +377,7 @@ static void crossover(int* parent1, int* parent2, int* child1, int* child2, int 
 		single_point_crossoverAVX(parent1, parent2, child1, child2, genes, individual_mem_size);
 	}
 	else if (crossover_param->crossover_method == crossover_method_two_point32) {
-		two_point_crossover32(parent1, parent2, child1, child2, genes);
+		two_point_crossoverAVX(parent1, parent2, child1, child2, genes, individual_mem_size);
 	}
 	else if (crossover_param->crossover_method == crossover_method_uniform32) {
 		uniform_crossover32(parent1, parent2, child1, child2, genes);
